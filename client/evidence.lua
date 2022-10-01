@@ -311,12 +311,13 @@ CreateThread(function()
     end
 end)
 
+local closeEvidenceSleep = 5000
 CreateThread(function()
     while true do
-        Wait(10)
         if LocalPlayer.state.isLoggedIn then
             if PlayerJob.name == 'police' and onDuty then
                 if IsPlayerFreeAiming(PlayerId()) and GetSelectedPedWeapon(PlayerPedId()) == `WEAPON_FLASHLIGHT` then
+                    closeEvidenceSleep = 10
                     if next(Casings) then
                         local pos = GetEntityCoords(PlayerPedId(), true)
                         for k, v in pairs(Casings) do
@@ -345,11 +346,12 @@ CreateThread(function()
                         end
                     end
                 else
-                    Wait(1000)
+                    closeEvidenceSleep = 1000
                 end
             else
-                Wait(5000)
+                closeEvidenceSleep = 5000
             end
         end
+        Wait(closeEvidenceSleep)
     end
 end)
