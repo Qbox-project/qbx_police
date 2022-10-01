@@ -98,6 +98,8 @@ Config.SecurityCameras = {
         [32] = {label = "Vangelico Jewelery CAM#2", coords = vector3(-627.51, -229.51, 40.24), r = {x = -35.0, y = 0.0, z = -95.78}, canRotate = true, isOnline = true},
         [33] = {label = "Vangelico Jewelery CAM#3", coords = vector3(-620.3, -224.31, 40.23), r = {x = -35.0, y = 0.0, z = 165.78}, canRotate = true, isOnline = true},
         [34] = {label = "Vangelico Jewelery CAM#4", coords = vector3(-622.57, -236.3, 40.31), r = {x = -35.0, y = 0.0, z = 5.78}, canRotate = true, isOnline = true},
+        [35] = {label = "Limited Ltd GrapeSeed CAM#1", coords = vector3(1709.0, 4930.3, 44.00), r = {x = -25.0, y = 0.0, z = 98.0}, canRotate = false, isOnline = true},
+        [36] = {label = "24/7 Tataviam Mountains CAM#1", coords = vector3(2558.8, 390.44, 110.8), r = {x = -25.0, y = 0.0, z = 140.0}, canRotate = false, isOnline = true},
     },
 }
 
