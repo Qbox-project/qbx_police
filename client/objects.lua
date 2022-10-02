@@ -234,9 +234,12 @@ CreateThread(function()
     end
 end)
 
+local spikeSleep = 1000
 CreateThread(function()
     while true do
-        if LocalPlayer.state.isLoggedIn then
+        local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+        if LocalPlayer.state.isLoggedIn and vehicle ~= 0 then
+            spikeSleep = 3
             if ClosestSpike then
                 local tires = {
                     {bone = "wheel_lf", index = 0},
@@ -248,7 +251,6 @@ CreateThread(function()
                 }
 
                 for a = 1, #tires do
-                    local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
                     local tirePos = GetWorldPositionOfEntityBone(vehicle, GetEntityBoneIndexByName(vehicle, tires[a].bone))
                     local spike = GetClosestObjectOfType(tirePos.x, tirePos.y, tirePos.z, 15.0, spikemodel, 1, 1, 1)
                     local spikePos = GetEntityCoords(spike, false)
@@ -261,9 +263,10 @@ CreateThread(function()
                     end
                 end
             end
+        else
+            spikeSleep = 1000
         end
-
-        Wait(3)
+        Wait(spikeSleep)
     end
 end)
 
