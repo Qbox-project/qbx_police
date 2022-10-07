@@ -94,64 +94,64 @@ end
 QBCore.Commands.Add("spikestrip", Lang:t("commands.place_spike"), {}, false, function(source)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if not (Player.PlayerData.job.name == "police" or Player.PlayerData.job.onduty) then return end
+    if not (Player.PlayerData.job.name == "police" and Player.PlayerData.job.onduty) then return end
     TriggerClientEvent('police:client:SpawnSpikeStrip', src)
 end)
 
 QBCore.Commands.Add("grantlicense", Lang:t("commands.license_grant"), {{name = "id", help = Lang:t('info.player_id')}, {name = "license", help = Lang:t('info.license_type')}}, true, function(source, args)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if not (Player.PlayerData.job.name == "police" or Player.PlayerData.job.grade.level >= Config.LicenseRank) then
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.rank_license"), "error")
+    if not (Player.PlayerData.job.name == "police" and Player.PlayerData.job.grade.level >= Config.LicenseRank) then
+        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.error_rank_license"), type = 'error'})
         return
     end
     if not (args[2] == "driver" or args[2] == "weapon") then
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.error_license_type"), "error")
+        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.license_type"), type = 'error'})
         return
     end
     local SearchedPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
     if not SearchedPlayer then return end
     local licenseTable = SearchedPlayer.PlayerData.metadata["licences"]
     if licenseTable[args[2]] then
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.license_already"), "error")
+        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.license_already"), type = 'error'})
         return
     end
     licenseTable[args[2]] = true
     SearchedPlayer.Functions.SetMetaData("licences", licenseTable)
-    TriggerClientEvent('QBCore:Notify', SearchedPlayer.PlayerData.source, Lang:t("success.granted_license"), "success")
-    TriggerClientEvent('QBCore:Notify', src, Lang:t("success.grant_license"), "success")      
+    TriggerClientEvent('ox_lib:notify', SearchedPlayer.PlayerData.source, {description = Lang:t("success.granted_license"), type = 'success'})
+    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.grant_license"), type = 'success'})      
 end)
 
 QBCore.Commands.Add("revokelicense", Lang:t("commands.license_revoke"), {{name = "id", help = Lang:t('info.player_id')}, {name = "license", help = Lang:t('info.license_type')}}, true, function(source, args)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if not (Player.PlayerData.job.name == "police" or Player.PlayerData.job.grade.level >= Config.LicenseRank) then
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.rank_revoke"), "error")
+    if not (Player.PlayerData.job.name == "police" and Player.PlayerData.job.grade.level >= Config.LicenseRank) then
+        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.rank_revoke"), type = "error"})
         return
     end
     if not (args[2] == "driver" or args[2] == "weapon") then
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.error_license"), "error")
+        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.error_license"), type = "error"})
         return
     end
     local SearchedPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
     if not SearchedPlayer then return end
     local licenseTable = SearchedPlayer.PlayerData.metadata["licences"]
     if not licenseTable[args[2]] then
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.error_license"), "error")
+        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.error_license"), type = "error"})
         return
     end
     licenseTable[args[2]] = false
     SearchedPlayer.Functions.SetMetaData("licences", licenseTable)
-    TriggerClientEvent('QBCore:Notify', SearchedPlayer.PlayerData.source, Lang:t("error.revoked_license"), "error")
-    TriggerClientEvent('QBCore:Notify', src, Lang:t("success.revoke_license"), "success")
-end)
+    TriggerClientEvent('ox_lib:notify', SearchedPlayer.PlayerData.source, {description = Lang:t("error.revoked_license"), type = "error"})
+    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.revoke_license"), type = "success"})
+end)d
 
 QBCore.Commands.Add("pobject", Lang:t("commands.place_object"), {{name = "type",help = Lang:t("info.poobject_object")}}, true, function(source, args)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local type = args[1]:lower()
-    if not (Player.PlayerData.job.name == "police" or Player.PlayerData.job.onduty) then
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.on_duty_police_only"), 'error')
+    if not (Player.PlayerData.job.name == "police" and Player.PlayerData.job.onduty) then
+        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.on_duty_police_only"), type = 'error'})
         return
     end
 
@@ -159,8 +159,9 @@ QBCore.Commands.Add("pobject", Lang:t("commands.place_object"), {{name = "type",
         TriggerClientEvent("police:client:deleteObject", src)
         return
     end
-
-    Config.Objects[type].spawn(src)
+    if Config.Objects[type] then
+        Config.Objects[type].spawn(src)
+    end
 end)
 
 QBCore.Commands.Add("cuff", Lang:t("commands.cuff_player"), {}, false, function(source)
