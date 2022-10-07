@@ -160,6 +160,7 @@ QBCore.Commands.Add("pobject", Lang:t("commands.place_object"), {{name = "type",
         TriggerClientEvent("police:client:deleteObject", src)
         return
     end
+
     if Config.Objects[type] then
         TriggerClientEvent(Config.Objects[type].event, src)
     end
@@ -300,7 +301,7 @@ QBCore.Commands.Add("plateinfo", Lang:t("commands.plateinfo"), {{name = "plate",
     if Player.PlayerData.job.name == "police" and Player.PlayerData.job.onduty then
         if Plates and Plates[args[1]:upper()] then
             if Plates[args[1]:upper()].isflagged then
-                TriggerClientEvent('ox_lib', src, {description = Lang:t('success.vehicle_flagged', {plate = args[1]:upper(), reason = Plates[args[1]:upper()].reason}), type = 'success'})
+                TriggerClientEvent('ox_lib:notify', src, {description = Lang:t('success.vehicle_flagged', {plate = args[1]:upper(), reason = Plates[args[1]:upper()].reason}), type = 'success'})
             else
                 TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.vehicle_not_flag"), type = 'error'})
             end
