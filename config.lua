@@ -1,21 +1,11 @@
 Config = {}
 
 Config.Objects = {
-    ["cone"] = {model = `prop_roadcone02a`, freeze = false, spawn = function(src)
-        TriggerClientEvent("police:client:spawnCone", src)
-    end},
-    ["barrier"] = {model = `prop_barrier_work06a`, freeze = true, spawn = function(src)
-        TriggerClientEvent("police:client:spawnBarrier", src)
-    end},
-    ["roadsign"] = {model = `prop_snow_sign_road_06g`, freeze = true, spawn = function(src)
-        TriggerClientEvent("police:client:spawnRoadSign", src)
-    end},
-    ["tent"] = {model = `prop_gazebo_03`, freeze = true, spawn = function(src)
-        TriggerClientEvent("police:client:spawnTent", src)
-    end},
-    ["light"] = {model = `prop_worklight_03b`, freeze = true, spawn = function(src)
-        TriggerClientEvent("police:client:spawnLight", src)
-    end},
+    ["cone"] = {model = `prop_roadcone02a`, freeze = false, event = "police:client:spawnCone"},
+    ["barrier"] = {model = `prop_barrier_work06a`, freeze = true, event = "police:client:spawnBarrier"},
+    ["roadsign"] = {model = `prop_snow_sign_road_06g`, freeze = true, event = "police:client:spawnRoadSign"},
+    ["tent"] = {model = `prop_gazebo_03`, freeze = true, event = "police:client:spawnTent"},
+    ["light"] = {model = `prop_worklight_03b`, freeze = true, event = "police:client:spawnLight"},
 }
 
 Config.MaxSpikes = 5
