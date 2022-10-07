@@ -106,7 +106,7 @@ QBCore.Commands.Add("grantlicense", Lang:t("commands.license_grant"), {{name = "
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.error_rank_license"), type = 'error'})
         return
     end
-    if not (args[2] == "driver" or args[2] == "weapon") then
+    if args[2] ~= "driver" and args[2] ~= "weapon" then
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.license_type"), type = 'error'})
         return
     end
