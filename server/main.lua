@@ -126,7 +126,7 @@ end)
 QBCore.Commands.Add("revokelicense", Lang:t("commands.license_revoke"), {{name = "id", help = Lang:t('info.player_id')}, {name = "license", help = Lang:t('info.license_type')}}, true, function(source, args)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if not (Player.PlayerData.job.name == "police" and Player.PlayerData.job.grade.level >= Config.LicenseRank) then
+    if Player.PlayerData.job.name ~= "police" or Player.PlayerData.job.grade.level < Config.LicenseRank then
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.rank_revoke"), type = "error"})
         return
     end
