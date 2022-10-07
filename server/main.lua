@@ -102,7 +102,7 @@ end)
 QBCore.Commands.Add("grantlicense", Lang:t("commands.license_grant"), {{name = "id", help = Lang:t('info.player_id')}, {name = "license", help = Lang:t('info.license_type')}}, true, function(source, args)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if not (Player.PlayerData.job.name == "police" and Player.PlayerData.job.grade.level >= Config.LicenseRank) then
+    if Player.PlayerData.job.name ~= "police"  or Player.PlayerData.job.grade.level < Config.LicenseRank then
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.error_rank_license"), type = 'error'})
         return
     end
