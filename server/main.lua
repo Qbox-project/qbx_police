@@ -130,7 +130,7 @@ QBCore.Commands.Add("revokelicense", Lang:t("commands.license_revoke"), {{name =
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.rank_revoke"), type = "error"})
         return
     end
-    if not (args[2] == "driver" or args[2] == "weapon") then
+    if args[2] ~= "driver" and args[2] ~= "weapon" then
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.error_license"), type = "error"})
         return
     end
