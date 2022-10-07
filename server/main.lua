@@ -33,60 +33,43 @@ local function UpdateBlips()
 end
 
 local function CreateBloodId()
-    if BloodDrops then
-        local bloodId = math.random(10000, 99999)
-        while BloodDrops[bloodId] do
+    local bloodId = math.random(10000, 99999)
+    if not BloodDrops then return bloodId end
+    while BloodDrops[bloodId] do
             bloodId = math.random(10000, 99999)
-        end
-        return bloodId
-    else
-        local bloodId = math.random(10000, 99999)
-        return bloodId
     end
+    return bloodId
 end
 
 local function CreateFingerId()
-    if FingerDrops then
-        local fingerId = math.random(10000, 99999)
-        while FingerDrops[fingerId] do
-            fingerId = math.random(10000, 99999)
-        end
-        return fingerId
-    else
-        local fingerId = math.random(10000, 99999)
-        return fingerId
+    local fingerId = math.random(10000, 99999)
+    if not FingerDrops then return fingerId end
+    while FingerDrops[fingerId] do
+        fingerId = math.random(10000, 99999)
     end
+    return fingerId
 end
 
 local function CreateCasingId()
-    if Casings then
-        local caseId = math.random(10000, 99999)
-        while Casings[caseId] do
-            caseId = math.random(10000, 99999)
-        end
-        return caseId
-    else
-        local caseId = math.random(10000, 99999)
-        return caseId
+    local caseId = math.random(10000, 99999)
+    if not Casings then return caseId end
+    while Casings[caseId] do
+        caseId = math.random(10000, 99999)
     end
+    return caseId
 end
 
 local function CreateObjectId()
-    if Objects then
-        local objectId = math.random(10000, 99999)
-        while Objects[objectId] do
-            objectId = math.random(10000, 99999)
-        end
-        return objectId
-    else
-        local objectId = math.random(10000, 99999)
-        return objectId
+    local objectId = math.random(10000, 99999)
+    if not Objects then return objectId end
+    while Objects[objectId] do
+        objectId = math.random(10000, 99999)
     end
+    return objectId
 end
 
 local function IsVehicleOwned(plate)
-    local result = MySQL.scalar.await('SELECT plate FROM player_vehicles WHERE plate = ?', {plate})
-    return result
+    return MySQL.scalar.await('SELECT plate FROM player_vehicles WHERE plate = ?', {plate})
 end
 
 local function GetCurrentCops()
@@ -111,80 +94,73 @@ end
 QBCore.Commands.Add("spikestrip", Lang:t("commands.place_spike"), {}, false, function(source)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if Player.PlayerData.job.name == "police" and Player.PlayerData.job.onduty then
-        TriggerClientEvent('police:client:SpawnSpikeStrip', src)
-    end
+    if not (Player.PlayerData.job.name == "police" or Player.PlayerData.job.onduty) then return end
+    TriggerClientEvent('police:client:SpawnSpikeStrip', src)
 end)
 
 QBCore.Commands.Add("grantlicense", Lang:t("commands.license_grant"), {{name = "id", help = Lang:t('info.player_id')}, {name = "license", help = Lang:t('info.license_type')}}, true, function(source, args)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if Player.PlayerData.job.name == "police" and Player.PlayerData.job.grade.level >= Config.LicenseRank then
-        if args[2] == "driver" or args[2] == "weapon" then
-            local SearchedPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
-            if not SearchedPlayer then return end
-            local licenseTable = SearchedPlayer.PlayerData.metadata["licences"]
-            if licenseTable[args[2]] then
-                TriggerClientEvent('QBCore:Notify', src, Lang:t("error.license_already"), "error")
-                return
-            end
-            licenseTable[args[2]] = true
-            SearchedPlayer.Functions.SetMetaData("licences", licenseTable)
-            TriggerClientEvent('QBCore:Notify', SearchedPlayer.PlayerData.source, Lang:t("success.granted_license"), "success")
-            TriggerClientEvent('QBCore:Notify', src, Lang:t("success.grant_license"), "success")
-        else
-            TriggerClientEvent('QBCore:Notify', src, Lang:t("error.error_license_type"), "error")
-        end
-    else
+    if not (Player.PlayerData.job.name == "police" or Player.PlayerData.job.grade.level >= Config.LicenseRank) then
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.rank_license"), "error")
+        return
     end
+    if not (args[2] == "driver" or args[2] == "weapon") then
+        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.error_license_type"), "error")
+        return
+    end
+    local SearchedPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
+    if not SearchedPlayer then return end
+    local licenseTable = SearchedPlayer.PlayerData.metadata["licences"]
+    if licenseTable[args[2]] then
+        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.license_already"), "error")
+        return
+    end
+    licenseTable[args[2]] = true
+    SearchedPlayer.Functions.SetMetaData("licences", licenseTable)
+    TriggerClientEvent('QBCore:Notify', SearchedPlayer.PlayerData.source, Lang:t("success.granted_license"), "success")
+    TriggerClientEvent('QBCore:Notify', src, Lang:t("success.grant_license"), "success")      
 end)
 
 QBCore.Commands.Add("revokelicense", Lang:t("commands.license_revoke"), {{name = "id", help = Lang:t('info.player_id')}, {name = "license", help = Lang:t('info.license_type')}}, true, function(source, args)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if Player.PlayerData.job.name == "police" and Player.PlayerData.job.grade.level >= Config.LicenseRank then
-        if args[2] == "driver" or args[2] == "weapon" then
-            local SearchedPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
-            if not SearchedPlayer then return end
-            local licenseTable = SearchedPlayer.PlayerData.metadata["licences"]
-            if not licenseTable[args[2]] then
-                TriggerClientEvent('QBCore:Notify', src, Lang:t("error.error_license"), "error")
-                return
-            end
-            licenseTable[args[2]] = false
-            SearchedPlayer.Functions.SetMetaData("licences", licenseTable)
-            TriggerClientEvent('QBCore:Notify', SearchedPlayer.PlayerData.source, Lang:t("error.revoked_license"), "error")
-            TriggerClientEvent('QBCore:Notify', src, Lang:t("success.revoke_license"), "success")
-        else
-            TriggerClientEvent('QBCore:Notify', src, Lang:t("error.error_license"), "error")
-        end
-    else
+    if not (Player.PlayerData.job.name == "police" or Player.PlayerData.job.grade.level >= Config.LicenseRank) then
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.rank_revoke"), "error")
+        return
     end
+    if not (args[2] == "driver" or args[2] == "weapon") then
+        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.error_license"), "error")
+        return
+    end
+    local SearchedPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
+    if not SearchedPlayer then return end
+    local licenseTable = SearchedPlayer.PlayerData.metadata["licences"]
+    if not licenseTable[args[2]] then
+        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.error_license"), "error")
+        return
+    end
+    licenseTable[args[2]] = false
+    SearchedPlayer.Functions.SetMetaData("licences", licenseTable)
+    TriggerClientEvent('QBCore:Notify', SearchedPlayer.PlayerData.source, Lang:t("error.revoked_license"), "error")
+    TriggerClientEvent('QBCore:Notify', src, Lang:t("success.revoke_license"), "success")
 end)
 
 QBCore.Commands.Add("pobject", Lang:t("commands.place_object"), {{name = "type",help = Lang:t("info.poobject_object")}}, true, function(source, args)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local type = args[1]:lower()
-    if Player.PlayerData.job.name == "police" and Player.PlayerData.job.onduty then
-        if type == "cone" then
-            TriggerClientEvent("police:client:spawnCone", src)
-        elseif type == "barrier" then
-            TriggerClientEvent("police:client:spawnBarrier", src)
-        elseif type == "roadsign" then
-            TriggerClientEvent("police:client:spawnRoadSign", src)
-        elseif type == "tent" then
-            TriggerClientEvent("police:client:spawnTent", src)
-        elseif type == "light" then
-            TriggerClientEvent("police:client:spawnLight", src)
-        elseif type == "delete" then
-            TriggerClientEvent("police:client:deleteObject", src)
-        end
-    else
+    if not (Player.PlayerData.job.name == "police" or Player.PlayerData.job.onduty) then
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.on_duty_police_only"), 'error')
+        return
     end
+
+    if type == 'delete' then
+        TriggerClientEvent("police:client:deleteObject", src)
+        return
+    end
+
+    Config.Objects[type].spawn(src)
 end)
 
 QBCore.Commands.Add("cuff", Lang:t("commands.cuff_player"), {}, false, function(source)
