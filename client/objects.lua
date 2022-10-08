@@ -117,21 +117,24 @@ RegisterNetEvent('police:client:SpawnSpikeStrip', function()
         return
     end
 
-    if PlayerJob.name == "police" and PlayerJob.onduty then
-        local spawnCoords = GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0.0, 2.0, 0.0)
-        local spike = CreateObject(spikemodel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 1, 1, 1)
-        local netid = NetworkGetNetworkIdFromEntity(spike)
-        SetNetworkIdExistsOnAllMachines(netid, true)
-        SetNetworkIdCanMigrate(netid, false)
-        SetEntityHeading(spike, GetEntityHeading(PlayerPedId()))
-        PlaceObjectOnGroundProperly(spike)
-        SpawnedSpikes[#SpawnedSpikes+1] = {
-            coords = vector3(spawnCoords.x, spawnCoords.y, spawnCoords.z),
-            netid = netid,
-            object = spike,
-        }
-        TriggerServerEvent('police:server:SyncSpikes', SpawnedSpikes)
+    if PlayerJob.name ~= "police" or not PlayerJob.onduty then
+        QBCore.Functions.Notify(Lang:t("error.no_spikestripe"), 'error')
+        return
     end
+
+    local spawnCoords = GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0.0, 2.0, 0.0)
+    local spike = CreateObject(spikemodel, spawnCoords.x, spawnCoords.y, spawnCoords.z, 1, 1, 1)
+    local netid = NetworkGetNetworkIdFromEntity(spike)
+    SetNetworkIdExistsOnAllMachines(netid, true)
+    SetNetworkIdCanMigrate(netid, false)
+    SetEntityHeading(spike, GetEntityHeading(PlayerPedId()))
+    PlaceObjectOnGroundProperly(spike)
+    SpawnedSpikes[#SpawnedSpikes+1] = {
+        coords = vector3(spawnCoords.x, spawnCoords.y, spawnCoords.z),
+        netid = netid,
+        object = spike,
+    }
+    TriggerServerEvent('police:server:SyncSpikes', SpawnedSpikes)
 end)
 
 RegisterNetEvent('police:client:SyncSpikes', function(table)
