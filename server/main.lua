@@ -162,7 +162,7 @@ QBCore.Commands.Add("pobject", Lang:t("commands.place_object"), {{name = "type",
     end
 
     if Config.Objects[type] then
-        TriggerClientEvent(Config.Objects[type].event, src)
+        TriggerClientEvent("police:client:spawnPObj", src, type)
     end
 end)
 
