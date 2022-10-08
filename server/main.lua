@@ -270,7 +270,7 @@ QBCore.Commands.Add("flagplate", Lang:t("commands.flagplate"), {{name = "plate",
             isflagged = true,
             reason = table.concat(reason, " ")
         }
-        TriggerClientEvent('ox_lib', src, {description = Lang:t("info.vehicle_flagged", {vehicle = args[1]:upper(), reason = table.concat(reason, " ")})})
+        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.vehicle_flagged", {vehicle = args[1]:upper(), reason = table.concat(reason, " ")})})
     else
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.on_duty_police_only"), type = 'error'})
     end
