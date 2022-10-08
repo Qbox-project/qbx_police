@@ -56,11 +56,8 @@ RegisterNetEvent('police:client:spawnPObj', function(item)
             clip = "drop_front"
         }
     }) then
-        StopAnimTask(PlayerPedId(), "anim@narcotics@trash", "drop_front", 1.0)
         TriggerServerEvent("police:server:spawnObject", item)
     else
-        lib.cancel()
-        StopAnimTask(PlayerPedId(), "anim@narcotics@trash", "drop_front", 1.0)
         lib.notify({description = Lang:t("error.canceled"), type = "error"})
     end
 end)
@@ -79,11 +76,8 @@ RegisterNetEvent('police:client:deleteObject', function()
                 clip = "plant_floor",
             }
         }) then
-            StopAnimTask(PlayerPedId(), "weapons@first_person@aim_rng@generic@projectile@thermal_charge@", "plant_floor", 1.0)
             TriggerServerEvent("police:server:deleteObject", objectId)
         else
-            lib.cancelProgress()
-            StopAnimTask(PlayerPedId(), "weapons@first_person@aim_rng@generic@projectile@thermal_charge@", "plant_floor", 1.0)
             lib.notify({description = Lang:t("error.canceled"), type = "error"})
         end
     end
