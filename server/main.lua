@@ -734,7 +734,7 @@ RegisterNetEvent('police:server:JailPlayer', function(playerId, time)
         ["date"] = currentDate
     })
     TriggerClientEvent("police:client:SendToJail", OtherPlayer.PlayerData.source, time)
-    TriggerClientEvent('ox_lib', src, {description = Lang:t("info.sent_jail_for", {time = time})})
+    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.sent_jail_for", {time = time})})
 end)
 
 RegisterNetEvent('police:server:SetHandcuffStatus', function(isHandcuffed)
