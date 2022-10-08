@@ -937,7 +937,7 @@ RegisterNetEvent('evidence:server:AddFingerprintToInventory', function(fingerId,
             FingerDrops[fingerId] = nil
         end
     else
-        TriggerClientEvent('ox_lib', src, {description = Lang:t("error.have_evidence_bag"), type = "error"})
+        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.have_evidence_bag"), type = "error"})
     end
 end)
 
