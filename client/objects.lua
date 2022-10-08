@@ -50,7 +50,7 @@ RegisterNetEvent('police:client:spawnPObj', function(item)
         label = Lang:t("progressbar.place_object"),
         useWhileDead = false,
         canCancel = true,
-        disable = {car = true, move = true, combat = true},
+        disable = { car = true, move = true, combat = true },
         anim = {
             dict = "anim@narcotics@trash",
             clip = "drop_front"
@@ -58,7 +58,7 @@ RegisterNetEvent('police:client:spawnPObj', function(item)
     }) then
         TriggerServerEvent("police:server:spawnObject", item)
     else
-        lib.notify({description = Lang:t("error.canceled"), type = "error"})
+        lib.notify({ description = Lang:t("error.canceled"), type = "error" })
     end
 end)
 
@@ -70,7 +70,7 @@ RegisterNetEvent('police:client:deleteObject', function()
             label = Lang:t("progressbar.remove_object"),
             useWhileDead = false,
             canCancel = true,
-            disable = {car = true, move = true, combat = true},
+            disable = { car = true, move = true, combat = true },
             anim = {
                 dict = "weapons@first_person@aim_rng@generic@projectile@thermal_charge@",
                 clip = "plant_floor",
@@ -78,7 +78,7 @@ RegisterNetEvent('police:client:deleteObject', function()
         }) then
             TriggerServerEvent("police:server:deleteObject", objectId)
         else
-            lib.notify({description = Lang:t("error.canceled"), type = "error"})
+            lib.notify({ description = Lang:t("error.canceled"), type = "error" })
         end
     end
 end)
@@ -107,7 +107,7 @@ end)
 
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
     if #SpawnedSpikes >= Config.MaxSpikes then
-        lib.notify({description = Lang:t("error.no_spikestripe"), type = 'error'})
+        lib.notify({ description = Lang:t("error.no_spikestripe"), type = 'error'})
         return
     end
 
@@ -123,7 +123,7 @@ RegisterNetEvent('police:client:SpawnSpikeStrip', function()
     SetNetworkIdCanMigrate(netid, false)
     SetEntityHeading(spike, GetEntityHeading(PlayerPedId()))
     PlaceObjectOnGroundProperly(spike)
-    SpawnedSpikes[#SpawnedSpikes+1] = {
+    SpawnedSpikes[#SpawnedSpikes + 1] = {
         coords = vector3(spawnCoords.x, spawnCoords.y, spawnCoords.z),
         netid = netid,
         object = spike,
@@ -153,12 +153,12 @@ CreateThread(function()
             spikeSleep = 3
             if ClosestSpike then
                 local tires = {
-                    {bone = "wheel_lf", index = 0},
-                    {bone = "wheel_rf", index = 1},
-                    {bone = "wheel_lm", index = 2},
-                    {bone = "wheel_rm", index = 3},
-                    {bone = "wheel_lr", index = 4},
-                    {bone = "wheel_rr", index = 5}
+                    { bone = "wheel_lf", index = 0 },
+                    { bone = "wheel_rf", index = 1 },
+                    { bone = "wheel_lm", index = 2 },
+                    { bone = "wheel_rm", index = 3 },
+                    { bone = "wheel_lr", index = 4 },
+                    { bone = "wheel_rr", index = 5 }
                 }
 
                 for a = 1, #tires do
