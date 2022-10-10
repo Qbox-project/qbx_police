@@ -44,7 +44,9 @@ function GetClosestSpike()
 end
 
 -- Events
----@type fun(item: string): fun(item: string)
+
+---Spawn police object.
+---@param item string  name from `Config.Objects`
 RegisterNetEvent('police:client:spawnPObj', function(item)
     if lib.progressBar({
         duration = 2500,
