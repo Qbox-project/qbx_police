@@ -120,7 +120,7 @@ QBCore.Commands.Add("grantlicense", Lang:t("commands.license_grant"), {{name = "
     licenseTable[args[2]] = true
     SearchedPlayer.Functions.SetMetaData("licences", licenseTable)
     TriggerClientEvent('ox_lib:notify', SearchedPlayer.PlayerData.source, {description = Lang:t("success.granted_license"), type = 'success'})
-    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.grant_license"), type = 'success'})      
+    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.grant_license"), type = 'success'})
 end)
 
 QBCore.Commands.Add("revokelicense", Lang:t("commands.license_revoke"), {{name = "id", help = Lang:t('info.player_id')}, {name = "license", help = Lang:t('info.license_type')}}, true, function(source, args)
