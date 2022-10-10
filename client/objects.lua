@@ -44,6 +44,7 @@ function GetClosestSpike()
 end
 
 -- Events
+---@type fun(item: string): fun(item: string)
 RegisterNetEvent('police:client:spawnPObj', function(item)
     if lib.progressBar({
         duration = 2500,
@@ -105,6 +106,7 @@ RegisterNetEvent('police:client:spawnObject', function(objectId, type, player)
     }
 end)
 
+---@type fun(): fun(SpawnedSpikes: table)
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
     if #SpawnedSpikes >= Config.MaxSpikes or PlayerJob.name ~= "police" or not PlayerJob.onduty then
         lib.notify({ description = Lang:t("error.no_spikestripe"), type = 'error'})
