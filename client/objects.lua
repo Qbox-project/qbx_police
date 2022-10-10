@@ -108,7 +108,7 @@ RegisterNetEvent('police:client:spawnObject', function(objectId, type, player)
     }
 end)
 
----@type fun(): fun(SpawnedSpikes: table)
+---Spawn a spike strip.
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
     if #SpawnedSpikes >= Config.MaxSpikes or PlayerJob.name ~= "police" or not PlayerJob.onduty then
         lib.notify({ description = Lang:t("error.no_spikestripe"), type = 'error'})
