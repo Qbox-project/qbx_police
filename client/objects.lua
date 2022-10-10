@@ -106,13 +106,8 @@ RegisterNetEvent('police:client:spawnObject', function(objectId, type, player)
 end)
 
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
-    if #SpawnedSpikes >= Config.MaxSpikes then
+    if #SpawnedSpikes >= Config.MaxSpikes or PlayerJob.name ~= "police" or not PlayerJob.onduty then
         lib.notify({ description = Lang:t("error.no_spikestripe"), type = 'error'})
-        return
-    end
-
-    if PlayerJob.name ~= "police" or not PlayerJob.onduty then
-        QBCore.Functions.Notify(Lang:t("error.no_spikestripe"), 'error')
         return
     end
 
