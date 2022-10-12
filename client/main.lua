@@ -45,31 +45,30 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     PlayerJob = player.job
     onDuty = player.job.onduty
     isHandcuffed = false
+    
     TriggerServerEvent("police:server:SetHandcuffStatus", false)
     TriggerServerEvent("police:server:UpdateBlips")
     TriggerServerEvent("police:server:UpdateCurrentCops")
 
+    local trackerClothingData = {}
+
     if player.metadata.tracker then
-        local trackerClothingData = {
-            outfitData = {
-                ["accessory"] = {
-                    item = 13,
-                    texture = 0
-                }
+        trackerClothingData.outfitData = {
+            ["accessory"] = {
+                item = 13,
+                texture = 0
             }
         }
-        TriggerEvent('qb-clothing:client:loadOutfit', trackerClothingData)
     else
-        local trackerClothingData = {
-            outfitData = {
-                ["accessory"] = {
-                    item = -1,
-                    texture = 0
-                }
+        trackerClothingData.outfitData = {
+            ["accessory"] = {
+                item = -1,
+                texture = 0
             }
         }
-        TriggerEvent('qb-clothing:client:loadOutfit', trackerClothingData)
     end
+
+    TriggerEvent('qb-clothing:client:loadOutfit', trackerClothingData)
 
     if PlayerJob and PlayerJob.name ~= "police" then
         if DutyBlips then
@@ -147,7 +146,6 @@ RegisterNetEvent('police:client:UpdateBlips', function(players)
             for _, data in pairs(players) do
                 local id = GetPlayerFromServerId(data.source)
                 CreateDutyBlips(id, data.label, data.job, data.location)
-
             end
         end
     end
@@ -157,7 +155,18 @@ RegisterNetEvent('police:client:policeAlert', function(coords, text)
     local street1, street2 = GetStreetNameAtCoord(coords.x, coords.y, coords.z)
     local street1name = GetStreetNameFromHashKey(street1)
     local street2name = GetStreetNameFromHashKey(street2)
-    QBCore.Functions.Notify({text = text, caption = street1name.. ' ' ..street2name}, 'police')
+    lib.notify({
+        id = 'policeAlert',
+        title = text,
+        description = street1name.. ' ' ..street2name,
+        position = 'top',
+        style = {
+            backgroundColor = '#20207a',
+            color = '#86869e',
+        },
+        icon = {'fas', 'tower-broadcast'},
+        iconColor = '#d60d17'
+    })
     PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)

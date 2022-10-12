@@ -4,7 +4,7 @@ RegisterNetEvent('police:client:CheckDistance', function()
         local playerId = GetPlayerServerId(player)
         TriggerServerEvent("police:server:SetTracker", playerId)
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({description = Lang:t("error.none_nearby"), type = "error"})
     end
 end)
 
@@ -35,7 +35,17 @@ end)
 
 RegisterNetEvent('police:client:TrackerMessage', function(msg, coords)
     PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
-    QBCore.Functions.Notify(msg, 'police')
+    lib.notify({
+        id = 'policeAlert',
+        description = msg,
+        position = 'top',
+        style = {
+            backgroundColor = '#20207a',
+            color = '#86869e',
+        },
+        icon = {'fas', 'tower-broadcast'},
+        iconColor = '#d60d17'
+    })
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
     SetBlipSprite(blip, 458)
