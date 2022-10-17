@@ -110,7 +110,7 @@ end)
 
 ---Spawn a spike strip.
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
-    if #SpawnedSpikes >= Config.MaxSpikes or PlayerJob.name ~= "police" or not PlayerJob.onduty then
+    if #SpawnedSpikes >= Config.MaxSpikes or PlayerJob.type ~= "leo" or not PlayerJob.onduty then
         lib.notify({ description = Lang:t("error.no_spikestripe"), type = 'error'})
         return
     end
@@ -190,7 +190,7 @@ CreateThread(function()
                 local dist = #(pos - SpawnedSpikes[ClosestSpike].coords)
                 if dist < 4 then
                     if not IsPedInAnyVehicle(PlayerPedId()) then
-                        if PlayerJob.name == "police" and PlayerJob.onduty then
+                        if PlayerJob.type == "leo" and PlayerJob.onduty then
                             sleep = 0
                             lib.showTextUI(Lang:t('info.delete_spike'))
                             if IsControlJustPressed(0, 38) then
