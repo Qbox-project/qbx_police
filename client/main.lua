@@ -155,18 +155,7 @@ RegisterNetEvent('police:client:policeAlert', function(coords, text)
     local street1, street2 = GetStreetNameAtCoord(coords.x, coords.y, coords.z)
     local street1name = GetStreetNameFromHashKey(street1)
     local street2name = GetStreetNameFromHashKey(street2)
-    lib.notify({
-        id = 'policeAlert',
-        title = text,
-        description = street1name.. ' ' ..street2name,
-        position = 'top',
-        style = {
-            backgroundColor = '#20207a',
-            color = '#86869e',
-        },
-        icon = {'fas', 'tower-broadcast'},
-        iconColor = '#d60d17'
-    })
+    lib.notify({ title = text, description = street1name.. ' ' ..street2name, type = 'inform' })
     PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
