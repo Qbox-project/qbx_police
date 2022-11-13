@@ -7,6 +7,7 @@ local FingerDrops = {}
 local Objects = {}
 local QBCore = exports['qb-core']:GetCoreObject()
 local updatingCops = false
+local hasOxInventory = GetResourceState('ox_inventory') ~= 'missing'
 
 -- Functions
 local function UpdateBlips()
@@ -571,14 +572,6 @@ QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_
 end)
 
 -- Events
-AddEventHandler('onResourceStart', function(resourceName)
-    if resourceName == GetCurrentResourceName() then
-        CreateThread(function()
-            MySQL.query("DELETE FROM stashitems WHERE stash = 'policetrash'")
-        end)
-    end
-end)
-
 RegisterNetEvent('police:server:policeAlert', function(text)
     local src = source
     local ped = GetPlayerPed(src)
@@ -1038,8 +1031,30 @@ RegisterNetEvent('police:server:SyncSpikes', function(table)
     TriggerClientEvent('police:client:SyncSpikes', -1, table)
 end)
 
+AddEventHandler('onServerResourceStart', function(resource)
+    if resource ~= 'ox_inventory' then return end
+
+    local jobs = {}
+    for k, v in pairs(QBCore.Shared.Jobs) do
+        if v.type == 'leo' then
+            jobs[k] = 0
+        end
+    end
+    for i = 1, #Config.Locations.trash do
+        exports.ox_inventory:RegisterStash(('policetrash_%s'):format(i), 'Police Trash', 300, 4000000, nil, jobs, Config.Locations.trash[i])
+    end
+end)
+
 -- Threads
 CreateThread(function()
+    if hasOxInventory then
+        for i = 1, #Config.Locations.trash do
+            exports.ox_inventory:ClearInventory(('policetrash_%s'):format(i))
+        end
+    else
+        MySQL.query("DELETE FROM stashitems WHERE stash = 'policetrash'")
+    end
+
     while true do
         Wait(1000 * 60 * 10)
         local curCops = GetCurrentCops()
