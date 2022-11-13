@@ -3,8 +3,8 @@ QBCore = exports['qb-core']:GetCoreObject()
 isHandcuffed = false
 cuffType = 1
 isEscorted = false
-PlayerJob = {}
-onDuty = false
+PlayerJob = QBCore.Functions.GetPlayerData()?.job or {}
+onDuty = PlayerJob?.onduty or false
 local DutyBlips = {}
 
 -- Functions
