@@ -8,6 +8,7 @@ local inAmoury = false
 local inHelicopter = false
 local inImpound = false
 local inGarage = false
+local hasOxInventory = GetResourceState('ox_inventory') ~= 'missing'
 
 local function loadAnimDict(dict) -- interactions, job,
     while (not HasAnimDictLoaded(dict)) do
@@ -117,14 +118,13 @@ function TakeOutImpound(vehicle)
             QBCore.Functions.TriggerCallback('qb-garage:server:GetVehicleProperties', function(properties)
                 QBCore.Functions.SetVehicleProperties(veh, properties)
                 SetVehicleNumberPlateText(veh, vehicle.plate)
-                SetEntityHeading(veh, coords.w)
                 exports['LegacyFuel']:SetFuel(veh, vehicle.fuel)
                 doCarDamage(veh, vehicle)
                 TriggerServerEvent('police:server:TakeOutImpound', vehicle.plate, currentGarage)
                 closeMenuFull()
                 TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
                 TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-                SetVehicleEngineOn(veh, true, true)
+                SetVehicleEngineOn(veh, true, true, false)
             end, vehicle.plate)
         end, vehicle.vehicle, coords, true)
     end
@@ -151,7 +151,7 @@ function TakeOutVehicle(vehicleInfo)
             TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
             TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
             TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
-            SetVehicleEngineOn(veh, true, true)
+            SetVehicleEngineOn(veh, true, true, false)
         end, vehicleInfo, coords, true)
     end
 end
@@ -166,7 +166,7 @@ local function IsArmoryWhitelist() -- being removed
 end
 
 local function SetWeaponSeries()
-    for k, _ in pairs(Config.Items.items) do
+    for k in pairs(Config.Items.items) do
         if k < 6 then
             Config.Items.items[k].info.serie = tostring(QBCore.Shared.RandomInt(2) .. QBCore.Shared.RandomStr(3) .. QBCore.Shared.RandomInt(1) .. QBCore.Shared.RandomStr(2) .. QBCore.Shared.RandomInt(3) .. QBCore.Shared.RandomStr(4))
         end
@@ -292,7 +292,7 @@ RegisterNetEvent('police:client:showFingerprintId', function(fid)
         type = "updateFingerprintId",
         fingerprintId = fid
     })
-    PlaySound(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", 0, 0, 1)
+    PlaySound(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", false, 0, true)
 end)
 
 RegisterNUICallback('doFingerScan', function(_, cb)
@@ -306,7 +306,7 @@ RegisterNetEvent('police:client:SendEmergencyMessage', function(coords, message)
 end)
 
 RegisterNetEvent('police:client:EmergencySound', function()
-    PlaySound(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", 0, 0, 1)
+    PlaySound(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", false, 0, true)
 end)
 
 RegisterNetEvent('police:client:CallAnim', function()
@@ -318,7 +318,7 @@ RegisterNetEvent('police:client:CallAnim', function()
     CreateThread(function()
         while isCalling do
             Wait(1000)
-            callCount = callCount - 1
+            callCount -= 1
             if callCount <= 0 then
                 isCalling = false
                 StopAnimTask(PlayerPedId(), 'cellphone@', 'cellphone_call_listen_base', 1.0)
@@ -336,8 +336,8 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
         local ped = PlayerPedId()
         local pos = GetEntityCoords(ped)
         local vehpos = GetEntityCoords(vehicle)
-        if #(pos - vehpos) < 5.0 and not IsPedInAnyVehicle(ped) then
-           QBCore.Functions.Progressbar('impound', Lang:t('progressbar.impound'), 5000, false, true, {
+        if #(pos - vehpos) < 5.0 and not IsPedInAnyVehicle(ped, false) then
+            QBCore.Functions.Progressbar('impound', Lang:t('progressbar.impound'), 5000, false, true, {
                 disableMovement = true,
                 disableCarMovement = true,
                 disableMouse = false,
@@ -395,24 +395,21 @@ RegisterNetEvent("police:client:VehicleMenuHeader", function (data)
     currentGarage = data.currentSelection
 end)
 
-
 RegisterNetEvent("police:client:ImpoundMenuHeader", function (data)
     MenuImpound(data.currentSelection)
     currentGarage = data.currentSelection
 end)
 
 RegisterNetEvent('police:client:TakeOutImpound', function(data)
-    if inImpound then
-        local vehicle = data.vehicle
-        TakeOutImpound(vehicle)
-    end
+    if not inImpound then return end
+
+    TakeOutImpound(data.vehicle)
 end)
 
 RegisterNetEvent('police:client:TakeOutVehicle', function(data)
-    if inGarage then
-        local vehicle = data.vehicle
-        TakeOutVehicle(vehicle)
-    end
+    if not inGarage then return end
+
+    TakeOutVehicle(data.vehicle)
 end)
 
 RegisterNetEvent('police:client:EvidenceStashDrawer', function(data)
@@ -478,7 +475,7 @@ RegisterNetEvent('qb-police:client:openArmoury', function()
             if armoryItem.authorizedJobGrades[i] == PlayerJob.grade.level then
                 authorizedItems.items[index] = armoryItem
                 authorizedItems.items[index].slot = index
-                index = index + 1
+                index += 1
             end
         end
     end
@@ -487,22 +484,27 @@ RegisterNetEvent('qb-police:client:openArmoury', function()
 end)
 
 RegisterNetEvent('qb-police:client:spawnHelicopter', function(k)
-    if IsPedInAnyVehicle(PlayerPedId(), false) then
-        QBCore.Functions.DeleteVehicle(GetVehiclePedIsIn(PlayerPedId()))
+    local ped = PlayerPedId()
+    if IsPedInAnyVehicle(ped, false) then
+        QBCore.Functions.DeleteVehicle(GetVehiclePedIsIn(ped, false))
     else
         local coords = Config.Locations["helicopter"][k]
-        if not coords then coords = GetEntityCoords(PlayerPedId()) end
+        if not coords then
+            local plyCoords = GetEntityCoords(ped)
+            local plyHeading = GetEntityHeading(ped)
+            coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, plyHeading)
+        end
         QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
             local veh = NetToVeh(netId)
             SetVehicleLivery(veh , 0)
-            SetVehicleMod(veh, 0, 48)
+            SetVehicleMod(veh, 0, 48, false)
             SetVehicleNumberPlateText(veh, "ZULU"..tostring(math.random(1000, 9999)))
             SetEntityHeading(veh, coords.w)
             exports['LegacyFuel']:SetFuel(veh, 100.0)
             closeMenuFull()
             TaskWarpPedIntoVehicle(PlayerPedId(), veh, -1)
             TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-            SetVehicleEngineOn(veh, true, true)
+            SetVehicleEngineOn(veh, true, true, false)
         end, Config.PoliceHelicopter, coords, true)
     end
 end)
@@ -513,8 +515,8 @@ if Config.UseTarget then
     CreateThread(function()
         -- Toggle Duty
         for k, v in pairs(Config.Locations["duty"]) do
-            exports['qb-target']:AddBoxZone("PoliceDuty_"..k, vector3(v.x, v.y, v.z), 1, 1, {
-                name = "PoliceDuty_"..k,
+            exports['qb-target']:AddBoxZone("box_zone_police_duty_"..k, vector3(v.x, v.y, v.z), 1, 1, {
+                name = "box_zone_police_duty_"..k,
                 heading = 11,
                 debugPoly = false,
                 minZ = v.z - 1,
@@ -532,13 +534,11 @@ if Config.UseTarget then
                 distance = 1.5
             })
         end
-
     end)
-
 else
-
     local dutylisten = false
     function dutylistener()
+        if PlayerJob.type ~= "leo" then return end
         dutylisten = true
         CreateThread(function()
             while dutylisten do
@@ -561,10 +561,10 @@ else
 
     -- Toggle Duty
     local dutyZones = {}
-    for _, v in pairs(Config.Locations["duty"]) do
+    for k, v in pairs(Config.Locations["duty"]) do
         dutyZones[#dutyZones+1] = BoxZone:Create(
-            vector3(vector3(v.x, v.y, v.z)), 1.75, 1, {
-            name="box_zone",
+            vector3(v.x, v.y, v.z), 1.75, 1, {
+            name="box_zone_police_duty"..k,
             debugPoly = false,
             minZ = v.z - 1,
             maxZ = v.z + 1,
@@ -593,10 +593,10 @@ end
 CreateThread(function()
     -- Evidence Storage
     local evidenceZones = {}
-    for _, v in pairs(Config.Locations["evidence"]) do
+    for k, v in pairs(Config.Locations["evidence"]) do
         evidenceZones[#evidenceZones+1] = BoxZone:Create(
-            vector3(vector3(v.x, v.y, v.z)), 2, 1, {
-            name="box_zone",
+            vector3(v.x, v.y, v.z), 2, 1, {
+            name="box_zone_police_evidence_"..k,
             debugPoly = false,
             minZ = v.z - 1,
             maxZ = v.z + 1,
@@ -634,10 +634,10 @@ CreateThread(function()
 
     -- Personal Stash
     local stashZones = {}
-    for _, v in pairs(Config.Locations["stash"]) do
+    for k, v in pairs(Config.Locations["stash"]) do
         stashZones[#stashZones+1] = BoxZone:Create(
-            vector3(vector3(v.x, v.y, v.z)), 1.5, 1.5, {
-            name="box_zone",
+            vector3(v.x, v.y, v.z), 1.5, 1.5, {
+            name="box_zone_police_stash_"..k,
             debugPoly = false,
             minZ = v.z - 1,
             maxZ = v.z + 1,
@@ -657,37 +657,34 @@ CreateThread(function()
     end)
 
     -- Police Trash
-    local trashZones = {}
-    for _, v in pairs(Config.Locations["trash"]) do
-        trashZones[#trashZones+1] = BoxZone:Create(
-            vector3(vector3(v.x, v.y, v.z)), 1, 1.75, {
-            name="box_zone",
+    for i = 1, #Config.Locations.trash do
+        local v = Config.Locations.trash[i]
+        local trashZone = BoxZone:Create(
+            vector3(v.x, v.y, v.z), 1, 1.75, {
+            name="box_zone_police_trash_"..i,
             debugPoly = false,
             minZ = v.z - 1,
             maxZ = v.z + 1,
         })
-    end
-
-    local trashCombo = ComboZone:Create(trashZones, {name = "trashCombo", debugPoly = false})
-    trashCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            inTrash = true
-            if onDuty then
-                exports['qb-core']:DrawText(Lang:t('info.trash_enter'),'left')
-                trash()
+        trashZone:onPlayerInOut(function(isPointInside)
+            inTrash = isPointInside
+            if isPointInside then
+                if onDuty then
+                    exports['qb-core']:DrawText(Lang:t('info.trash_enter'),'left')
+                    trash(i)
+                end
+            else
+                exports['qb-core']:HideText()
             end
-        else
-            inTrash = false
-            exports['qb-core']:HideText()
-        end
-    end)
+        end)
+    end
 
     -- Fingerprints
     local fingerprintZones = {}
-    for _, v in pairs(Config.Locations["fingerprint"]) do
+    for k, v in pairs(Config.Locations["fingerprint"]) do
         fingerprintZones[#fingerprintZones+1] = BoxZone:Create(
-            vector3(vector3(v.x, v.y, v.z)), 2, 1, {
-            name="box_zone",
+            vector3(v.x, v.y, v.z), 2, 1, {
+            name="box_zone_police_fingerprint_"..k,
             debugPoly = false,
             minZ = v.z - 1,
             maxZ = v.z + 1,
@@ -710,10 +707,10 @@ CreateThread(function()
 
     -- Armoury
     local armouryZones = {}
-    for _, v in pairs(Config.Locations["armory"]) do
+    for k, v in pairs(Config.Locations["armory"]) do
         armouryZones[#armouryZones+1] = BoxZone:Create(
-            vector3(vector3(v.x, v.y, v.z)), 5, 1, {
-            name="box_zone",
+            vector3(v.x, v.y, v.z), 5, 1, {
+            name="box_zone_police_armory_"..k,
             debugPoly = false,
             minZ = v.z - 1,
             maxZ = v.z + 1,
@@ -736,10 +733,10 @@ CreateThread(function()
 
     -- Helicopter
     local helicopterZones = {}
-    for _, v in pairs(Config.Locations["helicopter"]) do
+    for k, v in pairs(Config.Locations["helicopter"]) do
         helicopterZones[#helicopterZones+1] = BoxZone:Create(
-            vector3(vector3(v.x, v.y, v.z)), 10, 10, {
-            name="box_zone",
+            vector3(v.x, v.y, v.z), 10, 10, {
+            name="box_zone_police_helicopter_"..k,
             debugPoly = false,
             minZ = v.z - 1,
             maxZ = v.z + 1,
@@ -751,13 +748,12 @@ CreateThread(function()
         if isPointInside then
             inHelicopter = true
             if onDuty then
+                heli()
                 if IsPedInAnyVehicle(PlayerPedId(), false) then
                     exports['qb-core']:HideText()
                     exports['qb-core']:DrawText(Lang:t('info.store_heli'), 'left')
-                    heli()
                 else
                     exports['qb-core']:DrawText(Lang:t('info.take_heli'), 'left')
-                    heli()
                 end
             end
         else
@@ -768,10 +764,10 @@ CreateThread(function()
 
     -- Police Impound
     local impoundZones = {}
-    for _, v in pairs(Config.Locations["impound"]) do
+    for k, v in pairs(Config.Locations["impound"]) do
         impoundZones[#impoundZones+1] = BoxZone:Create(
             vector3(v.x, v.y, v.z), 1, 1, {
-            name="box_zone",
+            name="box_zone_police_impound"..k,
             debugPoly = false,
             minZ = v.z - 1,
             maxZ = v.z + 1,
@@ -817,10 +813,10 @@ CreateThread(function()
 
     -- Police Garage
     local garageZones = {}
-    for _, v in pairs(Config.Locations["vehicle"]) do
+    for k, v in pairs(Config.Locations["vehicle"]) do
         garageZones[#garageZones+1] = BoxZone:Create(
             vector3(v.x, v.y, v.z), 3, 3, {
-            name="box_zone",
+            name="box_zone_police_vehicle_"..k,
             debugPoly = false,
             minZ = v.z - 1,
             maxZ = v.z + 1,
@@ -834,7 +830,7 @@ CreateThread(function()
             if onDuty and PlayerJob.type == 'leo' then
                 if IsPedInAnyVehicle(PlayerPedId(), false) then
                     exports['qb-core']:DrawText(Lang:t('info.store_veh'), 'left')
-		    garage()
+                    garage()
                 else
                     local currentSelection = 0
 
@@ -866,11 +862,12 @@ end)
 
 -- Personal Stash Thread
 function stash()
+    if not inStash or PlayerJob.type ~= "leo" then return end
+
     CreateThread(function()
         while true do
             Wait(0)
             if inStash and PlayerJob.type == "leo" then
-                if onDuty then sleep = 5 end
                 if IsControlJustReleased(0, 38) then
                     TriggerServerEvent("inventory:server:OpenInventory", "stash", "policestash_"..QBCore.Functions.GetPlayerData().citizenid)
                     TriggerEvent("inventory:client:SetCurrentStash", "policestash_"..QBCore.Functions.GetPlayerData().citizenid)
@@ -884,18 +881,23 @@ function stash()
 end
 
 -- Police Trash Thread
-function trash()
+function trash(id)
+    if not inTrash or PlayerJob.type ~= "leo" then return end
+
     CreateThread(function()
         while true do
             Wait(0)
             if inTrash and PlayerJob.type == "leo" then
-                if onDuty then sleep = 5 end
                 if IsControlJustReleased(0, 38) then
-                    TriggerServerEvent("inventory:server:OpenInventory", "stash", "policetrash", {
-                        maxweight = 4000000,
-                        slots = 300,
-                    })
-                    TriggerEvent("inventory:client:SetCurrentStash", "policetrash")
+                    if hasOxInventory then
+                        exports.ox_inventory:openInventory('stash', ('policetrash_%s'):format(id))
+                    else
+                        TriggerServerEvent("inventory:server:OpenInventory", "stash", ('policetrash_%s'):format(id), {
+                            maxweight = 4000000,
+                            slots = 300,
+                        })
+                        TriggerEvent("inventory:client:SetCurrentStash", ('policetrash_%s'):format(id))
+                    end
                     break
                 end
             else
@@ -907,11 +909,12 @@ end
 
 -- Fingerprint Thread
 function fingerprint()
+    if not inFingerprint or PlayerJob.type ~= "leo" then return end
+
     CreateThread(function()
         while true do
             Wait(0)
             if inFingerprint and PlayerJob.type == "leo" then
-                if onDuty then sleep = 5 end
                 if IsControlJustReleased(0, 38) then
                     TriggerEvent("qb-police:client:scanFingerPrint")
                     break
@@ -925,11 +928,12 @@ end
 
 -- Armoury Thread
 function armoury()
+    if not inAmoury or PlayerJob.type ~= "leo" then return end
+
     CreateThread(function()
         while true do
             Wait(0)
             if inAmoury and PlayerJob.type == "leo" then
-                if onDuty then sleep = 5 end
                 if IsControlJustReleased(0, 38) then
                     TriggerEvent("qb-police:client:openArmoury")
                     break
@@ -943,11 +947,12 @@ end
 
 -- Helicopter Thread
 function heli()
+    if not inHelicopter or PlayerJob.type ~= "leo" then return end
+
     CreateThread(function()
         while true do
             Wait(0)
             if inHelicopter and PlayerJob.type == "leo" then
-                if onDuty then sleep = 5 end
                 if IsControlJustReleased(0, 38) then
                     TriggerEvent("qb-police:client:spawnHelicopter")
                     break
@@ -961,14 +966,15 @@ end
 
 -- Police Impound Thread
 function impound()
+    if not inImpound or PlayerJob.type ~= "leo" then return end
+
     CreateThread(function()
         while true do
             Wait(0)
             if inImpound and PlayerJob.type == "leo" then
-                if onDuty then sleep = 5 end
                 if IsPedInAnyVehicle(PlayerPedId(), false) then
                     if IsControlJustReleased(0, 38) then
-                        QBCore.Functions.DeleteVehicle(GetVehiclePedIsIn(PlayerPedId()))
+                        QBCore.Functions.DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
                         break
                     end
                 end
@@ -981,14 +987,15 @@ end
 
 -- Police Garage Thread
 function garage()
+    if not inGarage or PlayerJob.type ~= "leo" then return end
+
     CreateThread(function()
         while true do
             Wait(0)
             if inGarage and PlayerJob.type == "leo" then
-                if onDuty then sleep = 5 end
                 if IsPedInAnyVehicle(PlayerPedId(), false) then
                     if IsControlJustReleased(0, 38) then
-                        QBCore.Functions.DeleteVehicle(GetVehiclePedIsIn(PlayerPedId()))
+                        QBCore.Functions.DeleteVehicle(GetVehiclePedIsIn(PlayerPedId(), false))
                         break
                     end
                 end
