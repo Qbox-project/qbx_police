@@ -56,7 +56,11 @@ RegisterNetEvent('police:client:spawnPObj', function(item)
         label = Lang:t("progressbar.place_object"),
         useWhileDead = false,
         canCancel = true,
-        disable = { car = true, move = true, combat = true },
+        disable = {
+            car = true,
+            move = true,
+            combat = true
+        },
         anim = {
             dict = "anim@narcotics@trash",
             clip = "drop_front"

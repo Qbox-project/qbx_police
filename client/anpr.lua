@@ -19,7 +19,7 @@ function HandlespeedCam(speedCam, hasBeenBusted)
 		if IsPedInAnyVehicle(cache.ped, false) then
 			if GetPedInVehicleSeat(vehicle, -1) == cache.ped then
 				if GetVehicleClass(vehicle) ~= 18 then
-          local plate = QBCore.Functions.GetPlate(vehicle)
+                    local plate = QBCore.Functions.GetPlate(vehicle)
 
 					QBCore.Functions.TriggerCallback('police:IsPlateFlagged', function(result)
 						if result then
@@ -39,7 +39,7 @@ function HandlespeedCam(speedCam, hasBeenBusted)
 
 							TriggerServerEvent("police:server:FlaggedPlateTriggered", hasBeenBusted, plate, street1, street2, blipsettings)
 						end
-          end, plate)
+                    end, plate)
 				end
 			end
 		end

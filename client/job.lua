@@ -167,21 +167,14 @@ function TakeOutVehicle(vehicleInfo)
     end
 end
 
-local function IsArmoryWhitelist() -- being removed
+local function IsVehicleWhitelist()
     local retval = false
 
     if QBCore.Functions.GetPlayerData().job.type == 'leo' then
         retval = true
     end
-    return retval
-end
 
-local function SetWeaponSeries()
-    for k in pairs(Config.Items.items) do
-        if k < 6 then
-            Config.Items.items[k].info.serie = tostring(QBCore.Shared.RandomInt(2) .. QBCore.Shared.RandomStr(3) .. QBCore.Shared.RandomInt(1) .. QBCore.Shared.RandomStr(2) .. QBCore.Shared.RandomInt(3) .. QBCore.Shared.RandomStr(4))
-        end
-    end
+    return retval
 end
 
 function MenuGarage(currentSelection)
@@ -196,22 +189,18 @@ function MenuGarage(currentSelection)
         }
     end
 
-    if IsArmoryWhitelist() then
+    if IsVehicleWhitelist() then
         for veh, label in pairs(Config.WhitelistedVehicles) do
             vehicleMenu[#vehicleMenu + 1] = {
                 title = label,
                 event = "police:client:TakeOutVehicle",
-                args = {vehicle = veh, currentSelection = currentSelection}
+                args = {
+                    vehicle = veh,
+                    currentSelection = currentSelection
+                }
             }
         end
     end
-
-    vehicleMenu[#vehicleMenu + 1] = {
-        title = Lang:t('menu.close'),
-        onSelect = function(args)
-            lib.hideContext()
-        end
-    }
 
     lib.registerContext({
         id = 'open_policeGarage',
@@ -248,13 +237,6 @@ function MenuImpound(currentSelection)
 
 
         if shouldContinue then
-            impoundMenu[#impoundMenu + 1] = {
-                title = Lang:t('menu.close'),
-                onSelect = function(args)
-                    lib.hideContext()
-                end
-            }
-
             lib.registerContext({
                 id = 'open_policeImpound',
                 title = Lang:t('menu.impound'),
@@ -310,15 +292,20 @@ RegisterNetEvent('police:client:CallAnim', function()
     local callCount = 5
 
     lib.requestAnimDict("cellphone@")
-    
+
     TaskPlayAnim(cache.ped, 'cellphone@', 'cellphone_call_listen_base', 3.0, -1, -1, 49, 0, false, false, false)
+
     Wait(1000)
+
     CreateThread(function()
         while isCalling do
             Wait(1000)
+
             callCount -= 1
+
             if callCount <= 0 then
                 isCalling = false
+
                 StopAnimTask(cache.ped, 'cellphone@', 'cellphone_call_listen_base', 1.0)
             end
         end
@@ -341,7 +328,7 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
                 disableCarMovement = true,
                 disableMouse = false,
                 disableCombat = true
-            }, {
+            },{
                 animDict = 'missheistdockssetup1clipboard@base',
                 anim = 'base',
                 flags = 1
@@ -461,35 +448,14 @@ end)
 
 RegisterNetEvent('qb-police:client:scanFingerPrint', function()
     local player, distance = GetClosestPlayer()
+
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
+
         TriggerServerEvent("police:server:showFingerprint", playerId)
     else
         QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
     end
-end)
-
-RegisterNetEvent('qb-police:client:openArmoury', function()
-    local authorizedItems = {
-        label = Lang:t('menu.pol_armory'),
-        slots = 30,
-        items = {}
-    }
-    local index = 1
-
-    for _, armoryItem in pairs(Config.Items.items) do
-        for i=1, #armoryItem.authorizedJobGrades do
-            if armoryItem.authorizedJobGrades[i] == PlayerJob.grade.level then
-                authorizedItems.items[index] = armoryItem
-                authorizedItems.items[index].slot = index
-                index += 1
-            end
-        end
-    end
-
-    SetWeaponSeries()
-
-    TriggerServerEvent("inventory:server:OpenInventory", "shop", "police", authorizedItems)
 end)
 
 RegisterNetEvent('qb-police:client:spawnHelicopter', function(k)
@@ -726,36 +692,6 @@ CreateThread(function()
         end
     end)
 
-    -- Armoury
-    local armouryZones = {}
-
-    for k, v in pairs(Config.Locations["armory"]) do
-        armouryZones[#armouryZones + 1] = BoxZone:Create(vec3(v.x, v.y, v.z), 5, 1, {
-            name = "box_zone_police_armory_" .. k,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
-        })
-    end
-
-    local armouryCombo = ComboZone:Create(armouryZones, {
-        name = "armouryCombo"
-    })
-    armouryCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            inAmoury = true
-
-            if onDuty then
-                lib.showTextUI(Lang:t('info.enter_armory'))
-
-                armoury()
-            end
-        else
-            inAmoury = false
-
-            lib.hideTextUI()
-        end
-    end)
-
     -- Helicopter
     local helicopterZones = {}
 
@@ -955,25 +891,6 @@ function fingerprint()
             if inFingerprint and PlayerJob.type == "leo" then
                 if IsControlJustReleased(0, 38) then
                     TriggerEvent("qb-police:client:scanFingerPrint")
-                    break
-                end
-            else
-                break
-            end
-        end
-    end)
-end
-
--- Armoury Thread
-function armoury()
-    if not inAmoury or PlayerJob.type ~= "leo" then return end
-
-    CreateThread(function()
-        while true do
-            Wait(0)
-            if inAmoury and PlayerJob.type == "leo" then
-                if IsControlJustReleased(0, 38) then
-                    TriggerEvent("qb-police:client:openArmoury")
                     break
                 end
             else

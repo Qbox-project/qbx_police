@@ -4,12 +4,15 @@ local createdCamera = 0
 local function GetCurrentTime()
     local hours = GetClockHours()
     local minutes = GetClockMinutes()
+
     if hours < 10 then
         hours = tostring(0 .. GetClockHours())
     end
+
     if minutes < 10 then
         minutes = tostring(0 .. GetClockMinutes())
     end
+
     return tostring(hours .. ":" .. minutes)
 end
 
@@ -20,22 +23,29 @@ local function ChangeSecurityCamera(x, y, z, r)
     end
 
     local cam = CreateCam("DEFAULT_SCRIPTED_CAMERA", 1)
+
     SetCamCoord(cam, x, y, z)
     SetCamRot(cam, r.x, r.y, r.z, 2)
     RenderScriptCams(1, 0, 0, 1, 1)
+
     Wait(250)
+
     createdCamera = cam
 end
 
 local function CloseSecurityCamera()
     DestroyCam(createdCamera, 0)
     RenderScriptCams(0, 0, 1, 1, 1)
+
     createdCamera = 0
+
     ClearTimecycleModifier("scanline_cam_cheap")
     SetFocusEntity(cache.ped)
+
     if Config.SecurityCameras.hideradar then
         DisplayRadar(true)
     end
+
     FreezeEntityPosition(cache.ped, false)
 end
 
@@ -54,6 +64,7 @@ local function CreateInstuctionScaleform(scaleform)
     while not HasScaleformMovieLoaded(scaleform) do
         Wait(0)
     end
+
     PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
     PopScaleformMovieFunctionVoid()
 
@@ -87,30 +98,39 @@ RegisterNetEvent('police:client:ActiveCamera', function(cameraId)
         while not IsScreenFadedOut() do
             Wait(0)
         end
+
         SendNUIMessage({
             type = "enablecam",
             label = Config.SecurityCameras.cameras[cameraId].label,
             id = cameraId,
             connected = Config.SecurityCameras.cameras[cameraId].isOnline,
-            time = GetCurrentTime(),
+            time = GetCurrentTime()
         })
+
         local firstCamx = Config.SecurityCameras.cameras[cameraId].coords.x
         local firstCamy = Config.SecurityCameras.cameras[cameraId].coords.y
         local firstCamz = Config.SecurityCameras.cameras[cameraId].coords.z
         local firstCamr = Config.SecurityCameras.cameras[cameraId].r
+
         SetFocusArea(firstCamx, firstCamy, firstCamz, firstCamx, firstCamy, firstCamz)
+
         ChangeSecurityCamera(firstCamx, firstCamy, firstCamz, firstCamr)
+
         currentCameraIndex = cameraId
+
         DoScreenFadeIn(250)
     elseif cameraId == 0 then
         DoScreenFadeOut(250)
         while not IsScreenFadedOut() do
             Wait(0)
         end
+
         CloseSecurityCamera()
+
         SendNUIMessage({
-            type = "disablecam",
+            type = "disablecam"
         })
+
         DoScreenFadeIn(250)
     else
         QBCore.Functions.Notify(Lang:t("error.no_camera"), "error")
@@ -145,9 +165,12 @@ end)
 CreateThread(function()
     while true do
         local sleep = 2000
+
         if createdCamera ~= 0 then
             sleep = 5
+
             local instructions = CreateInstuctionScaleform("instructional_buttons")
+
             DrawScaleformMovieFullscreen(instructions, 255, 255, 255, 255, 0)
             SetTimecycleModifier("scanline_cam_cheap")
             SetTimecycleModifierStrength(1.0)
@@ -162,9 +185,11 @@ CreateThread(function()
                 while not IsScreenFadedOut() do
                     Wait(0)
                 end
+
                 CloseSecurityCamera()
+
                 SendNUIMessage({
-                    type = "disablecam",
+                    type = "disablecam"
                 })
                 DoScreenFadeIn(250)
             end
@@ -200,6 +225,7 @@ CreateThread(function()
                 end
             end
         end
+
         Wait(sleep)
     end
 end)

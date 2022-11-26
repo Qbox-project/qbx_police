@@ -7,7 +7,6 @@ local CurrentBlooddrop = nil
 local Fingerprints = {}
 local CurrentFingerprint = 0
 local shotAmount = 0
-
 local StatusList = {
     ['fight'] = Lang:t('evidence.red_hands'),
     ['widepupils'] = Lang:t('evidence.wide_pupils'),
@@ -23,37 +22,41 @@ local StatusList = {
     ["heavyalcohol"] = Lang:t('evidence.heavy_alcohol'),
     ["agitated"] = Lang:t('evidence.agitated')
 }
-
 local WhitelistedWeapons = {
-    `weapon_unarmed`,
-    `weapon_snowball`,
-    `weapon_stungun`,
-    `weapon_petrolcan`,
-    `weapon_hazardcan`,
-    `weapon_fireextinguisher`
+    joaat('weapon_unarmed'),
+    joaat('weapon_snowball'),
+    joaat('weapon_stungun'),
+    joaat('weapon_petrolcan'),
+    joaat('weapon_hazardcan'),
+    joaat('weapon_fireextinguisher')
 }
+local closeEvidenceSleep = 5000
 
 -- Functions
 local function DrawText3D(x, y, z, text)
     SetTextScale(0.35, 0.35)
     SetTextFont(4)
     SetTextColour(255, 255, 255, 215)
-    BeginTextCommandDisplayText('STRING')
     SetTextCentre(true)
-    AddTextComponentSubstringPlayerName(text)
     SetDrawOrigin(x,y,z, 0)
+
+    BeginTextCommandDisplayText('STRING')
+    AddTextComponentSubstringPlayerName(text)
     EndTextCommandDisplayText(0.0, 0.0)
+
     local factor = (string.len(text)) / 370
+
     DrawRect(0.0, 0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
     ClearDrawOrigin()
 end
 
 local function WhitelistedWeapon(weapon)
-    for i=1, #WhitelistedWeapons do
+    for i = 1, #WhitelistedWeapons do
         if WhitelistedWeapons[i] == weapon then
             return true
         end
     end
+
     return false
 end
 
@@ -61,7 +64,9 @@ local function DropBulletCasing(weapon, ped)
     local randX = math.random() + math.random(-1, 1)
     local randY = math.random() + math.random(-1, 1)
     local coords = GetOffsetFromEntityInWorldCoords(ped, randX, randY, 0)
+
     TriggerServerEvent('evidence:server:CreateCasing', weapon, coords)
+
     Wait(300)
 end
 
@@ -69,23 +74,25 @@ local function DnaHash(s)
     local h = string.gsub(s, '.', function(c)
         return string.format('%02x', string.byte(c))
     end)
+
     return h
 end
 
 -- Events
 RegisterNetEvent('evidence:client:SetStatus', function(statusId, time)
     if time > 0 and StatusList[statusId] then
-        if (CurrentStatusList == nil or CurrentStatusList[statusId] == nil) or
-            (CurrentStatusList[statusId] and CurrentStatusList[statusId].time < 20) then
+        if (CurrentStatusList == nil or CurrentStatusList[statusId] == nil) or (CurrentStatusList[statusId] and CurrentStatusList[statusId].time < 20) then
             CurrentStatusList[statusId] = {
                 text = StatusList[statusId],
                 time = time
             }
+
             QBCore.Functions.Notify(CurrentStatusList[statusId].text, 'error')
         end
     elseif StatusList[statusId] then
         CurrentStatusList[statusId] = nil
     end
+
     TriggerServerEvent('evidence:server:UpdateStatus', CurrentStatusList)
 end)
 
@@ -193,10 +200,10 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
 end)
 
 -- Threads
-
 CreateThread(function()
     while true do
         Wait(10000)
+
         if LocalPlayer.state.isLoggedIn then
             if CurrentStatusList and next(CurrentStatusList) then
                 for k, _ in pairs(CurrentStatusList) do
@@ -206,8 +213,10 @@ CreateThread(function()
                         CurrentStatusList[k].time = 0
                     end
                 end
+
                 TriggerServerEvent('evidence:server:UpdateStatus', CurrentStatusList)
             end
+
             if shotAmount > 0 then
                 shotAmount = 0
             end
@@ -217,8 +226,6 @@ end)
 
 CreateThread(function() -- Gunpowder Status when shooting
     while true do
-        Wait(0)
-
         if IsPedShooting(cache.ped) then
             local weapon = GetSelectedPedWeapon(cache.ped)
 
@@ -234,19 +241,19 @@ CreateThread(function() -- Gunpowder Status when shooting
                 DropBulletCasing(weapon, cache.ped)
             end
         end
+
+        Wait(0)
     end
 end)
 
 CreateThread(function()
     while true do
-        Wait(0)
-
         if CurrentCasing and CurrentCasing ~= 0 then
             local pos = GetEntityCoords(cache.ped)
-            if #(pos -vec3(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z)) < 1.5 then
 
+            if #(pos -vec3(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z)) < 1.5 then
                 DrawText3D(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z, Lang:t('info.bullet_casing', {value = Casings[CurrentCasing].type}))
-                
+
                 if IsControlJustReleased(0, 47) then
                     local s1, s2 = GetStreetNameAtCoord(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z)
                     local street1 = GetStreetNameFromHashKey(s1)
@@ -307,7 +314,7 @@ CreateThread(function()
                 Fingerprints[CurrentFingerprint].coords.z)) < 1.5 then
 
                 DrawText3D(Fingerprints[CurrentFingerprint].coords.x, Fingerprints[CurrentFingerprint].coords.y, Fingerprints[CurrentFingerprint].coords.z, Lang:t('info.fingerprint_text'))
-                
+
                 if IsControlJustReleased(0, 47) then
                     local s1, s2 = GetStreetNameAtCoord(Fingerprints[CurrentFingerprint].coords.x,Fingerprints[CurrentFingerprint].coords.y, Fingerprints[CurrentFingerprint].coords.z)
                     local street1 = GetStreetNameFromHashKey(s1)
@@ -317,7 +324,7 @@ CreateThread(function()
                     if street2 then
                         streetLabel = streetLabel .. ' | ' .. street2
                     end
-                    
+
                     local info = {
                         label = Lang:t('info.fingerprint'),
                         type = 'fingerprint',
@@ -329,10 +336,10 @@ CreateThread(function()
                 end
             end
         end
+
+        Wait(0)
     end
 end)
-
-local closeEvidenceSleep = 5000
 
 CreateThread(function()
     while true do
@@ -383,6 +390,7 @@ CreateThread(function()
                 closeEvidenceSleep = 5000
             end
         end
+
         Wait(closeEvidenceSleep)
     end
 end)
