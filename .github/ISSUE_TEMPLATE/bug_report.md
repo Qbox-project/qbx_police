@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is. A stranger to qbcore should be able to read your bug report and understand how to reproduce it themselves and understand how the feature should work normally.
+A clear and concise description of what the bug is. A stranger to qbox should be able to read your bug report and understand how to reproduce it themselves and understand how the feature should work normally.
 
 **To Reproduce**
 Steps to reproduce the behavior:

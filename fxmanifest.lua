@@ -1,14 +1,10 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'QB-PoliceJob'
-version '1.0.0'
-
 shared_scripts {
-    'config.lua',
-    '@qb-core/shared/locale.lua',
-    'locales/en.lua',
-    'locales/*.lua',
+	'config.lua',
+	'@qb-core/shared/locale.lua',
+	'locales/en.lua',
 	'@ox_lib/init.lua'
 }
 
@@ -21,7 +17,7 @@ client_scripts {
 	'client/interactions.lua',
 	'client/job.lua',
 	'client/heli.lua',
-	--'client/anpr.lua',
+	'client/anpr.lua',
 	'client/evidence.lua',
 	'client/objects.lua',
 	'client/tracker.lua'

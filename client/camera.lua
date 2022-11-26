@@ -32,11 +32,11 @@ local function CloseSecurityCamera()
     RenderScriptCams(0, 0, 1, 1, 1)
     createdCamera = 0
     ClearTimecycleModifier("scanline_cam_cheap")
-    SetFocusEntity(GetPlayerPed(PlayerId()))
+    SetFocusEntity(cache.ped)
     if Config.SecurityCameras.hideradar then
         DisplayRadar(true)
     end
-    FreezeEntityPosition(GetPlayerPed(PlayerId()), false)
+    FreezeEntityPosition(cache.ped, false)
 end
 
 local function InstructionButton(ControlButton)
