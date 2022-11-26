@@ -27,8 +27,7 @@ RegisterNetEvent('police:client:SetTracker', function(bool)
 end)
 
 RegisterNetEvent('police:client:SendTrackerLocation', function(requestId)
-    local ped = PlayerPedId()
-    local coords = GetEntityCoords(ped)
+    local coords = GetEntityCoords(cache.ped)
 
     TriggerServerEvent('police:server:SendTrackerLocation', coords, requestId)
 end)
