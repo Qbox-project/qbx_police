@@ -294,6 +294,7 @@ RegisterNetEvent('police:client:CallAnim', function()
     lib.requestAnimDict("cellphone@")
 
     TaskPlayAnim(cache.ped, 'cellphone@', 'cellphone_call_listen_base', 3.0, -1, -1, 49, 0, false, false, false)
+    RemoveAnimDict('cellphone@')
 
     Wait(1000)
 
@@ -496,7 +497,7 @@ if Config.UseTarget then
     CreateThread(function()
         -- Toggle Duty
         for k, v in pairs(Config.Locations["duty"]) do
-            exports['qb-target']:AddBoxZone("box_zone_police_duty_"..k, vec3(v.x, v.y, v.z), 1, 1, {
+            exports['qb-target']:AddBoxZone("box_zone_police_duty_" .. k, vec3(v.x, v.y, v.z), 1, 1, {
                 name = "box_zone_police_duty_"..k,
                 heading = 11,
                 minZ = v.z - 1,
@@ -517,22 +518,30 @@ if Config.UseTarget then
     end)
 else
     local dutylisten = false
+
     function dutylistener()
-        if PlayerJob.type ~= "leo" then return end
+        if PlayerJob.type ~= "leo" then
+            return
+        end
+
         dutylisten = true
+
         CreateThread(function()
             while dutylisten do
                 if PlayerJob.type == "leo" then
                     if IsControlJustReleased(0, 38) then
                         onDuty = not onDuty
+
                         TriggerServerEvent("police:server:UpdateCurrentCops")
                         TriggerServerEvent("QBCore:ToggleDuty")
+
                         dutylisten = false
                         break
                     end
                 else
                     break
                 end
+
                 Wait(0)
             end
         end)

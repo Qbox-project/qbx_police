@@ -6,7 +6,10 @@ RegisterNetEvent('police:client:CheckDistance', function()
 
         TriggerServerEvent("police:server:SetTracker", playerId)
     else
-        lib.notify({description = Lang:t("error.none_nearby"), type = "error"})
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = "error"
+        })
     end
 end)
 

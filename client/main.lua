@@ -168,7 +168,11 @@ RegisterNetEvent('police:client:policeAlert', function(coords, text)
     local street1name = GetStreetNameFromHashKey(street1)
     local street2name = GetStreetNameFromHashKey(street2)
 
-    lib.notify({ title = text, description = street1name .. ' ' .. street2name, type = 'inform' })
+    lib.notify({
+        title = text,
+        description = street1name .. ' ' .. street2name,
+        type = 'inform'
+    })
 
     PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
 

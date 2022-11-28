@@ -68,7 +68,10 @@ RegisterNetEvent('police:client:spawnPObj', function(item)
     }) then
         TriggerServerEvent("police:server:spawnObject", item)
     else
-        lib.notify({ description = Lang:t("error.canceled"), type = "error" })
+        lib.notify({
+            description = Lang:t("error.canceled"),
+            type = "error"
+        })
     end
 end)
 
@@ -93,7 +96,10 @@ RegisterNetEvent('police:client:deleteObject', function()
         }) then
             TriggerServerEvent("police:server:deleteObject", objectId)
         else
-            lib.notify({ description = Lang:t("error.canceled"), type = "error" })
+            lib.notify({
+                description = Lang:t("error.canceled"),
+                type = "error"
+            })
         end
     end
 end)
@@ -126,7 +132,10 @@ end)
 -- Spawn a spike strip.
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
     if #SpawnedSpikes >= Config.MaxSpikes or PlayerJob.type ~= "leo" or not PlayerJob.onduty then
-        lib.notify({ description = Lang:t("error.no_spikestripe"), type = 'error'})
+        lib.notify({
+            description = Lang:t("error.no_spikestripe"),
+            type = 'error'
+        })
         return
     end
 

@@ -40,18 +40,25 @@ local function HandCuffAnimation()
 	Wait(3500)
 
     TaskPlayAnim(cache.ped, "mp_arrest_paired", "exit", 3.0, 3.0, -1, 48, 0, 0, 0, 0)
+    RemoveAnimDict("mp_arrest_paired")
 end
 
 local function GetCuffedAnimation(playerId)
     local cuffer = GetPlayerPed(GetPlayerFromServerId(playerId))
     local heading = GetEntityHeading(cuffer)
+
     TriggerServerEvent("InteractSound_SV:PlayOnSource", "Cuff", 0.2)
-    loadAnimDict("mp_arrest_paired")
+
+    lib.requestAnimDict("mp_arrest_paired")
+
     SetEntityCoords(cache.ped, GetOffsetFromEntityInWorldCoords(cuffer, 0.0, 0.45, 0.0))
 
 	Wait(100)
+
 	SetEntityHeading(cache.ped, heading)
 	TaskPlayAnim(cache.ped, "mp_arrest_paired", "crook_p2_back_right", 3.0, 3.0, -1, 32, 0, 0, 0, 0 ,true, true, true)
+    RemoveAnimDict("mp_arrest_paired")
+
 	Wait(2500)
 end
 
@@ -313,7 +320,7 @@ RegisterNetEvent('police:client:GetEscorted', function(playerId)
     local ped = cache.ped
 
     QBCore.Functions.GetPlayerData(function(PlayerData)
-        if PlayerData.metadata["isdead"] or isHandcuffed or PlayerData.metadata["inlaststand"] then
+        if PlayerData.metadata.isdead or isHandcuffed or PlayerData.metadata.inlaststand then
             if not isEscorted then
                 isEscorted = true
 
@@ -342,7 +349,7 @@ end)
 
 RegisterNetEvent('police:client:GetKidnappedTarget', function(playerId)
     QBCore.Functions.GetPlayerData(function(PlayerData)
-        if PlayerData.metadata["isdead"] or PlayerData.metadata["inlaststand"] or isHandcuffed then
+        if PlayerData.metadata.isdead or PlayerData.metadata.inlaststand or isHandcuffed then
             if not isEscorted then
                 isEscorted = true
 
@@ -352,6 +359,7 @@ RegisterNetEvent('police:client:GetKidnappedTarget', function(playerId)
 
                 AttachEntityToEntity(cache.ped, dragger, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 0.0, false, false, false, false, 2, false)
                 TaskPlayAnim(cache.ped, "nm", "firemans_carry", 8.0, -8.0, 100000, 33, 0, false, false, false)
+                RemoveAnimDict("nm")
             else
                 isEscorted = false
 
@@ -370,6 +378,7 @@ RegisterNetEvent('police:client:GetKidnappedDragger', function()
             lib.requestAnimDict("missfinale_c2mcs_1")
 
             TaskPlayAnim(cache.ped, "missfinale_c2mcs_1", "fin_c2_mcs_1_camman", 8.0, -8.0, 100000, 49, 0, false, false, false)
+            RemoveAnimDict("missfinale_c2mcs_1")
 
             isEscorting = true
         else
@@ -481,9 +490,11 @@ CreateThread(function()
             EnableControlAction(0, 249, true) -- Added for talking while cuffed
             EnableControlAction(0, 46, true)  -- Added for talking while cuffed
 
-            if (not IsEntityPlayingAnim(cache.ped, "mp_arresting", "idle", 3) and not IsEntityPlayingAnim(cache.ped, "mp_arrest_paired", "crook_p2_back_right", 3)) and not QBCore.Functions.GetPlayerData().metadata["isdead"] then
-                loadAnimDict("mp_arresting")
+            if (not IsEntityPlayingAnim(cache.ped, "mp_arresting", "idle", 3) and not IsEntityPlayingAnim(cache.ped, "mp_arrest_paired", "crook_p2_back_right", 3)) and not QBCore.Functions.GetPlayerData().metadata.isdead then
+                lib.requestAnimDict("mp_arresting")
+
                 TaskPlayAnim(cache.ped, "mp_arresting", "idle", 8.0, -8, -1, cuffType, 0, 0, 0, 0)
+                RemoveAnimDict("mp_arresting")
             end
         end
 

@@ -21,7 +21,7 @@ local function UpdateBlips()
 
             dutyPlayers[#dutyPlayers + 1] = {
                 source = v.PlayerData.source,
-                label = v.PlayerData.metadata["callsign"],
+                label = v.PlayerData.metadata.callsign,
                 job = v.PlayerData.job.name,
                 location = {
                     x = coords.x,
@@ -140,7 +140,7 @@ QBCore.Commands.Add("grantlicense", Lang:t("commands.license_grant"), {
 
     if not SearchedPlayer then return end
 
-    local licenseTable = SearchedPlayer.PlayerData.metadata["licences"]
+    local licenseTable = SearchedPlayer.PlayerData.metadata.licences
 
     if licenseTable[args[2]] then
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.license_already"), type = 'error'})
@@ -176,10 +176,13 @@ QBCore.Commands.Add("revokelicense", Lang:t("commands.license_revoke"), {
 
     if not SearchedPlayer then return end
 
-    local licenseTable = SearchedPlayer.PlayerData.metadata["licences"]
+    local licenseTable = SearchedPlayer.PlayerData.metadata.licences
 
     if not licenseTable[args[2]] then
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.error_license"), type = "error"})
+        TriggerClientEvent('ox_lib:notify', src, {
+            description = Lang:t("error.error_license"),
+            type = "error"
+        })
         return
     end
 
@@ -187,8 +190,14 @@ QBCore.Commands.Add("revokelicense", Lang:t("commands.license_revoke"), {
 
     SearchedPlayer.Functions.SetMetaData("licences", licenseTable)
 
-    TriggerClientEvent('ox_lib:notify', SearchedPlayer.PlayerData.source, {description = Lang:t("error.revoked_license"), type = "error"})
-    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.revoke_license"), type = "success"})
+    TriggerClientEvent('ox_lib:notify', SearchedPlayer.PlayerData.source, {
+        description = Lang:t("error.revoked_license"),
+        type = "error"
+    })
+    TriggerClientEvent('ox_lib:notify', src, {
+        description = Lang:t("success.revoke_license"),
+        type = "success"
+    })
 end)
 
 QBCore.Commands.Add("pobject", Lang:t("commands.place_object"), {
@@ -488,7 +497,7 @@ QBCore.Commands.Add("ankletlocation", Lang:t("commands.ankletlocation"), {
 
         if not Target then return end
 
-        if Target.PlayerData.metadata["tracker"] then
+        if Target.PlayerData.metadata.tracker then
             TriggerClientEvent("police:client:SendTrackerLocation", Target.PlayerData.source, src)
         else
             TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.no_anklet"), type = 'error'})
@@ -588,7 +597,13 @@ QBCore.Functions.CreateUseableItem("moneybag", function(source, item)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
 
-    if not Player or not Player.Functions.GetItemByName("moneybag") or not item.info or item.info == "" or Player.PlayerData.job.type == "leo" or not Player.Functions.RemoveItem("moneybag", 1, item.slot) then return end
+    if not Player then
+        return
+    end
+
+    if not Player.Functions.GetItemByName("moneybag") or not item.info or item.info == "" or Player.PlayerData.job.type == "leo" or not Player.Functions.RemoveItem("moneybag", 1, item.slot) then
+        return
+    end
 
     Player.Functions.AddMoney("cash", tonumber(item.info.cash), "used-moneybag")
 end)
@@ -597,7 +612,7 @@ end)
 QBCore.Functions.CreateCallback('police:server:isPlayerDead', function(_, cb, playerId)
     local Player = QBCore.Functions.GetPlayer(playerId)
 
-    cb(Player.PlayerData.metadata["isdead"])
+    cb(Player.PlayerData.metadata.isdead)
 end)
 
 QBCore.Functions.CreateCallback('police:GetPlayerStatus', function(_, cb, playerId)
@@ -617,7 +632,7 @@ end)
 
 QBCore.Functions.CreateCallback('police:IsSilencedWeapon', function(source, cb, weapon)
     local Player = QBCore.Functions.GetPlayer(source)
-    local itemInfo = Player.Functions.GetItemByName(QBCore.Shared.Weapons[weapon]["name"])
+    local itemInfo = Player.Functions.GetItemByName(QBCore.Shared.Weapons[weapon].name)
     local retval = false
 
     if itemInfo then
@@ -644,7 +659,7 @@ QBCore.Functions.CreateCallback('police:GetDutyPlayers', function(_, cb)
         if v and v.PlayerData.job.type == "leo" and v.PlayerData.job.onduty then
             dutyPlayers[#dutyPlayers + 1] = {
                 source = v.PlayerData.source,
-                label = v.PlayerData.metadata["callsign"],
+                label = v.PlayerData.metadata.callsign,
                 job = v.PlayerData.job.name
             }
         end
@@ -762,14 +777,18 @@ RegisterNetEvent('police:server:EscortPlayer', function(playerId)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
 
-    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
+    if #(playerCoords - targetCoords) > 2.5 then
+        return DropPlayer(src, "Attempted exploit abuse")
+    end
 
     local Player = QBCore.Functions.GetPlayer(src)
     local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
 
-    if not Player or not EscortPlayer then return end
+    if not Player or not EscortPlayer then
+        return
+    end
 
-    if (Player.PlayerData.job.type == "leo" or Player.PlayerData.job.name == "ambulance") or (EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] or EscortPlayer.PlayerData.metadata["inlaststand"]) then
+    if (Player.PlayerData.job.type == "leo" or Player.PlayerData.job.name == "ambulance") or (EscortPlayer.PlayerData.metadata.ishandcuffed or EscortPlayer.PlayerData.metadata.isdead or EscortPlayer.PlayerData.metadata.inlaststand) then
         TriggerClientEvent("police:client:GetEscorted", EscortPlayer.PlayerData.source, Player.PlayerData.source)
     else
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.not_cuffed_dead"), type = 'error'})
@@ -788,7 +807,7 @@ RegisterNetEvent('police:server:KidnapPlayer', function(playerId)
     local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
     if not Player or not EscortPlayer then return end
 
-    if EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] or EscortPlayer.PlayerData.metadata["inlaststand"] then
+    if EscortPlayer.PlayerData.metadata.ishandcuffed or EscortPlayer.PlayerData.metadata.isdead or EscortPlayer.PlayerData.metadata.inlaststand then
         TriggerClientEvent("police:client:GetKidnappedTarget", EscortPlayer.PlayerData.source, Player.PlayerData.source)
         TriggerClientEvent("police:client:GetKidnappedDragger", Player.PlayerData.source, EscortPlayer.PlayerData.source)
     else
@@ -802,15 +821,24 @@ RegisterNetEvent('police:server:SetPlayerOutVehicle', function(playerId)
     local targetPed = GetPlayerPed(playerId)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
-    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
+
+    if #(playerCoords - targetCoords) > 2.5 then
+        return DropPlayer(src, "Attempted exploit abuse")
+    end
 
     local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
-    if not QBCore.Functions.GetPlayer(src) or not EscortPlayer then return end
 
-    if EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] then
+    if not QBCore.Functions.GetPlayer(src) or not EscortPlayer then
+        return
+    end
+
+    if EscortPlayer.PlayerData.metadata.ishandcuffed or EscortPlayer.PlayerData.metadata.isdead then
         TriggerClientEvent("police:client:SetOutVehicle", EscortPlayer.PlayerData.source)
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.not_cuffed_dead"), type = 'error'})
+        TriggerClientEvent('ox_lib:notify', src, {
+            description = Lang:t("error.not_cuffed_dead"),
+            type = 'error'
+        })
     end
 end)
 
@@ -825,10 +853,13 @@ RegisterNetEvent('police:server:PutPlayerInVehicle', function(playerId)
     local EscortPlayer = QBCore.Functions.GetPlayer(playerId)
     if not QBCore.Functions.GetPlayer(src) or not EscortPlayer then return end
 
-    if EscortPlayer.PlayerData.metadata["ishandcuffed"] or EscortPlayer.PlayerData.metadata["isdead"] then
+    if EscortPlayer.PlayerData.metadata.ishandcuffed or EscortPlayer.PlayerData.metadata.isdead then
         TriggerClientEvent("police:client:PutInVehicle", EscortPlayer.PlayerData.source)
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.not_cuffed_dead"), type = 'error'})
+        TriggerClientEvent('ox_lib:notify', src, {
+            description = Lang:t("error.not_cuffed_dead"),
+            type = 'error'
+        })
     end
 end)
 
@@ -875,8 +906,8 @@ RegisterNetEvent('police:server:JailPlayer', function(playerId, time)
 
     OtherPlayer.Functions.SetMetaData("injail", time)
     OtherPlayer.Functions.SetMetaData("criminalrecord", {
-        ["hasRecord"] = true,
-        ["date"] = currentDate
+        hasRecord = true,
+        date = currentDate
     })
 
     TriggerClientEvent("police:client:SendToJail", OtherPlayer.PlayerData.source, time)
@@ -904,13 +935,23 @@ RegisterNetEvent('police:server:SearchPlayer', function(playerId)
     local targetPed = GetPlayerPed(playerId)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
-    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
+
+    if #(playerCoords - targetCoords) > 2.5 then
+        return DropPlayer(src, "Attempted exploit abuse")
+    end
 
     local SearchedPlayer = QBCore.Functions.GetPlayer(playerId)
-    if not QBCore.Functions.GetPlayer(src) or not SearchedPlayer then return end
 
-    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.cash_found", {cash = SearchedPlayer.PlayerData.money["cash"]})})
-    TriggerClientEvent('ox_lib:notify', SearchedPlayer.PlayerData.source, {description = Lang:t("info.being_searched")})
+    if not QBCore.Functions.GetPlayer(src) or not SearchedPlayer then
+        return
+    end
+
+    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.cash_found", {
+        cash = SearchedPlayer.PlayerData.money.cash
+    })})
+    TriggerClientEvent('ox_lib:notify', SearchedPlayer.PlayerData.source, {
+        description = Lang:t("info.being_searched")
+    })
 end)
 
 RegisterNetEvent('police:server:SeizeCash', function(playerId)
@@ -925,7 +966,7 @@ RegisterNetEvent('police:server:SeizeCash', function(playerId)
     local SearchedPlayer = QBCore.Functions.GetPlayer(playerId)
     if not Player or not SearchedPlayer then return end
 
-    local moneyAmount = SearchedPlayer.PlayerData.money["cash"]
+    local moneyAmount = SearchedPlayer.PlayerData.money.cash
     local info = { cash = moneyAmount }
 
     SearchedPlayer.Functions.RemoveMoney("cash", moneyAmount, "police-cash-seized")
@@ -941,22 +982,34 @@ RegisterNetEvent('police:server:SeizeDriverLicense', function(playerId)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
 
-    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
+    if #(playerCoords - targetCoords) > 2.5 then
+        return DropPlayer(src, "Attempted exploit abuse")
+    end
 
     local SearchedPlayer = QBCore.Functions.GetPlayer(playerId)
 
-    if not QBCore.Functions.GetPlayer(src) or not SearchedPlayer then return end
+    if not QBCore.Functions.GetPlayer(src) or not SearchedPlayer then
+        return
+    end
 
-    local driverLicense = SearchedPlayer.PlayerData.metadata["licences"]["driver"]
+    local driverLicense = SearchedPlayer.PlayerData.metadata.licences.driver
 
     if driverLicense then
-        local licenses = {["driver"] = false, ["business"] = SearchedPlayer.PlayerData.metadata["licences"]["business"]}
+        local licenses = {
+            driver = false,
+            business = SearchedPlayer.PlayerData.metadata.licences.business
+        }
 
         SearchedPlayer.Functions.SetMetaData("licences", licenses)
 
-        TriggerClientEvent('ox_lib:notify', SearchedPlayer.PlayerData.source, {description = Lang:t("info.driving_license_confiscated")})
+        TriggerClientEvent('ox_lib:notify', SearchedPlayer.PlayerData.source, {
+            description = Lang:t("info.driving_license_confiscated")
+        })
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.no_driver_license"), type = 'error'})
+        TriggerClientEvent('ox_lib:notify', src, {
+            description = Lang:t("error.no_driver_license"),
+            type = 'error'
+        })
     end
 end)
 
@@ -1181,13 +1234,17 @@ RegisterNetEvent('police:server:SetTracker', function(targetId)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
 
-    if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, "Attempted exploit abuse") end
+    if #(playerCoords - targetCoords) > 2.5 then
+        return DropPlayer(src, "Attempted exploit abuse")
+    end
 
     local Target = QBCore.Functions.GetPlayer(targetId)
 
-    if not QBCore.Functions.GetPlayer(src) or not Target then return end
+    if not QBCore.Functions.GetPlayer(src) or not Target then
+        return
+    end
 
-    local TrackerMeta = Target.PlayerData.metadata["tracker"]
+    local TrackerMeta = Target.PlayerData.metadata.tracker
 
     if TrackerMeta then
         Target.Functions.SetMetaData("tracker", false)
@@ -1197,7 +1254,7 @@ RegisterNetEvent('police:server:SetTracker', function(targetId)
         TriggerClientEvent('police:client:SetTracker', targetId, false)
     else
         Target.Functions.SetMetaData("tracker", true)
-    
+
         TriggerClientEvent('ox_lib:notify', targetId, {description = Lang:t("success.put_anklet"), type = 'success'})
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.put_anklet_on", {firstname = Target.PlayerData.charinfo.firstname, lastname = Target.PlayerData.charinfo.lastname}), type = 'success'})
         TriggerClientEvent('police:client:SetTracker', targetId, true)
