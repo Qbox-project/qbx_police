@@ -67,8 +67,6 @@ Config.Locations = {
     }
 }
 
-Config.ArmoryWhitelist = {}
-
 Config.PoliceHelicopter = "POLMAV"
 
 Config.SecurityCameras = {
@@ -109,8 +107,8 @@ Config.SecurityCameras = {
         [33] = {label = "Vangelico Jewelery CAM#3", coords = vec3(-620.3, -224.31, 40.23), r = {x = -35.0, y = 0.0, z = 165.78}, canRotate = true, isOnline = true},
         [34] = {label = "Vangelico Jewelery CAM#4", coords = vec3(-622.57, -236.3, 40.31), r = {x = -35.0, y = 0.0, z = 5.78}, canRotate = true, isOnline = true},
         [35] = {label = "Limited Ltd GrapeSeed CAM#1", coords = vec3(1709.0, 4930.3, 44.00), r = {x = -25.0, y = 0.0, z = 98.0}, canRotate = false, isOnline = true},
-        [36] = {label = "24/7 Tataviam Mountains CAM#1", coords = vec3(2558.8, 390.44, 110.8), r = {x = -25.0, y = 0.0, z = 140.0}, canRotate = false, isOnline = true},
-    },
+        [36] = {label = "24/7 Tataviam Mountains CAM#1", coords = vec3(2558.8, 390.44, 110.8), r = {x = -25.0, y = 0.0, z = 140.0}, canRotate = false, isOnline = true}
+    }
 }
 
 Config.AuthorizedVehicles = {
@@ -171,7 +169,9 @@ Config.AuthorizedVehicles = {
 	}
 }
 
-Config.WhitelistedVehicles = {}
+Config.WhitelistedVehicles = {
+    -- ["police"] = "Police Car 1"
+}
 
 Config.AmmoLabels = {
     ["AMMO_PISTOL"] = "9x19mm parabellum bullet",
@@ -196,30 +196,6 @@ Config.Radars = {
 	vec4(-823.3688, -1146.980, 8.0, 300.0)
 }
 
-Config.CarItems = {
-    [1] = {
-        name = "heavyarmor",
-        amount = 2,
-        info = {},
-        type = "item",
-        slot = 1
-    },
-    [2] = {
-        name = "empty_evidence_bag",
-        amount = 10,
-        info = {},
-        type = "item",
-        slot = 2
-    },
-    [3] = {
-        name = "police_stormram",
-        amount = 1,
-        info = {},
-        type = "item",
-        slot = 3
-    }
-}
-
 Config.VehicleSettings = {
     --[[
     ["car1"] = { --- Model name
@@ -229,4 +205,13 @@ Config.VehicleSettings = {
 		["livery"] = 1
     }
     ]]
+}
+
+Config.EvidenceWhitelistedWeapons = {
+    joaat('weapon_unarmed'),
+    joaat('weapon_snowball'),
+    joaat('weapon_stungun'),
+    joaat('weapon_petrolcan'),
+    joaat('weapon_hazardcan'),
+    joaat('weapon_fireextinguisher')
 }

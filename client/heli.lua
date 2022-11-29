@@ -24,117 +24,117 @@ local locked_on_vehicle = nil
 
 -- Functions
 local function IsPlayerInPolmav()
-  return IsVehicleModel(cache.vehicle, joaat(Config.PoliceHelicopter))
+    return IsVehicleModel(cache.vehicle, joaat(Config.PoliceHelicopter))
 end
 
 local function IsHeliHighEnough(heli)
-  return GetEntityHeightAboveGround(heli) > 1.5
+    return GetEntityHeightAboveGround(heli) > 1.5
 end
 
 local function ChangeVision()
-  if vision_state == 0 then
-    SetNightvision(true)
+    if vision_state == 0 then
+        SetNightvision(true)
 
-    vision_state = 1
-  elseif vision_state == 1 then
-    SetNightvision(false)
-    SetSeethrough(true)
+        vision_state = 1
+    elseif vision_state == 1 then
+        SetNightvision(false)
+        SetSeethrough(true)
 
-    vision_state = 2
-  else
-    SetSeethrough(false)
+        vision_state = 2
+    else
+        SetSeethrough(false)
 
-    vision_state = 0
-  end
+        vision_state = 0
+    end
 end
 
 local function HideHUDThisFrame()
-  HideHelpTextThisFrame()
-  HideHudAndRadarThisFrame()
-  HideHudComponentThisFrame(19) -- weapon wheel
-  HideHudComponentThisFrame(1) -- Wanted Stars
-  HideHudComponentThisFrame(2) -- Weapon icon
-  HideHudComponentThisFrame(3) -- Cash
-  HideHudComponentThisFrame(4) -- MP CASH
-  HideHudComponentThisFrame(13) -- Cash Change
-  HideHudComponentThisFrame(11) -- Floating Help Text
-  HideHudComponentThisFrame(12) -- more floating help text
-  HideHudComponentThisFrame(15) -- Subtitle Text
-  HideHudComponentThisFrame(18) -- Game Stream
+    HideHelpTextThisFrame()
+    HideHudAndRadarThisFrame()
+    HideHudComponentThisFrame(19) -- weapon wheel
+    HideHudComponentThisFrame(1) -- Wanted Stars
+    HideHudComponentThisFrame(2) -- Weapon icon
+    HideHudComponentThisFrame(3) -- Cash
+    HideHudComponentThisFrame(4) -- MP CASH
+    HideHudComponentThisFrame(13) -- Cash Change
+    HideHudComponentThisFrame(11) -- Floating Help Text
+    HideHudComponentThisFrame(12) -- more floating help text
+    HideHudComponentThisFrame(15) -- Subtitle Text
+    HideHudComponentThisFrame(18) -- Game Stream
 end
 
 local function CheckInputRotation(cam, zoomvalue)
-  local rightAxisX = GetDisabledControlNormal(0, 220)
-  local rightAxisY = GetDisabledControlNormal(0, 221)
-  local rotation = GetCamRot(cam, 2)
+    local rightAxisX = GetDisabledControlNormal(0, 220)
+    local rightAxisY = GetDisabledControlNormal(0, 221)
+    local rotation = GetCamRot(cam, 2)
 
-  if rightAxisX ~= 0.0 or rightAxisY ~= 0.0 then
-    local new_z = rotation.z + rightAxisX*-1.0*(speed_ud)*(zoomvalue+0.1)
-    local new_x = math.max(math.min(20.0, rotation.x + rightAxisY*-1.0*(speed_lr)*(zoomvalue+0.1)), -89.5) -- Clamping at top (cant see top of heli) and at bottom (doesn't glitch out in -90deg)
+    if rightAxisX ~= 0.0 or rightAxisY ~= 0.0 then
+        local new_z = rotation.z + rightAxisX*-1.0*(speed_ud)*(zoomvalue+0.1)
+        local new_x = math.max(math.min(20.0, rotation.x + rightAxisY*-1.0*(speed_lr)*(zoomvalue+0.1)), -89.5) -- Clamping at top (cant see top of heli) and at bottom (doesn't glitch out in -90deg)
 
         SetCamRot(cam, new_x, 0.0, new_z, 2)
-  end
+    end
 end
 
 local function HandleZoom(cam)
-  if IsControlJustPressed(0,241) then -- Scrollup
-    fov = math.max(fov - zoomspeed, fov_min)
-  end
+    if IsControlJustPressed(0,241) then -- Scrollup
+        fov = math.max(fov - zoomspeed, fov_min)
+    end
 
-  if IsControlJustPressed(0,242) then
-    fov = math.min(fov + zoomspeed, fov_max) -- ScrollDown
-  end
+    if IsControlJustPressed(0,242) then
+        fov = math.min(fov + zoomspeed, fov_max) -- ScrollDown
+    end
 
-  local current_fov = GetCamFov(cam)
+    local current_fov = GetCamFov(cam)
 
-  if math.abs(fov-current_fov) < 0.1 then -- the difference is too small, just set the value directly to avoid unneeded updates to FOV of order 10^-5
-    fov = current_fov
-  end
+    if math.abs(fov-current_fov) < 0.1 then -- the difference is too small, just set the value directly to avoid unneeded updates to FOV of order 10^-5
+        fov = current_fov
+    end
 
-  SetCamFov(cam, current_fov + (fov - current_fov)*0.05) -- Smoothing of camera zoom
+    SetCamFov(cam, current_fov + (fov - current_fov)*0.05) -- Smoothing of camera zoom
 end
 
 local function RotAnglesToVec(rot) -- input vector3
-  local z = math.rad(rot.z)
-  local x = math.rad(rot.x)
-  local num = math.abs(math.cos(x))
+    local z = math.rad(rot.z)
+    local x = math.rad(rot.x)
+    local num = math.abs(math.cos(x))
 
-  return vec3(-math.sin(z)*num, math.cos(z)*num, math.sin(x))
+    return vec3(-math.sin(z) * num, math.cos(z) * num, math.sin(x))
 end
 
 local function GetVehicleInView(cam)
-  local coords = GetCamCoord(cam)
-  local forward_vector = RotAnglesToVec(GetCamRot(cam, 2))
-  local rayhandle = CastRayPointToPoint(coords, coords + (forward_vector * 400.0), 10, cache.vehicle, 0)
-  local _, _, _, _, entityHit = GetRaycastResult(rayhandle)
+    local coords = GetCamCoord(cam)
+    local forward_vector = RotAnglesToVec(GetCamRot(cam, 2))
+    local rayhandle = CastRayPointToPoint(coords, coords + (forward_vector * 400.0), 10, cache.vehicle, 0)
+    local _, _, _, _, entityHit = GetRaycastResult(rayhandle)
 
-  if entityHit > 0 and IsEntityAVehicle(entityHit) then
-    return entityHit
-  else
-    return nil
-  end
+    if entityHit > 0 and IsEntityAVehicle(entityHit) then
+        return entityHit
+    else
+        return nil
+    end
 end
 
 local function RenderVehicleInfo(vehicle)
-  local pos = GetEntityCoords(vehicle)
-  local model = GetEntityModel(vehicle)
-  local vehname = GetLabelText(GetDisplayNameFromVehicleModel(model))
-  local licenseplate = QBCore.Functions.GetPlate(vehicle)
-  local speed = math.ceil(GetEntitySpeed(vehicle) * 3.6)
-  local street1, street2 = GetStreetNameAtCoord(pos.x, pos.y, pos.z)
-  local streetLabel = GetStreetNameFromHashKey(street1)
+    local pos = GetEntityCoords(vehicle)
+    local model = GetEntityModel(vehicle)
+    local vehname = GetLabelText(GetDisplayNameFromVehicleModel(model))
+    local licenseplate = QBCore.Functions.GetPlate(vehicle)
+    local speed = math.ceil(GetEntitySpeed(vehicle) * 3.6)
+    local street1, street2 = GetStreetNameAtCoord(pos.x, pos.y, pos.z)
+    local streetLabel = GetStreetNameFromHashKey(street1)
 
-  if street2 ~= 0 then
-    streetLabel = streetLabel .. " | " .. GetStreetNameFromHashKey(street2)
-  end
+    if street2 ~= 0 then
+        streetLabel = streetLabel .. " | " .. GetStreetNameFromHashKey(street2)
+    end
 
-  SendNUIMessage({
-    type = "heliupdateinfo",
-    model = vehname,
-    plate = licenseplate,
-    speed = speed,
-    street = streetLabel
-  })
+    SendNUIMessage({
+        type = "heliupdateinfo",
+        model = vehname,
+        plate = licenseplate,
+        speed = speed,
+        street = streetLabel
+    })
 end
 
 -- Events

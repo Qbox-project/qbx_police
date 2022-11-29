@@ -22,14 +22,6 @@ local StatusList = {
     ["heavyalcohol"] = Lang:t('evidence.heavy_alcohol'),
     ["agitated"] = Lang:t('evidence.agitated')
 }
-local WhitelistedWeapons = {
-    joaat('weapon_unarmed'),
-    joaat('weapon_snowball'),
-    joaat('weapon_stungun'),
-    joaat('weapon_petrolcan'),
-    joaat('weapon_hazardcan'),
-    joaat('weapon_fireextinguisher')
-}
 local closeEvidenceSleep = 5000
 
 -- Functions
@@ -51,8 +43,8 @@ local function DrawText3D(x, y, z, text)
 end
 
 local function WhitelistedWeapon(weapon)
-    for i = 1, #WhitelistedWeapons do
-        if WhitelistedWeapons[i] == weapon then
+    for i = 1, #Config.EvidenceWhitelistedWeapons do
+        if Config.EvidenceWhitelistedWeapons[i] == weapon then
             return true
         end
     end
@@ -81,13 +73,16 @@ end
 -- Events
 RegisterNetEvent('evidence:client:SetStatus', function(statusId, time)
     if time > 0 and StatusList[statusId] then
-        if (CurrentStatusList == nil or CurrentStatusList[statusId] == nil) or (CurrentStatusList[statusId] and CurrentStatusList[statusId].time < 20) then
+        if (not CurrentStatusList or not CurrentStatusList[statusId]) or (CurrentStatusList[statusId] and CurrentStatusList[statusId].time < 20) then
             CurrentStatusList[statusId] = {
                 text = StatusList[statusId],
                 time = time
             }
 
-            QBCore.Functions.Notify(CurrentStatusList[statusId].text, 'error')
+            lib.notify({
+                description = CurrentStatusList[statusId].text,
+                type = 'error'
+            })
         end
     elseif StatusList[statusId] then
         CurrentStatusList[statusId] = nil
@@ -148,10 +143,16 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
 
             TriggerServerEvent('evidence:server:ClearBlooddrops', blooddropList)
 
-            QBCore.Functions.Notify(Lang:t("success.blood_clear"), "success")
+            lib.notify({
+                description = Lang:t("success.blood_clear"),
+                type = 'success'
+            })
         end
     end, function() -- Cancel
-        QBCore.Functions.Notify(Lang:t("error.blood_not_cleared"), "error")
+        lib.notify({
+            description = Lang:t("success.blood_not_cleared"),
+            type = 'error'
+        })
     end)
 end)
 
@@ -184,18 +185,23 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
     }, {}, {}, {}, function() -- Done
         if Casings and next(Casings) then
             for casingId, _ in pairs(Casings) do
-                if #(pos - vec3(Casings[casingId].coords.x, Casings[casingId].coords.y, Casings[casingId].coords.z)) <
-                    10.0 then
+                if #(pos - vec3(Casings[casingId].coords.x, Casings[casingId].coords.y, Casings[casingId].coords.z)) < 10.0 then
                     casingList[#casingList + 1] = casingId
                 end
             end
 
             TriggerServerEvent('evidence:server:ClearCasings', casingList)
 
-            QBCore.Functions.Notify(Lang:t("success.bullet_casing_removed"), "success")
+            lib.notify({
+                description = Lang:t("success.bullet_casing_removed"),
+                type = 'success'
+            })
         end
     end, function() -- Cancel
-        QBCore.Functions.Notify(Lang:t("error.bullet_casing_not_removed"), "error")
+        lib.notify({
+            description = Lang:t("error.bullet_casing_not_removed"),
+            type = 'error'
+        })
     end)
 end)
 
@@ -232,7 +238,7 @@ CreateThread(function() -- Gunpowder Status when shooting
             if not WhitelistedWeapon(weapon) then
                 shotAmount = shotAmount + 1
 
-                if shotAmount > 5 and (CurrentStatusList == nil or CurrentStatusList['gunpowder'] == nil) then
+                if shotAmount > 5 and (not CurrentStatusList or not CurrentStatusList['gunpowder']) then
                     if math.random(1, 10) <= 7 then
                         TriggerEvent('evidence:client:SetStatus', 'gunpowder', 200)
                     end

@@ -3,6 +3,32 @@ local ObjectList = {}
 local SpawnedSpikes = {}
 local spikemodel = joaat('P_ld_stinger_s')
 local ClosestSpike = nil
+local tires = {
+    {
+        bone = "wheel_lf",
+        index = 0
+    },
+    {
+        bone = "wheel_rf",
+        index = 1
+    },
+    {
+        bone = "wheel_lm",
+        index = 2
+    },
+    {
+        bone = "wheel_rm",
+        index = 3
+    },
+    {
+        bone = "wheel_lr",
+        index = 4
+    },
+    {
+        bone = "wheel_rr",
+        index = 5
+    }
+}
 
 -- Functions
 local function GetClosestPoliceObject()
@@ -180,15 +206,6 @@ CreateThread(function()
             spikeSleep = 100
 
             if ClosestSpike then
-                local tires = {
-                    { bone = "wheel_lf", index = 0 },
-                    { bone = "wheel_rf", index = 1 },
-                    { bone = "wheel_lm", index = 2 },
-                    { bone = "wheel_rm", index = 3 },
-                    { bone = "wheel_lr", index = 4 },
-                    { bone = "wheel_rr", index = 5 }
-                }
-
                 for a = 1, #tires do
                     local tirePos = GetWorldPositionOfEntityBone(cache.vehicle, GetEntityBoneIndexByName(cache.vehicle, tires[a].bone))
                     local spike = GetClosestObjectOfType(tirePos.x, tirePos.y, tirePos.z, 15.0, spikemodel, 1, 1, 1)

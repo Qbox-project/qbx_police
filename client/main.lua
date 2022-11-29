@@ -132,14 +132,21 @@ end)
 RegisterNetEvent('police:client:sendBillingMail', function(amount)
     SetTimeout(math.random(2500, 4000), function()
         local gender = Lang:t('info.mr')
+
         if QBCore.Functions.GetPlayerData().charinfo.gender == 1 then
             gender = Lang:t('info.mrs')
         end
+
         local charinfo = QBCore.Functions.GetPlayerData().charinfo
+
         TriggerServerEvent('qb-phone:server:sendNewMail', {
             sender = Lang:t('email.sender'),
             subject = Lang:t('email.subject'),
-            message = Lang:t('email.message', {value = gender, value2 = charinfo.lastname, value3 = amount}),
+            message = Lang:t('email.message', {
+                value = gender,
+                value2 = charinfo.lastname,
+                value3 = amount
+            }),
             button = {}
         })
     end)
@@ -148,15 +155,19 @@ end)
 RegisterNetEvent('police:client:UpdateBlips', function(players)
     if PlayerJob and (PlayerJob.type == 'leo' or PlayerJob.name == 'ambulance') and
         onDuty then
+
         if DutyBlips then
             for _, v in pairs(DutyBlips) do
                 RemoveBlip(v)
             end
         end
+
         DutyBlips = {}
+
         if players then
             for _, data in pairs(players) do
                 local id = GetPlayerFromServerId(data.source)
+
                 CreateDutyBlips(id, data.label, data.job, data.location)
             end
         end
@@ -170,8 +181,7 @@ RegisterNetEvent('police:client:policeAlert', function(coords, text)
 
     lib.notify({
         title = text,
-        description = street1name .. ' ' .. street2name,
-        type = 'inform'
+        description = street1name .. ' ' .. street2name
     })
 
     PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
@@ -179,7 +189,9 @@ RegisterNetEvent('police:client:policeAlert', function(coords, text)
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
     local blip2 = AddBlipForCoord(coords.x, coords.y, coords.z)
-    local blipText = Lang:t('info.blip_text', {value = text})
+    local blipText = Lang:t('info.blip_text', {
+        value = text
+    })
 
     SetBlipSprite(blip, 60)
     SetBlipSprite(blip2, 161)
@@ -229,8 +241,14 @@ end)
 RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
     local Player = QBCore.Functions.GetPlayerData()
 
-    TriggerServerEvent('police:server:policeAlert', Lang:t('info.officer_down', {lastname = Player.charinfo.lastname, callsign = Player.metadata.callsign}))
-    TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {lastname = Player.charinfo.lastname, callsign = Player.metadata.callsign}))
+    TriggerServerEvent('police:server:policeAlert', Lang:t('info.officer_down', {
+        lastname = Player.charinfo.lastname,
+        callsign = Player.metadata.callsign
+    }))
+    TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {
+        lastname = Player.charinfo.lastname,
+        callsign = Player.metadata.callsign
+    }))
 end)
 
 -- Threads

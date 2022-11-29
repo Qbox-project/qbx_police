@@ -74,8 +74,10 @@ local function CreateInstuctionScaleform(scaleform)
 
     PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
     PushScaleformMovieFunctionParameterInt(1)
+
     InstructionButton(GetControlInstructionalButton(1, 194, true))
     InstructionButtonMessage(Lang:t('info.close_camera'))
+
     PopScaleformMovieFunctionVoid()
 
     PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
@@ -133,7 +135,10 @@ RegisterNetEvent('police:client:ActiveCamera', function(cameraId)
 
         DoScreenFadeIn(250)
     else
-        QBCore.Functions.Notify(Lang:t("error.no_camera"), "error")
+        lib.notify({
+            description = Lang:t("error.no_camera"),
+            type = 'error'
+        })
     end
 end)
 

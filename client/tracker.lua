@@ -47,8 +47,7 @@ RegisterNetEvent('police:client:TrackerMessage', function(msg, coords)
     PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
 
     lib.notify({
-        description = msg,
-        type = 'inform'
+        description = msg
     })
 
     local transG = 250

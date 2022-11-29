@@ -23,7 +23,7 @@ local function IsTargetDead(playerId)
 end
 
 local function HandCuffAnimation()
-    if isHandcuffed == true then
+    if isHandcuffed then
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "Cuff", 0.2)
     else
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "Uncuff", 0.2)
@@ -104,7 +104,10 @@ RegisterNetEvent('police:client:SearchPlayer', function()
         TriggerServerEvent("inventory:server:OpenInventory", "otherplayer", playerId)
         TriggerServerEvent("police:server:SearchPlayer", playerId)
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
@@ -116,7 +119,10 @@ RegisterNetEvent('police:client:SeizeCash', function()
 
         TriggerServerEvent("police:server:SeizeCash", playerId)
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
@@ -128,7 +134,10 @@ RegisterNetEvent('police:client:SeizeDriverLicense', function()
 
         TriggerServerEvent("police:server:SeizeDriverLicense", playerId)
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
@@ -159,110 +168,163 @@ RegisterNetEvent('police:client:RobPlayer', function()
                     TriggerServerEvent("inventory:server:OpenInventory", "otherplayer", playerId)
                     TriggerEvent("inventory:server:RobPlayer", playerId)
                 else
-                    QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+                    lib.notify({
+                        description = Lang:t("error.none_nearby"),
+                        type = 'error'
+                    })
                 end
             end, function() -- Cancel
                 StopAnimTask(cache.ped, "random@shop_robbery", "robbery_action_b", 1.0)
-                
-                QBCore.Functions.Notify(Lang:t("error.canceled"), "error")
+
+                lib.notify({
+                    description = Lang:t("error.canceled"),
+                    type = 'error'
+                })
             end)
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
 RegisterNetEvent('police:client:JailPlayer', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
+
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
         local dialog = lib.inputDialog(Lang:t('info.jail_time_input'), {
-            { type = "number", label = Lang:t('info.time_months') }
+            {
+                type = "number",
+                label = Lang:t('info.time_months')
+            }
         })
 
-        if not dialog then return end
+        if not dialog then
+            return
+        end
 
         local dialogJailTime = tonumber(dialog[1])
 
         if dialogJailTime > 0 then
             TriggerServerEvent("police:server:JailPlayer", playerId, dialogJailTime)
         else
-            QBCore.Functions.Notify(Lang:t("error.time_higher"), "error")
+            lib.notify({
+                description = Lang:t("error.time_higher"),
+                type = 'error'
+            })
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
 RegisterNetEvent('police:client:BillPlayer', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
+
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
         local dialog = lib.inputDialog(Lang:t('info.bill'), {
-            { type = "number", label = Lang:t('info.amount') }
+            {
+                type = "number",
+                label = Lang:t('info.amount')
+            }
         })
 
-        if not dialog then return end
+        if not dialog then
+            return
+        end
 
         local dialogBill = tonumber(dialog[1])
 
         if dialogBill > 0 then
             TriggerServerEvent("police:server:BillPlayer", playerId, dialogBill)
         else
-            QBCore.Functions.Notify(Lang:t("error.amount_higher"), "error")
+            lib.notify({
+                description = Lang:t("error.amount_higher"),
+                type = 'error'
+            })
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
 RegisterNetEvent('police:client:PutPlayerInVehicle', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
+
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
+
         if not isHandcuffed and not isEscorted then
             TriggerServerEvent("police:server:PutPlayerInVehicle", playerId)
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
 RegisterNetEvent('police:client:SetPlayerOutVehicle', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
+
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
+
         if not isHandcuffed and not isEscorted then
             TriggerServerEvent("police:server:SetPlayerOutVehicle", playerId)
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
 RegisterNetEvent('police:client:EscortPlayer', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
+
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
+
         if not isHandcuffed and not isEscorted then
             TriggerServerEvent("police:server:EscortPlayer", playerId)
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
 RegisterNetEvent('police:client:KidnapPlayer', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
+
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
+
         if not IsPedInAnyVehicle(GetPlayerPed(player)) then
             if not isHandcuffed and not isEscorted then
                 TriggerServerEvent("police:server:KidnapPlayer", playerId)
             end
         end
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
@@ -278,10 +340,16 @@ RegisterNetEvent('police:client:CuffPlayerSoft', function()
 
                 HandCuffAnimation()
             else
-                QBCore.Functions.Notify(Lang:t("error.vehicle_cuff"), "error")
+                lib.notify({
+                    description = Lang:t("error.vehicle_cuff"),
+                    type = 'error'
+                })
             end
         else
-            QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+            lib.notify({
+                description = Lang:t("error.none_nearby"),
+                type = 'error'
+            })
         end
     else
         Wait(2000)
@@ -302,14 +370,23 @@ RegisterNetEvent('police:client:CuffPlayer', function()
 
                         HandCuffAnimation()
                     else
-                        QBCore.Functions.Notify(Lang:t("error.vehicle_cuff"), "error")
+                        lib.notify({
+                            description = Lang:t("error.vehicle_cuff"),
+                            type = 'error'
+                        })
                     end
                 else
-                    QBCore.Functions.Notify(Lang:t("error.no_cuff"), "error")
+                    lib.notify({
+                        description = Lang:t("error.no_cuff"),
+                        type = 'error'
+                    })
                 end
             end, Config.HandCuffItem)
         else
-            QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+            lib.notify({
+                description = Lang:t("error.none_nearby"),
+                type = 'error'
+            })
         end
     else
         Wait(2000)
@@ -410,13 +487,18 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
 
             GetCuffedAnimation(playerId)
 
-            QBCore.Functions.Notify(Lang:t("info.cuff"), 'primary')
+
+            lib.notify({
+                description = Lang:t("info.cuff")
+            })
         else
             cuffType = 49
 
             GetCuffedAnimation(playerId)
 
-            QBCore.Functions.Notify(Lang:t("info.cuffed_walk"), 'primary')
+            lib.notify({
+                description = Lang:t("info.cuffed_walk")
+            })
         end
     else
         isHandcuffed = false
@@ -432,15 +514,16 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
 
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "Uncuff", 0.2)
 
-        QBCore.Functions.Notify(Lang:t("success.uncuffed"),"success")
+        lib.notify({
+            description = Lang:t("success.uncuffed"),
+            type = 'success'
+        })
     end
 end)
 
 -- Threads
 CreateThread(function()
     while true do
-        Wait(0)
-        
         if isEscorted then
             DisableAllControlActions(0)
             EnableControlAction(0, 1, true)
@@ -501,5 +584,7 @@ CreateThread(function()
         if not isHandcuffed and not isEscorted then
             Wait(2000)
         end
+
+        Wait(0)
     end
 end)

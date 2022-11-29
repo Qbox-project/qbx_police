@@ -4,11 +4,9 @@ local inFingerprint = false
 local FingerPrintSessionId = nil
 local inStash = false
 local inTrash = false
-local inAmoury = false
 local inHelicopter = false
 local inImpound = false
 local inGarage = false
-local hasOxInventory = GetResourceState('ox_inventory') ~= 'missing'
 
 local function GetClosestPlayer() -- interactions, job, tracker
     local closestPlayers = QBCore.Functions.GetPlayersFromCoords()
@@ -35,72 +33,10 @@ local function openFingerprintUI()
     SendNUIMessage({
         type = "fingerprintOpen"
     })
+
     inFingerprint = true
+
     SetNuiFocus(true, true)
-end
-
-local function SetCarItemsInfo()
-	local items = {}
-	for _, item in pairs(Config.CarItems) do
-		local itemInfo = QBCore.Shared.Items[item.name:lower()]
-		items[item.slot] = {
-			name = itemInfo["name"],
-			amount = tonumber(item.amount),
-			info = item.info,
-			label = itemInfo["label"],
-			description = itemInfo["description"] and itemInfo["description"] or "",
-			weight = itemInfo["weight"],
-			type = itemInfo["type"],
-			unique = itemInfo["unique"],
-			useable = itemInfo["useable"],
-			image = itemInfo["image"],
-			slot = item.slot,
-		}
-	end
-	Config.CarItems = items
-end
-
-local function doCarDamage(currentVehicle, veh)
-	local smash = false
-	local damageOutside = false
-	local damageOutside2 = false
-	local engine = veh.engine + 0.0
-	local body = veh.body + 0.0
-
-	if engine < 200.0 then engine = 200.0 end
-    if engine  > 1000.0 then engine = 950.0 end
-	if body < 150.0 then body = 150.0 end
-	if body < 950.0 then smash = true end
-	if body < 920.0 then damageOutside = true end
-	if body < 920.0 then damageOutside2 = true end
-
-    Wait(100)
-    SetVehicleEngineHealth(currentVehicle, engine)
-
-	if smash then
-		SmashVehicleWindow(currentVehicle, 0)
-		SmashVehicleWindow(currentVehicle, 1)
-		SmashVehicleWindow(currentVehicle, 2)
-		SmashVehicleWindow(currentVehicle, 3)
-		SmashVehicleWindow(currentVehicle, 4)
-	end
-
-	if damageOutside then
-		SetVehicleDoorBroken(currentVehicle, 1, true)
-		SetVehicleDoorBroken(currentVehicle, 6, true)
-		SetVehicleDoorBroken(currentVehicle, 4, true)
-	end
-
-	if damageOutside2 then
-		SetVehicleTyreBurst(currentVehicle, 1, false, 990.0)
-		SetVehicleTyreBurst(currentVehicle, 2, false, 990.0)
-		SetVehicleTyreBurst(currentVehicle, 3, false, 990.0)
-		SetVehicleTyreBurst(currentVehicle, 4, false, 990.0)
-	end
-
-	if body < 1000 then
-		SetVehicleBodyHealth(currentVehicle, 985.1)
-	end
 end
 
 function TakeOutImpound(vehicle)
@@ -115,8 +51,6 @@ function TakeOutImpound(vehicle)
 
                 SetVehicleNumberPlateText(veh, vehicle.plate)
                 SetVehicleFuelLevel(veh, vehicle.fuel)
-
-                doCarDamage(veh, vehicle)
 
                 TriggerServerEvent('police:server:TakeOutImpound', vehicle.plate, currentGarage)
 
@@ -139,20 +73,18 @@ function TakeOutVehicle(vehicleInfo)
         QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
             local veh = NetToVeh(netId)
 
-            SetCarItemsInfo()
-
             SetVehicleNumberPlateText(veh, Lang:t('info.police_plate') .. tostring(math.random(1000, 9999)))
             SetEntityHeading(veh, coords.w)
             SetVehicleFuelLevel(veh, 100.0)
 
             lib.hideContext()
 
-            if Config.VehicleSettings[vehicleInfo] ~= nil then
-                if Config.VehicleSettings[vehicleInfo].extras ~= nil then
+            if Config.VehicleSettings[vehicleInfo] then
+                if Config.VehicleSettings[vehicleInfo].extras then
                     QBCore.Shared.SetDefaultVehicleExtras(veh, Config.VehicleSettings[vehicleInfo].extras)
                 end
 
-                if Config.VehicleSettings[vehicleInfo].livery ~= nil then
+                if Config.VehicleSettings[vehicleInfo].livery then
                     SetVehicleLivery(veh, Config.VehicleSettings[vehicleInfo].livery)
                 end
             end
@@ -160,7 +92,6 @@ function TakeOutVehicle(vehicleInfo)
             TaskWarpPedIntoVehicle(cache.ped, veh, -1)
 
             TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-            TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
 
             SetVehicleEngineOn(veh, true, true, false)
         end, vehicleInfo, coords, true)
@@ -185,7 +116,10 @@ function MenuGarage(currentSelection)
         vehicleMenu[#vehicleMenu + 1] = {
             title = label,
             event = "police:client:TakeOutVehicle",
-            args = {vehicle = veh, currentSelection = currentSelection}
+            args = {
+                vehicle = veh,
+                currentSelection = currentSelection
+            }
         }
     end
 
@@ -216,8 +150,12 @@ function MenuImpound(currentSelection)
     QBCore.Functions.TriggerCallback("police:GetImpoundedVehicles", function(result)
         local shouldContinue = false
 
-        if result == nil then
-            QBCore.Functions.Notify(Lang:t("error.no_impound"), "error", 5000)
+        if not result then
+            lib.notify({
+                description = Lang:t("error.no_impound"),
+                duration = 5000,
+                type = 'error'
+            })
         else
             shouldContinue = true
 
@@ -227,10 +165,16 @@ function MenuImpound(currentSelection)
                 local vname = QBCore.Shared.Vehicles[v.vehicle].name
 
                 impoundMenu[#impoundMenu + 1] = {
-                    title = vname.." ["..v.plate.."]",
-                    description =  Lang:t('info.vehicle_info', {value = enginePercent, value2 = currentFuel}),
+                    title = vname .. " [" .. v.plate .. "]",
+                    description =  Lang:t('info.vehicle_info', {
+                        value = enginePercent,
+                        value2 = currentFuel
+                    }),
                     event = "police:client:TakeOutImpound",
-                    args = {vehicle = v, currentSelection = currentSelection}
+                    args = {
+                        vehicle = v,
+                        currentSelection = currentSelection
+                    }
                 }
             end
         end
@@ -373,24 +317,29 @@ RegisterNetEvent('police:client:CheckStatus', function()
                 QBCore.Functions.TriggerCallback('police:GetPlayerStatus', function(result)
                     if result then
                         for _, v in pairs(result) do
-                            QBCore.Functions.Notify(''..v..'')
+                            lib.notify({
+                                description = v
+                            })
                         end
                     end
                 end, playerId)
             else
-                QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+                lib.notify({
+                    description = Lang:t("error.none_nearby"),
+                    type = 'error'
+                })
             end
         end
     end)
 end)
 
-RegisterNetEvent("police:client:VehicleMenuHeader", function (data)
+RegisterNetEvent("police:client:VehicleMenuHeader", function(data)
     MenuGarage(data.currentSelection)
 
     currentGarage = data.currentSelection
 end)
 
-RegisterNetEvent("police:client:ImpoundMenuHeader", function (data)
+RegisterNetEvent("police:client:ImpoundMenuHeader", function(data)
     MenuImpound(data.currentSelection)
 
     currentGarage = data.currentSelection
@@ -405,7 +354,9 @@ RegisterNetEvent('police:client:TakeOutImpound', function(data)
 end)
 
 RegisterNetEvent('police:client:TakeOutVehicle', function(data)
-    if not inGarage then return end
+    if not inGarage then
+        return
+    end
 
     TakeOutVehicle(data.vehicle)
 end)
@@ -421,7 +372,10 @@ RegisterNetEvent('police:client:EvidenceStashDrawer', function(data)
 
     if #(pos - takeLoc) <= 1.0 then
         local drawer = lib.inputDialog(Lang:t('info.evidence_stash', {value = currentEvidence}), {
-            { type = "number", label = Lang:t('info.slot') }
+            {
+                type = "number",
+                label = Lang:t('info.slot')
+            }
         })
 
         if not drawer then
@@ -430,7 +384,10 @@ RegisterNetEvent('police:client:EvidenceStashDrawer', function(data)
 
         local drawerSlot = tonumber(drawer[1])
 
-        TriggerServerEvent("inventory:server:OpenInventory", "stash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = drawerSlot}), {
+        TriggerServerEvent("inventory:server:OpenInventory", "stash", Lang:t('info.current_evidence', {
+            value = currentEvidence,
+            value2 = drawerSlot
+        }), {
             maxweight = 4000000,
             slots = 500
         })
@@ -455,7 +412,10 @@ RegisterNetEvent('qb-police:client:scanFingerPrint', function()
 
         TriggerServerEvent("police:server:showFingerprint", playerId)
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({
+            description = Lang:t("error.none_nearby"),
+            type = 'error'
+        })
     end
 end)
 
@@ -496,23 +456,23 @@ end)
 if Config.UseTarget then
     CreateThread(function()
         -- Toggle Duty
-        for k, v in pairs(Config.Locations["duty"]) do
-            exports['qb-target']:AddBoxZone("box_zone_police_duty_" .. k, vec3(v.x, v.y, v.z), 1, 1, {
-                name = "box_zone_police_duty_"..k,
-                heading = 11,
-                minZ = v.z - 1,
-                maxZ = v.z + 1,
-            }, {
+        for _, v in pairs(Config.Locations["duty"]) do
+            exports.ox_target:addBoxZone({
+                coords = v,
+                size = vec3(2, 2, 2),
+                rotation = 11,
                 options = {
                     {
-                        type = "client",
+                        name = 'qb-policejob:duty',
                         event = "qb-policejob:ToggleDuty",
                         icon = "fas fa-sign-in-alt",
                         label = "Sign In",
-                        job = "police",
-                    },
-                },
-                distance = 1.5
+                        distance = 1.5,
+                        canInteract = function(_, _, _, _)
+                            return PlayerJob.name == "police"
+                        end
+                    }
+                }
             })
         end
     end)
@@ -548,355 +508,318 @@ else
     end
 
     -- Toggle Duty
-    local dutyZones = {}
+    for _, v in pairs(Config.Locations["duty"]) do
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                dutylisten = true
 
-    for k, v in pairs(Config.Locations["duty"]) do
-        dutyZones[#dutyZones + 1] = BoxZone:Create(vec3(v.x, v.y, v.z), 1.75, 1, {
-            name = "box_zone_police_duty" .. k,
-            minZ = v.z - 1,
-            maxZ = v.z + 1
+                if not onDuty then
+                    lib.showTextUI(Lang:t('info.on_duty'))
+
+                    dutylistener()
+                else
+                    lib.showTextUI(Lang:t('info.off_duty'))
+
+                    dutylistener()
+                end
+            end,
+            onExit = function(_)
+                dutylisten = false
+
+                lib.hideTextUI()
+            end
         })
     end
-
-    local dutyCombo = ComboZone:Create(dutyZones, {
-        name = "dutyCombo"
-    })
-    dutyCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            dutylisten = true
-
-            if not onDuty then
-                lib.showTextUI(Lang:t('info.on_duty'))
-
-                dutylistener()
-            else
-                lib.showTextUI(Lang:t('info.off_duty'))
-
-                dutylistener()
-            end
-        else
-            inDuty = false
-
-            lib.hideTextUI()
-        end
-    end)
 end
 
 CreateThread(function()
     -- Evidence Storage
-    local evidenceZones = {}
+    for _, v in pairs(Config.Locations["evidence"]) do
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                if PlayerJob.type == "leo" and onDuty then
+                    local currentEvidence = 0
+                    local pos = GetEntityCoords(cache.ped)
 
-    for k, v in pairs(Config.Locations["evidence"]) do
-        evidenceZones[#evidenceZones + 1] = BoxZone:Create(vec3(v.x, v.y, v.z), 2, 1, {
-            name = "box_zone_police_evidence_" .. k,
-            minZ = v.z - 1,
-            maxZ = v.z + 1
+                    for k, v in pairs(Config.Locations["evidence"]) do
+                        if #(pos - v) < 2 then
+                            currentEvidence = k
+                        end
+                    end
+
+                    lib.registerContext({
+                        id = 'open_policeEvidenceHeader',
+                        title = "Evidence",
+                        options = {
+                            {
+                                title = Lang:t('info.evidence_stash', {
+                                    value = currentEvidence
+                                }),
+                                icon = "fa-solid fa-paperclip",
+                                event = 'police:client:EvidenceStashDrawer',
+                                args = {
+                                    currentEvidence = currentEvidence
+                                }
+                            }
+                        }
+                    })
+                    lib.showContext('open_policeEvidenceHeader')
+                end
+            end,
+            onExit = function(_)
+                lib.hideContext()
+            end
         })
     end
-
-    local evidenceCombo = ComboZone:Create(evidenceZones, {
-        name = "evidenceCombo"
-    })
-    evidenceCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            if PlayerJob.type == "leo" and onDuty then
-                local currentEvidence = 0
-                local pos = GetEntityCoords(cache.ped)
-
-                for k, v in pairs(Config.Locations["evidence"]) do
-                    if #(pos - v) < 2 then
-                        currentEvidence = k
-                    end
-                end
-
-                lib.registerContext({
-                    id = 'open_policeEvidenceHeader',
-                    title = "Evidence",
-                    options = {
-                        {
-                            title = Lang:t('info.evidence_stash', {value = currentEvidence}),
-                            event = 'police:client:EvidenceStashDrawer',
-                            args = {currentEvidence = currentEvidence}
-                        }
-                    }
-                })
-                lib.showContext('open_policeEvidenceHeader')
-            end
-        else
-            lib.hideContext()
-        end
-    end)
 
     -- Personal Stash
-    local stashZones = {}
+    for _, v in pairs(Config.Locations["stash"]) do
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inStash = true
 
-    for k, v in pairs(Config.Locations["stash"]) do
-        stashZones[#stashZones + 1] = BoxZone:Create( vec3(v.x, v.y, v.z), 1.5, 1.5, {
-            name="box_zone_police_stash_" .. k,
-            minZ = v.z - 1,
-            maxZ = v.z + 1
+                lib.showTextUI(Lang:t('info.stash_enter'))
+
+                stash()
+            end,
+            onExit = function(_)
+                lib.hideTextUI()
+
+                inStash = false
+            end
         })
     end
 
-    local stashCombo = ComboZone:Create(stashZones, {
-        name = "stashCombo"
-    })
-    stashCombo:onPlayerInOut(function(isPointInside, _, _)
-        if isPointInside then
-            inStash = true
-            lib.showTextUI(Lang:t('info.stash_enter'))
-            stash()
-        else
-            lib.hideTextUI()
-            inStash = false
-        end
-    end)
-
     -- Police Trash
-    for i = 1, #Config.Locations.trash do
-        local v = Config.Locations.trash[i]
-        local trashZone = BoxZone:Create(
-            vec3(v.x, v.y, v.z), 1, 1.75, {
-            name="box_zone_police_trash_"..i,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
-        })
-        trashZone:onPlayerInOut(function(isPointInside)
-            inTrash = isPointInside
-            if isPointInside then
+    for k, v in pairs(Config.Locations["trash"]) do
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inTrash = true
+
                 if onDuty then
                     lib.showTextUI(Lang:t('info.trash_enter'))
-                    trash(i)
+
+                    trash(k)
                 end
-            else
+            end,
+            onExit = function(_)
+                inTrash = false
+
                 lib.hideTextUI()
             end
-        end)
+        })
     end
 
     -- Fingerprints
-    local fingerprintZones = {}
+    for _, v in pairs(Config.Locations["fingerprint"]) do
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inFingerprint = true
 
-    for k, v in pairs(Config.Locations["fingerprint"]) do
-        fingerprintZones[#fingerprintZones + 1] = BoxZone:Create(vec3(v.x, v.y, v.z), 2, 1, {
-            name = "box_zone_police_fingerprint_" .. k,
-            minZ = v.z - 1,
-            maxZ = v.z + 1
+                if onDuty then
+                    lib.showTextUI(Lang:t('info.scan_fingerprint'))
+
+                    fingerprint()
+                end
+            end,
+            onExit = function(_)
+                inFingerprint = false
+
+                lib.hideTextUI()
+            end
         })
     end
-
-    local fingerprintCombo = ComboZone:Create(fingerprintZones, {
-        name = "fingerprintCombo"
-    })
-    fingerprintCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            inFingerprint = true
-            if onDuty then
-                lib.showTextUI(Lang:t('info.scan_fingerprint'))
-                fingerprint()
-            end
-        else
-            inFingerprint = false
-            lib.hideTextUI()
-        end
-    end)
 
     -- Helicopter
-    local helicopterZones = {}
+    for _, v in pairs(Config.Locations["helicopter"]) do
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inHelicopter = true
 
-    for k, v in pairs(Config.Locations["helicopter"]) do
-        helicopterZones[#helicopterZones + 1] = BoxZone:Create(vec3(v.x, v.y, v.z), 10, 10, {
-            name="box_zone_police_helicopter_" .. k,
-            minZ = v.z - 1,
-            maxZ = v.z + 1
+                if onDuty then
+                    heli()
+
+                    if IsPedInAnyVehicle(cache.ped, false) then
+                        lib.hideTextUI()
+                        lib.showTextUI(Lang:t('info.store_heli'))
+                    else
+                        lib.showTextUI(Lang:t('info.take_heli'))
+                    end
+                end
+            end,
+            onExit = function(_)
+                inHelicopter = false
+
+                lib.hideTextUI()
+            end
         })
     end
-
-    local helicopterCombo = ComboZone:Create(helicopterZones, {
-        name = "helicopterCombo"
-    })
-    helicopterCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            inHelicopter = true
-            if onDuty then
-                heli()
-                if IsPedInAnyVehicle(cache.ped, false) then
-                    lib.hideTextUI()
-                    lib.showTextUI(Lang:t('info.store_heli'))
-                else
-                    lib.showTextUI(Lang:t('info.take_heli'))
-                end
-            end
-        else
-            inHelicopter = false
-            lib.hideTextUI()
-        end
-    end)
 
     -- Police Impound
-    local impoundZones = {}
+    for _, v in pairs(Config.Locations["impound"]) do
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inImpound = true
 
-    for k, v in pairs(Config.Locations["impound"]) do
-        impoundZones[#impoundZones + 1] = BoxZone:Create(vec3(v.x, v.y, v.z), 1, 1, {
-            name = "box_zone_police_impound" .. k,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
-            heading = 180
+                if onDuty then
+                    if IsPedInAnyVehicle(cache.ped, false) then
+                        lib.showTextUI(Lang:t('info.impound_veh'))
+
+                        impound()
+                    else
+                        local currentSelection = 0
+
+                        for k, v in pairs(Config.Locations["impound"]) do
+                            if #(point - vec3(v.x, v.y, v.z)) < 4 then
+                                currentSelection = k
+                            end
+                        end
+
+                        lib.registerContext({
+                            id = 'open_policeImpoundHeader',
+                            title = "Impound",
+                            options = {
+                                {
+                                    title = Lang:t('menu.pol_impound'),
+                                    icon = "fa-solid fa-warehouse",
+                                    event = 'police:client:ImpoundMenuHeader',
+                                    args = {
+                                        currentSelection = currentSelection
+                                    }
+                                }
+                            }
+                        })
+                        lib.showContext('open_policeImpoundHeader')
+                    end
+                end
+            end,
+            onExit = function(_)
+                inImpound = false
+
+                lib.hideContext()
+                lib.hideTextUI()
+            end
         })
     end
-
-    local impoundCombo = ComboZone:Create(impoundZones, {
-        name = "impoundCombo"
-    })
-    impoundCombo:onPlayerInOut(function(isPointInside, point)
-        if isPointInside then
-            inImpound = true
-            
-            if onDuty then
-                if IsPedInAnyVehicle(cache.ped, false) then
-                    lib.showTextUI(Lang:t('info.impound_veh'))
-
-                    impound()
-                else
-                    local currentSelection = 0
-
-                    for k, v in pairs(Config.Locations["impound"]) do
-                        if #(point - vec3(v.x, v.y, v.z)) < 4 then
-                            currentSelection = k
-                        end
-                    end
-
-                    lib.registerContext({
-                        id = 'open_policeImpoundHeader',
-                        title = "Impound",
-                        options = {
-                            {
-                                title = Lang:t('menu.pol_impound'),
-                                event = 'police:client:ImpoundMenuHeader',
-                                args = {currentSelection = currentSelection}
-                            }
-                        }
-                    })
-                    lib.showContext('open_policeImpoundHeader')
-                end
-            end
-        else
-            inImpound = false
-
-            lib.hideContext()
-            lib.hideTextUI()
-        end
-    end)
 
     -- Police Garage
-    local garageZones = {}
-
     for k, v in pairs(Config.Locations["vehicle"]) do
-        garageZones[#garageZones + 1] = BoxZone:Create(
-            vec3(v.x, v.y, v.z), 3, 3, {
-            name="box_zone_police_vehicle_"..k,
-            minZ = v.z - 1,
-            maxZ = v.z + 1
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inGarage = true
+
+                if onDuty and PlayerJob.type == 'leo' then
+                    if IsPedInAnyVehicle(cache.ped, false) then
+                        lib.showTextUI(Lang:t('info.store_veh'))
+
+                        garage()
+                    else
+                        lib.registerContext({
+                            id = 'open_policeGarageHeader',
+                            title = "Police garage",
+                            options = {
+                                {
+                                    title = Lang:t('menu.pol_garage'),
+                                    icon = "fa-solid fa-warehouse",
+                                    event = 'police:client:VehicleMenuHeader',
+                                    args = {
+                                        currentSelection = k
+                                    }
+                                }
+                            }
+                        })
+                        lib.showContext('open_policeGarageHeader')
+                    end
+                end
+            end,
+            onExit = function(_)
+                inGarage = false
+
+                lib.hideContext()
+                lib.hideTextUI()
+            end
         })
     end
-
-    local garageCombo = ComboZone:Create(garageZones, {
-        name = "garageCombo"
-    })
-    garageCombo:onPlayerInOut(function(isPointInside, point)
-        if isPointInside then
-            inGarage = true
-
-            if onDuty and PlayerJob.type == 'leo' then
-                if IsPedInAnyVehicle(cache.ped, false) then
-                    lib.showTextUI(Lang:t('info.store_veh'))
-                    garage()
-                else
-                    local currentSelection = 0
-
-                    for k, v in pairs(Config.Locations["vehicle"]) do
-                        if #(point - vec3(v.x, v.y, v.z)) < 4 then
-                            currentSelection = k
-                        end
-                    end
-
-                    lib.registerContext({
-                        id = 'open_policeGarageHeader',
-                        title = "Police garage",
-                        options = {
-                            {
-                                title = Lang:t('menu.pol_garage'),
-                                event = 'police:client:VehicleMenuHeader',
-                                args = {currentSelection = currentSelection}
-                            }
-                        }
-                    })
-                    lib.showContext('open_policeGarageHeader')
-                end
-            end
-        else
-            inGarage = false
-
-            lib.hideContext()
-            lib.hideTextUI()
-        end
-    end)
 end)
 
 -- Personal Stash Thread
 function stash()
-    if not inStash or PlayerJob.type ~= "leo" then return end
+    if not inStash or PlayerJob.type ~= "leo" then
+        return
+    end
 
     CreateThread(function()
         while true do
-            Wait(0)
 
             if inStash and PlayerJob.type == "leo" then
                 if IsControlJustReleased(0, 38) then
-                    TriggerServerEvent("inventory:server:OpenInventory", "stash", "policestash_"..QBCore.Functions.GetPlayerData().citizenid)
+                    TriggerServerEvent("inventory:server:OpenInventory", "stash", "policestash_" .. QBCore.Functions.GetPlayerData().citizenid)
                     break
                 end
             else
                 break
             end
+
+            Wait(0)
         end
     end)
 end
 
 -- Police Trash Thread
 function trash(id)
-    if not inTrash or PlayerJob.type ~= "leo" then return end
+    if not inTrash or PlayerJob.type ~= "leo" then
+        return
+    end
 
     CreateThread(function()
         while true do
-            Wait(0)
 
             if inTrash and PlayerJob.type == "leo" then
                 if IsControlJustReleased(0, 38) then
-                    if hasOxInventory then
-                        exports.ox_inventory:openInventory('stash', ('policetrash_%s'):format(id))
-                    else
-                        TriggerServerEvent("inventory:server:OpenInventory", "stash", ('policetrash_%s'):format(id), {
-                            maxweight = 4000000,
-                            slots = 300
-                        })
-                    end
+                    exports.ox_inventory:openInventory('stash', ('policetrash_%s'):format(id))
                     break
                 end
             else
                 break
             end
+
+            Wait(0)
         end
     end)
 end
 
 -- Fingerprint Thread
 function fingerprint()
-    if not inFingerprint or PlayerJob.type ~= "leo" then return end
+    if not inFingerprint or PlayerJob.type ~= "leo" then
+        return
+    end
 
     CreateThread(function()
         while true do
-            Wait(0)
             if inFingerprint and PlayerJob.type == "leo" then
                 if IsControlJustReleased(0, 38) then
                     TriggerEvent("qb-police:client:scanFingerPrint")
@@ -905,17 +828,20 @@ function fingerprint()
             else
                 break
             end
+
+            Wait(0)
         end
     end)
 end
 
 -- Helicopter Thread
 function heli()
-    if not inHelicopter or PlayerJob.type ~= "leo" then return end
+    if not inHelicopter or PlayerJob.type ~= "leo" then
+        return
+    end
 
     CreateThread(function()
         while true do
-            Wait(0)
             if inHelicopter and PlayerJob.type == "leo" then
                 if IsControlJustReleased(0, 38) then
                     TriggerEvent("qb-police:client:spawnHelicopter")
@@ -924,13 +850,17 @@ function heli()
             else
                 break
             end
+
+            Wait(0)
         end
     end)
 end
 
 -- Police Impound Thread
 function impound()
-    if not inImpound or PlayerJob.type ~= "leo" then return end
+    if not inImpound or PlayerJob.type ~= "leo" then
+        return
+    end
 
     CreateThread(function()
         while true do
@@ -952,7 +882,9 @@ end
 
 -- Police Garage Thread
 function garage()
-    if not inGarage or PlayerJob.type ~= "leo" then return end
+    if not inGarage or PlayerJob.type ~= "leo" then
+        return
+    end
 
     CreateThread(function()
         while true do
