@@ -149,16 +149,21 @@ RegisterNetEvent('police:client:RobPlayer', function()
         local playerId = GetPlayerServerId(player)
 
         if IsEntityPlayingAnim(playerPed, "missminuteman_1ig_2", "handsup_base", 3) or IsEntityPlayingAnim(playerPed, "mp_arresting", "idle", 3) or IsTargetDead(playerId) then
-            QBCore.Functions.Progressbar("robbing_player", Lang:t("progressbar.robbing"), math.random(5000, 7000), false, true, {
-                disableMovement = true,
-                disableCarMovement = true,
-                disableMouse = false,
-                disableCombat = true
-            }, {
-                animDict = "random@shop_robbery",
-                anim = "robbery_action_b",
-                flags = 16
-            }, {}, {}, function() -- Done
+            if lib.progressBar({
+                duration = math.random(5000, 7000),
+                label = Lang:t("progressbar.robbing"),
+                useWhileDead = false,
+                canCancel = true,
+                disable = {
+                    car = true,
+                    move = true
+                },
+                anim = {
+                    dict = 'random@shop_robbery',
+                    clip = 'robbery_action_b',
+                    flag = 16
+                }
+            }) then
                 local plyCoords = GetEntityCoords(playerPed)
                 local pos = GetEntityCoords(cache.ped)
 
@@ -173,14 +178,14 @@ RegisterNetEvent('police:client:RobPlayer', function()
                         type = 'error'
                     })
                 end
-            end, function() -- Cancel
+            else
                 StopAnimTask(cache.ped, "random@shop_robbery", "robbery_action_b", 1.0)
 
                 lib.notify({
                     description = Lang:t("error.canceled"),
                     type = 'error'
                 })
-            end)
+            end
         end
     else
         lib.notify({

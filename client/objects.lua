@@ -104,29 +104,35 @@ end)
 RegisterNetEvent('police:client:deleteObject', function()
     local objectId, dist = GetClosestPoliceObject()
 
-    if dist < 5.0 then
-        if lib.progressBar({
-            duration = 2500,
-            label = Lang:t("progressbar.remove_object"),
-            useWhileDead = false,
-            canCancel = true,
-            disable = {
-                car = true,
-                move = true,
-                combat = true
-            },
-            anim = {
-                dict = "weapons@first_person@aim_rng@generic@projectile@thermal_charge@",
-                clip = "plant_floor"
-            }
-        }) then
-            TriggerServerEvent("police:server:deleteObject", objectId)
-        else
-            lib.notify({
-                description = Lang:t("error.canceled"),
-                type = "error"
-            })
-        end
+    if not objectId then
+        return
+    end
+
+    if dist > 5.0 then
+        return
+    end
+
+    if lib.progressBar({
+        duration = 2500,
+        label = Lang:t("progressbar.remove_object"),
+        useWhileDead = false,
+        canCancel = true,
+        disable = {
+            car = true,
+            move = true,
+            combat = true
+        },
+        anim = {
+            dict = "weapons@first_person@aim_rng@generic@projectile@thermal_charge@",
+            clip = "plant_floor"
+        }
+    }) then
+        TriggerServerEvent("police:server:deleteObject", objectId)
+    else
+        lib.notify({
+            description = Lang:t("error.canceled"),
+            type = "error"
+        })
     end
 end)
 

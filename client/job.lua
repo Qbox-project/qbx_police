@@ -268,26 +268,36 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
         local vehpos = GetEntityCoords(vehicle)
 
         if #(pos - vehpos) < 5.0 and not IsPedInAnyVehicle(cache.ped, false) then
-            QBCore.Functions.Progressbar('impound', Lang:t('progressbar.impound'), 5000, false, true, {
-                disableMovement = true,
-                disableCarMovement = true,
-                disableMouse = false,
-                disableCombat = true
-            },{
-                animDict = 'missheistdockssetup1clipboard@base',
-                anim = 'base',
-                flags = 1
-            }, {
-                model = 'prop_notepad_01',
-                bone = 18905,
-                coords = { x = 0.1, y = 0.02, z = 0.05 },
-                rotation = { x = 10.0, y = 0.0, z = 0.0 }
-            },{
-                model = 'prop_pencil_01',
-                bone = 58866,
-                coords = { x = 0.11, y = -0.02, z = 0.001 },
-                rotation = { x = -120.0, y = 0.0, z = 0.0 }
-            }, function() -- Play When Done
+            if lib.progressBar({
+                duration = 2000,
+                label = 'Drinking water',
+                useWhileDead = false,
+                canCancel = true,
+                disable = {
+                    move = true,
+                    car = true,
+                    combat = true
+                },
+                anim = {
+                    dict = 'missheistdockssetup1clipboard@base',
+                    clip = 'base',
+                    flag = 1
+                },
+                prop = {
+                    {
+                        model = `prop_notepad_01`,
+                        bone = 18905,
+                        pos = vec3(0.1, 0.02, 0.05),
+                        rot = vec3(10.0, 0.0, 0.0)
+                    },
+                    {
+                        model = `prop_pencil_01`,
+                        bone = 58866,
+                        pos = vec3(0.11, -0.02, 0.001),
+                        rot = vec3(-120.0, 0.0, 0.0)
+                    }
+                }
+            }) then
                 local plate = QBCore.Functions.GetPlate(vehicle)
 
                 TriggerServerEvent("police:server:Impound", plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
@@ -297,11 +307,11 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
                 TriggerEvent('QBCore:Notify', Lang:t('success.impounded'), 'success')
 
                 ClearPedTasks(cache.ped)
-            end, function() -- Play When Cancel
+            else
                 ClearPedTasks(cache.ped)
 
                 TriggerEvent('QBCore:Notify', Lang:t('error.canceled'), 'error')
-            end)
+            end
         end
     end
 end)
@@ -437,7 +447,7 @@ RegisterNetEvent('qb-police:client:spawnHelicopter', function(k)
 
             SetVehicleLivery(veh , 0)
             SetVehicleMod(veh, 0, 48, false)
-            SetVehicleNumberPlateText(veh, "ZULU"..tostring(math.random(1000, 9999)))
+            SetVehicleNumberPlateText(veh, "ZULU" .. tostring(math.random(1000, 9999)))
             SetEntityHeading(veh, coords.w)
             SetVehicleFuelLevel(veh, 100.0)
 
@@ -649,7 +659,7 @@ CreateThread(function()
     for _, v in pairs(Config.Locations["helicopter"]) do
         lib.zones.box({
             coords = v,
-            size = vec3(2, 2, 2),
+            size = vec3(4, 4, 4),
             rotation = 0.0,
             onEnter = function(_)
                 inHelicopter = true
@@ -674,7 +684,7 @@ CreateThread(function()
     end
 
     -- Police Impound
-    for _, v in pairs(Config.Locations["impound"]) do
+    for k, v in pairs(Config.Locations["impound"]) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -688,14 +698,6 @@ CreateThread(function()
 
                         impound()
                     else
-                        local currentSelection = 0
-
-                        for k, v in pairs(Config.Locations["impound"]) do
-                            if #(point - vec3(v.x, v.y, v.z)) < 4 then
-                                currentSelection = k
-                            end
-                        end
-
                         lib.registerContext({
                             id = 'open_policeImpoundHeader',
                             title = "Impound",
@@ -705,7 +707,7 @@ CreateThread(function()
                                     icon = "fa-solid fa-warehouse",
                                     event = 'police:client:ImpoundMenuHeader',
                                     args = {
-                                        currentSelection = currentSelection
+                                        currentSelection = k
                                     }
                                 }
                             }

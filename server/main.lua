@@ -230,7 +230,7 @@ end)
 QBCore.Commands.Add("pobject", Lang:t("commands.place_object"), {
     {name = "type",help = Lang:t("info.poobject_object")}
 }, true, function(source, args)
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
     local type = args[1]:lower()
 
     if not (Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty) then
