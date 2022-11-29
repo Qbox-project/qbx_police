@@ -58,13 +58,13 @@ function GetClosestSpike()
     local current = nil
     local dist = nil
 
-    for id, _ in pairs(SpawnedSpikes) do
+    for id, data in pairs(SpawnedSpikes) do
         if current then
-            if #(pos - vec3(SpawnedSpikes[id].coords.x, SpawnedSpikes[id].coords.y, SpawnedSpikes[id].coords.z)) < dist then
+            if #(pos - data.coords) < dist then
                 current = id
             end
         else
-            dist = #(pos - vec3(SpawnedSpikes[id].coords.x, SpawnedSpikes[id].coords.y, SpawnedSpikes[id].coords.z))
+            dist = #(pos - data.coords)
             current = id
         end
     end
@@ -205,10 +205,10 @@ CreateThread(function()
 end)
 
 CreateThread(function()
-    local spikeSleep = 1000
-
     while true do
-        if LocalPlayer.state.isLoggedIn and cache.vehicle ~= 0 then
+        local spikeSleep = 1000
+
+        if LocalPlayer.state.isLoggedIn and cache.vehicle then
             spikeSleep = 100
 
             if ClosestSpike then

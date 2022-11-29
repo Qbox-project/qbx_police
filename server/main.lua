@@ -221,7 +221,7 @@ QBCore.Commands.Add("revokelicense", Lang:t("commands.license_revoke"), {
         description = Lang:t("error.revoked_license"),
         type = "error"
     })
-    TriggerClientEvent('ox_lib:notify', src, {
+    TriggerClientEvent('ox_lib:notify', source, {
         description = Lang:t("success.revoke_license"),
         type = "success"
     })
@@ -408,33 +408,32 @@ end)
 QBCore.Commands.Add("unflagplate", Lang:t("commands.unflagplate"), {
     {name = "plate", help = Lang:t('info.plate_number')}
 }, true, function(source, args)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
         if Plates and Plates[args[1]:upper()] then
             if Plates[args[1]:upper()].isflagged then
                 Plates[args[1]:upper()].isflagged = false
 
-                TriggerClientEvent('ox_lib:notify', src, {
+                TriggerClientEvent('ox_lib:notify', source, {
                     description = Lang:t("info.unflag_vehicle", {
                         vehicle = args[1]:upper()
                     })
                 })
             else
-                TriggerClientEvent('ox_lib:notify', src, {
+                TriggerClientEvent('ox_lib:notify', source, {
                     description = Lang:t("error.vehicle_not_flag"),
                     type = 'error'
                 })
             end
         else
-            TriggerClientEvent('ox_lib:notify', src, {
+            TriggerClientEvent('ox_lib:notify', source, {
                 description = Lang:t("error.vehicle_not_flag"),
                 type = 'error'
             })
         end
     else
-        TriggerClientEvent('ox_lib:notify', src, {
+        TriggerClientEvent('ox_lib:notify', source, {
             description = Lang:t("error.on_duty_police_only"),
             type = 'error'
         })
@@ -444,13 +443,12 @@ end)
 QBCore.Commands.Add("plateinfo", Lang:t("commands.plateinfo"), {
     {name = "plate", help = Lang:t('info.plate_number')}
 }, true, function(source, args)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
         if Plates and Plates[args[1]:upper()] then
             if Plates[args[1]:upper()].isflagged then
-                TriggerClientEvent('ox_lib:notify', src, {
+                TriggerClientEvent('ox_lib:notify', source, {
                     description = Lang:t('success.vehicle_flagged', {
                         plate = args[1]:upper(),
                         reason = Plates[args[1]:upper()].reason
@@ -458,19 +456,19 @@ QBCore.Commands.Add("plateinfo", Lang:t("commands.plateinfo"), {
                     type = 'success'
                 })
             else
-                TriggerClientEvent('ox_lib:notify', src, {
+                TriggerClientEvent('ox_lib:notify', source, {
                     description = Lang:t("error.vehicle_not_flag"),
                     type = 'error'
                 })
             end
         else
-            TriggerClientEvent('ox_lib:notify', src, {
+            TriggerClientEvent('ox_lib:notify', source, {
                 description = Lang:t("error.vehicle_not_flag"),
                 type = 'error'
             })
         end
     else
-        TriggerClientEvent('ox_lib:notify', src, {
+        TriggerClientEvent('ox_lib:notify', source, {
             description = Lang:t("error.on_duty_police_only"),
             type = 'error'
         })
@@ -480,13 +478,12 @@ end)
 QBCore.Commands.Add("depot", Lang:t("commands.depot"), {
     {name = "price", help = Lang:t('info.impound_price')}
 }, false, function(source, args)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
-        TriggerClientEvent("police:client:ImpoundVehicle", src, false, tonumber(args[1]))
+        TriggerClientEvent("police:client:ImpoundVehicle", source, false, tonumber(args[1]))
     else
-        TriggerClientEvent('ox_lib:notify', src, {
+        TriggerClientEvent('ox_lib:notify', source, {
             description = Lang:t("error.on_duty_police_only"),
             type = 'error'
         })
@@ -494,13 +491,12 @@ QBCore.Commands.Add("depot", Lang:t("commands.depot"), {
 end)
 
 QBCore.Commands.Add("impound", Lang:t("commands.impound"), {}, false, function(source)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
-        TriggerClientEvent("police:client:ImpoundVehicle", src, true)
+        TriggerClientEvent("police:client:ImpoundVehicle", source, true)
     else
-        TriggerClientEvent('ox_lib:notify', src, {
+        TriggerClientEvent('ox_lib:notify', source, {
             description = Lang:t("error.on_duty_police_only"),
             type = 'error'
         })
@@ -510,8 +506,7 @@ end)
 QBCore.Commands.Add("paytow", Lang:t("commands.paytow"), {
     {name = "id", help = Lang:t('info.player_id')}
 }, true, function(source, args)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
         local playerId = tonumber(args[1])
@@ -525,18 +520,18 @@ QBCore.Commands.Add("paytow", Lang:t("commands.paytow"), {
                     description = Lang:t("success.tow_paid"),
                     type = 'success'
                 })
-                TriggerClientEvent('ox_lib:notify', src, {
+                TriggerClientEvent('ox_lib:notify', source, {
                     description = Lang:t("info.tow_driver_paid")
                 })
             else
-                TriggerClientEvent('ox_lib:notify', src, {
+                TriggerClientEvent('ox_lib:notify', source, {
                     description = Lang:t("error.not_towdriver"),
                     type = 'error'
                 })
             end
         end
     else
-        TriggerClientEvent('ox_lib:notify', src, {
+        TriggerClientEvent('ox_lib:notify', source, {
             description = Lang:t("error.on_duty_police_only"),
             type = 'error'
         })
@@ -546,8 +541,7 @@ end)
 QBCore.Commands.Add("paylawyer", Lang:t("commands.paylawyer"), {
     {name = "id",help = Lang:t('info.player_id')}
 }, true, function(source, args)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.job.type == "leo" or Player.PlayerData.job.name == "judge" then
         local playerId = tonumber(args[1])
@@ -564,17 +558,17 @@ QBCore.Commands.Add("paylawyer", Lang:t("commands.paylawyer"), {
                 description = Lang:t("success.tow_paid"),
                 type = 'success'
             })
-            TriggerClientEvent('ox_lib:notify', src, {
+            TriggerClientEvent('ox_lib:notify', source, {
                 description = Lang:t("info.paid_lawyer")
             })
         else
-            TriggerClientEvent('ox_lib:notify', src, {
+            TriggerClientEvent('ox_lib:notify', source, {
                 description = Lang:t("error.not_lawyer"),
                 type = "error"
             })
         end
     else
-        TriggerClientEvent('ox_lib:notify', src, {
+        TriggerClientEvent('ox_lib:notify', source, {
             description = Lang:t("error.on_duty_police_only"),
             type = 'error'
         })
@@ -582,13 +576,12 @@ QBCore.Commands.Add("paylawyer", Lang:t("commands.paylawyer"), {
 end)
 
 QBCore.Commands.Add("anklet", Lang:t("commands.anklet"), {}, false, function(source)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
-        TriggerClientEvent("police:client:CheckDistance", src)
+        TriggerClientEvent("police:client:CheckDistance", source)
     else
-        TriggerClientEvent('ox_lib:notify', src, {
+        TriggerClientEvent('ox_lib:notify', source, {
             description = Lang:t("error.on_duty_police_only"),
             type = 'error'
         })
@@ -598,8 +591,7 @@ end)
 QBCore.Commands.Add("ankletlocation", Lang:t("commands.ankletlocation"), {
     {name = "cid", help = Lang:t('info.citizen_id')}
 }, true, function(source, args)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
         local citizenid = args[1]
@@ -610,23 +602,28 @@ QBCore.Commands.Add("ankletlocation", Lang:t("commands.ankletlocation"), {
         end
 
         if Target.PlayerData.metadata.tracker then
-            TriggerClientEvent("police:client:SendTrackerLocation", Target.PlayerData.source, src)
+            TriggerClientEvent("police:client:SendTrackerLocation", Target.PlayerData.source, source)
         else
-            TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.no_anklet"), type = 'error'})
+            TriggerClientEvent('ox_lib:notify', source, {
+                description = Lang:t("error.no_anklet"),
+                type = 'error'
+            })
         end
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.on_duty_police_only"), type = 'error'})
+        TriggerClientEvent('ox_lib:notify', source, {
+            description = Lang:t("error.on_duty_police_only"),
+            type = 'error'
+        })
     end
 end)
 
 QBCore.Commands.Add("takedrivinglicense", Lang:t("commands.drivinglicense"), {}, false, function(source)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.job.type == "leo" and Player.PlayerData.job.onduty then
         TriggerClientEvent("police:client:SeizeDriverLicense", source)
     else
-        TriggerClientEvent('ox_lib:notify', src, {
+        TriggerClientEvent('ox_lib:notify', source, {
             description = Lang:t("error.on_duty_police_only"),
             type = 'error'
         })
@@ -636,8 +633,7 @@ end)
 QBCore.Commands.Add("takedna", Lang:t("commands.takedna"), {
     {name = "id", help = Lang:t('info.player_id')}
 }, true, function(source, args)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
     local OtherPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
 
     if not OtherPlayer or Player.PlayerData.job.type ~= "leo" or not Player.PlayerData.job.onduty then
@@ -655,7 +651,7 @@ QBCore.Commands.Add("takedna", Lang:t("commands.takedna"), {
             return
         end
     else
-        TriggerClientEvent('ox_lib:notify', src, {
+        TriggerClientEvent('ox_lib:notify', source, {
             description = Lang:t("error.have_evidence_bag"),
             type = "error"
         })
@@ -686,12 +682,13 @@ end)
 QBCore.Commands.Add('911p', Lang:t("commands.police_report"), {
     {name='message', help= Lang:t("commands.message_sent")}
 }, false, function(source, args)
-	local src = source
-    local message
+    local message = Lang:t("commands.civilian_call")
 
-	if args[1] then message = table.concat(args, " ") else message = Lang:t("commands.civilian_call") end
+	if args[1] then
+        message = table.concat(args, " ")
+    end
 
-    local ped = GetPlayerPed(src)
+    local ped = GetPlayerPed(source)
     local coords = GetEntityCoords(ped)
     local players = QBCore.Functions.GetQBPlayers()
 
@@ -715,12 +712,11 @@ end)
 
 -- Items
 QBCore.Functions.CreateUseableItem("handcuffs", function(source)
-    TriggerClientEvent("police:client:CuffPlayerSoft", src)
+    TriggerClientEvent("police:client:CuffPlayerSoft", source)
 end)
 
 QBCore.Functions.CreateUseableItem("moneybag", function(source, item)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = QBCore.Functions.GetPlayer(source)
 
     if not Player then
         return

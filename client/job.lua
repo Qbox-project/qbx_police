@@ -451,7 +451,7 @@ RegisterNetEvent('qb-police:client:spawnHelicopter', function(k)
             SetEntityHeading(veh, coords.w)
             SetVehicleFuelLevel(veh, 100.0)
 
-            closeMenuFull()
+            lib.hideContext()
 
             TaskWarpPedIntoVehicle(cache.ped, veh, -1)
 
@@ -547,22 +547,13 @@ end
 
 CreateThread(function()
     -- Evidence Storage
-    for _, v in pairs(Config.Locations["evidence"]) do
+    for k, v in pairs(Config.Locations["evidence"]) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
             onEnter = function(_)
                 if PlayerJob.type == "leo" and onDuty then
-                    local currentEvidence = 0
-                    local pos = GetEntityCoords(cache.ped)
-
-                    for k, v in pairs(Config.Locations["evidence"]) do
-                        if #(pos - v) < 2 then
-                            currentEvidence = k
-                        end
-                    end
-
                     lib.registerContext({
                         id = 'open_policeEvidenceHeader',
                         title = "Evidence",
@@ -574,7 +565,7 @@ CreateThread(function()
                                 icon = "fa-solid fa-paperclip",
                                 event = 'police:client:EvidenceStashDrawer',
                                 args = {
-                                    currentEvidence = currentEvidence
+                                    currentEvidence = k
                                 }
                             }
                         }
