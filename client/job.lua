@@ -381,7 +381,9 @@ RegisterNetEvent('police:client:EvidenceStashDrawer', function(data)
     end
 
     if #(pos - takeLoc) <= 1.0 then
-        local drawer = lib.inputDialog(Lang:t('info.evidence_stash', {value = currentEvidence}), {
+        local drawer = lib.inputDialog(Lang:t('info.evidence_stash', {
+            value = currentEvidence
+        }), {
             {
                 type = "number",
                 label = Lang:t('info.slot')

@@ -29,6 +29,7 @@ local tires = {
         index = 5
     }
 }
+local spikeSleep = 1000
 
 -- Functions
 local function GetClosestPoliceObject()
@@ -206,8 +207,6 @@ end)
 
 CreateThread(function()
     while true do
-        local spikeSleep = 1000
-
         if LocalPlayer.state.isLoggedIn and cache.vehicle then
             spikeSleep = 100
 
