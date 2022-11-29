@@ -562,7 +562,7 @@ CreateThread(function()
                         options = {
                             {
                                 title = Lang:t('info.evidence_stash', {
-                                    value = currentEvidence
+                                    value = k
                                 }),
                                 icon = "fa-solid fa-paperclip",
                                 event = 'police:client:EvidenceStashDrawer',
