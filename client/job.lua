@@ -304,13 +304,19 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
 
                 QBCore.Functions.DeleteVehicle(vehicle)
 
-                TriggerEvent('QBCore:Notify', Lang:t('success.impounded'), 'success')
+                lib.notify({
+                    description = Lang:t('success.impounded'),
+                    type = 'success'
+                })
 
                 ClearPedTasks(cache.ped)
             else
                 ClearPedTasks(cache.ped)
 
-                TriggerEvent('QBCore:Notify', Lang:t('error.canceled'), 'error')
+                lib.notify({
+                    description = Lang:t('error.canceled'),
+                    type = 'error'
+                })
             end
         end
     end
