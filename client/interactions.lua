@@ -31,13 +31,13 @@ local function HandCuffAnimation()
 
     lib.requestAnimDict("mp_arrest_paired")
 
-	Wait(100)
+    Wait(100)
 
     TaskPlayAnim(cache.ped, "mp_arrest_paired", "cop_p2_back_right", 3.0, 3.0, -1, 48, 0, 0, 0, 0)
 
     TriggerServerEvent("InteractSound_SV:PlayOnSource", "Cuff", 0.2)
 
-	Wait(3500)
+    Wait(3500)
 
     TaskPlayAnim(cache.ped, "mp_arrest_paired", "exit", 3.0, 3.0, -1, 48, 0, 0, 0, 0)
     RemoveAnimDict("mp_arrest_paired")
@@ -53,18 +53,18 @@ local function GetCuffedAnimation(playerId)
 
     SetEntityCoords(cache.ped, GetOffsetFromEntityInWorldCoords(cuffer, 0.0, 0.45, 0.0))
 
-	Wait(100)
+    Wait(100)
 
-	SetEntityHeading(cache.ped, heading)
-	TaskPlayAnim(cache.ped, "mp_arrest_paired", "crook_p2_back_right", 3.0, 3.0, -1, 32, 0, 0, 0, 0 ,true, true, true)
+    SetEntityHeading(cache.ped, heading)
+    TaskPlayAnim(cache.ped, "mp_arrest_paired", "crook_p2_back_right", 3.0, 3.0, -1, 32, 0, 0, 0, 0 ,true, true, true)
     RemoveAnimDict("mp_arrest_paired")
 
-	Wait(2500)
+    Wait(2500)
 end
 
 -- Events
 RegisterNetEvent('police:client:SetOutVehicle', function()
-    if not IsPedInAnyVehicle(cache.ped, false) then
+    if not cache.vehicle then
         return
     end
 
@@ -532,7 +532,7 @@ CreateThread(function()
         if isEscorted then
             DisableAllControlActions(0)
             EnableControlAction(0, 1, true)
-			EnableControlAction(0, 2, true)
+            EnableControlAction(0, 2, true)
             EnableControlAction(0, 245, true)
             EnableControlAction(0, 38, true)
             EnableControlAction(0, 322, true)
@@ -542,39 +542,39 @@ CreateThread(function()
 
         if isHandcuffed then
             DisableControlAction(0, 24, true) -- Attack
-			DisableControlAction(0, 257, true) -- Attack 2
-			DisableControlAction(0, 25, true) -- Aim
-			DisableControlAction(0, 263, true) -- Melee Attack 1
+            DisableControlAction(0, 257, true) -- Attack 2
+            DisableControlAction(0, 25, true) -- Aim
+            DisableControlAction(0, 263, true) -- Melee Attack 1
 
-			DisableControlAction(0, 45, true) -- Reload
-			DisableControlAction(0, 22, true) -- Jump
-			DisableControlAction(0, 44, true) -- Cover
-			DisableControlAction(0, 37, true) -- Select Weapon
-			DisableControlAction(0, 23, true) -- Also 'enter'?
+            DisableControlAction(0, 45, true) -- Reload
+            DisableControlAction(0, 22, true) -- Jump
+            DisableControlAction(0, 44, true) -- Cover
+            DisableControlAction(0, 37, true) -- Select Weapon
+            DisableControlAction(0, 23, true) -- Also 'enter'?
 
-			DisableControlAction(0, 288, true) -- Disable phone
-			DisableControlAction(0, 289, true) -- Inventory
-			DisableControlAction(0, 170, true) -- Animations
-			DisableControlAction(0, 167, true) -- Job
+            DisableControlAction(0, 288, true) -- Disable phone
+            DisableControlAction(0, 289, true) -- Inventory
+            DisableControlAction(0, 170, true) -- Animations
+            DisableControlAction(0, 167, true) -- Job
 
-			DisableControlAction(0, 26, true) -- Disable looking behind
-			DisableControlAction(0, 73, true) -- Disable clearing animation
-			DisableControlAction(2, 199, true) -- Disable pause screen
+            DisableControlAction(0, 26, true) -- Disable looking behind
+            DisableControlAction(0, 73, true) -- Disable clearing animation
+            DisableControlAction(2, 199, true) -- Disable pause screen
 
-			DisableControlAction(0, 59, true) -- Disable steering in vehicle
-			DisableControlAction(0, 71, true) -- Disable driving forward in vehicle
-			DisableControlAction(0, 72, true) -- Disable reversing in vehicle
+            DisableControlAction(0, 59, true) -- Disable steering in vehicle
+            DisableControlAction(0, 71, true) -- Disable driving forward in vehicle
+            DisableControlAction(0, 72, true) -- Disable reversing in vehicle
 
-			DisableControlAction(2, 36, true) -- Disable going stealth
+            DisableControlAction(2, 36, true) -- Disable going stealth
 
-			DisableControlAction(0, 264, true) -- Disable melee
-			DisableControlAction(0, 257, true) -- Disable melee
-			DisableControlAction(0, 140, true) -- Disable melee
-			DisableControlAction(0, 141, true) -- Disable melee
-			DisableControlAction(0, 142, true) -- Disable melee
-			DisableControlAction(0, 143, true) -- Disable melee
-			DisableControlAction(0, 75, true)  -- Disable exit vehicle
-			DisableControlAction(27, 75, true) -- Disable exit vehicle
+            DisableControlAction(0, 264, true) -- Disable melee
+            DisableControlAction(0, 257, true) -- Disable melee
+            DisableControlAction(0, 140, true) -- Disable melee
+            DisableControlAction(0, 141, true) -- Disable melee
+            DisableControlAction(0, 142, true) -- Disable melee
+            DisableControlAction(0, 143, true) -- Disable melee
+            DisableControlAction(0, 75, true)  -- Disable exit vehicle
+            DisableControlAction(27, 75, true) -- Disable exit vehicle
             EnableControlAction(0, 249, true) -- Added for talking while cuffed
             EnableControlAction(0, 46, true)  -- Added for talking while cuffed
 

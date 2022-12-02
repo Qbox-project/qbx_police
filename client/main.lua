@@ -239,21 +239,21 @@ RegisterNetEvent('police:client:SendToJail', function(time)
 end)
 
 RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
-    local Player = QBCore.Functions.GetPlayerData()
+    local PlayerData = QBCore.Functions.GetPlayerData()
 
     TriggerServerEvent('police:server:policeAlert', Lang:t('info.officer_down', {
-        lastname = Player.charinfo.lastname,
-        callsign = Player.metadata.callsign
+        lastname = PlayerData.charinfo.lastname,
+        callsign = PlayerData.metadata.callsign
     }))
     TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {
-        lastname = Player.charinfo.lastname,
-        callsign = Player.metadata.callsign
+        lastname = PlayerData.charinfo.lastname,
+        callsign = PlayerData.metadata.callsign
     }))
 end)
 
 -- Threads
 CreateThread(function()
-    for _, station in pairs(Config.Locations["stations"]) do
+    for _, station in pairs(Config.Locations.stations) do
         local blip = AddBlipForCoord(station.coords.x, station.coords.y, station.coords.z)
 
         SetBlipSprite(blip, 60)

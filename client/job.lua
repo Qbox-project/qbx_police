@@ -40,7 +40,7 @@ local function openFingerprintUI()
 end
 
 function TakeOutImpound(vehicle)
-    local coords = Config.Locations["impound"][currentGarage]
+    local coords = Config.Locations.impound[currentGarage]
 
     if coords then
         QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
@@ -67,7 +67,7 @@ function TakeOutImpound(vehicle)
 end
 
 function TakeOutVehicle(vehicleInfo)
-    local coords = Config.Locations["vehicle"][currentGarage]
+    local coords = Config.Locations.vehicle[currentGarage]
 
     if coords then
         QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
@@ -267,7 +267,7 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
         local pos = GetEntityCoords(cache.ped)
         local vehpos = GetEntityCoords(vehicle)
 
-        if #(pos - vehpos) < 5.0 and not IsPedInAnyVehicle(cache.ped, false) then
+        if #(pos - vehpos) < 5.0 and not cache.vehicle then
             if lib.progressBar({
                 duration = 2000,
                 label = 'Drinking water',
@@ -380,7 +380,7 @@ end)
 RegisterNetEvent('police:client:EvidenceStashDrawer', function(data)
     local currentEvidence = data.currentEvidence
     local pos = GetEntityCoords(cache.ped)
-    local takeLoc = Config.Locations["evidence"][currentEvidence]
+    local takeLoc = Config.Locations.evidence[currentEvidence]
 
     if not takeLoc then
         return
@@ -438,10 +438,10 @@ RegisterNetEvent('qb-police:client:scanFingerPrint', function()
 end)
 
 RegisterNetEvent('qb-police:client:spawnHelicopter', function(k)
-    if IsPedInAnyVehicle(cache.ped, false) then
+    if cache.vehicle then
         QBCore.Functions.DeleteVehicle(cache.vehicle)
     else
-        local coords = Config.Locations["helicopter"][k]
+        local coords = Config.Locations.helicopter[k]
 
         if not coords then
             local plyCoords = GetEntityCoords(cache.ped)
@@ -474,7 +474,7 @@ end)
 if Config.UseTarget then
     CreateThread(function()
         -- Toggle Duty
-        for _, v in pairs(Config.Locations["duty"]) do
+        for _, v in pairs(Config.Locations.duty) do
             exports.ox_target:addBoxZone({
                 coords = v,
                 size = vec3(2, 2, 2),
@@ -483,7 +483,7 @@ if Config.UseTarget then
                     {
                         name = 'qb-policejob:duty',
                         event = "qb-policejob:ToggleDuty",
-                        icon = "fas fa-sign-in-alt",
+                        icon = "fa-solid fa-right-to-bracket",
                         label = "Sign In",
                         distance = 1.5,
                         canInteract = function(_, _, _, _)
@@ -526,7 +526,7 @@ else
     end
 
     -- Toggle Duty
-    for _, v in pairs(Config.Locations["duty"]) do
+    for _, v in pairs(Config.Locations.duty) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -555,7 +555,7 @@ end
 
 CreateThread(function()
     -- Evidence Storage
-    for k, v in pairs(Config.Locations["evidence"]) do
+    for k, v in pairs(Config.Locations.evidence) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -588,7 +588,7 @@ CreateThread(function()
     end
 
     -- Personal Stash
-    for _, v in pairs(Config.Locations["stash"]) do
+    for _, v in pairs(Config.Locations.stash) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -609,7 +609,7 @@ CreateThread(function()
     end
 
     -- Police Trash
-    for k, v in pairs(Config.Locations["trash"]) do
+    for k, v in pairs(Config.Locations.trash) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -632,7 +632,7 @@ CreateThread(function()
     end
 
     -- Fingerprints
-    for _, v in pairs(Config.Locations["fingerprint"]) do
+    for _, v in pairs(Config.Locations.fingerprint) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -655,7 +655,7 @@ CreateThread(function()
     end
 
     -- Helicopter
-    for _, v in pairs(Config.Locations["helicopter"]) do
+    for _, v in pairs(Config.Locations.helicopter) do
         lib.zones.box({
             coords = v,
             size = vec3(4, 4, 4),
@@ -666,7 +666,7 @@ CreateThread(function()
                 if onDuty then
                     heli()
 
-                    if IsPedInAnyVehicle(cache.ped, false) then
+                    if cache.vehicle then
                         lib.hideTextUI()
                         lib.showTextUI(Lang:t('info.store_heli'))
                     else
@@ -683,7 +683,7 @@ CreateThread(function()
     end
 
     -- Police Impound
-    for k, v in pairs(Config.Locations["impound"]) do
+    for k, v in pairs(Config.Locations.impound) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -692,7 +692,7 @@ CreateThread(function()
                 inImpound = true
 
                 if onDuty then
-                    if IsPedInAnyVehicle(cache.ped, false) then
+                    if cache.vehicle then
                         lib.showTextUI(Lang:t('info.impound_veh'))
 
                         impound()
@@ -725,7 +725,7 @@ CreateThread(function()
     end
 
     -- Police Garage
-    for k, v in pairs(Config.Locations["vehicle"]) do
+    for k, v in pairs(Config.Locations.vehicle) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -734,7 +734,7 @@ CreateThread(function()
                 inGarage = true
 
                 if onDuty and PlayerJob.type == 'leo' then
-                    if IsPedInAnyVehicle(cache.ped, false) then
+                    if cache.vehicle then
                         lib.showTextUI(Lang:t('info.store_veh'))
 
                         garage()
@@ -868,7 +868,7 @@ function impound()
             Wait(0)
 
             if inImpound and PlayerJob.type == "leo" then
-                if IsPedInAnyVehicle(cache.ped, false) then
+                if cache.vehicle then
                     if IsControlJustReleased(0, 38) then
                         QBCore.Functions.DeleteVehicle(cache.vehicle)
                         break
@@ -892,7 +892,7 @@ function garage()
             Wait(0)
 
             if inGarage and PlayerJob.type == "leo" then
-                if IsPedInAnyVehicle(cache.ped, false) then
+                if cache.vehicle then
                     if IsControlJustReleased(0, 38) then
                         QBCore.Functions.DeleteVehicle(cache.vehicle)
                         break

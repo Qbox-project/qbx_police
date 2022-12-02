@@ -16,7 +16,7 @@ function HandlespeedCam(speedCam, hasBeenBusted)
 
         local vehicle = GetPlayersLastVehicle() -- gets the current vehicle the player is in.
 
-        if IsPedInAnyVehicle(cache.ped, false) then
+        if cache.vehicle then
             if GetPedInVehicleSeat(vehicle, -1) == cache.ped then
                 if GetVehicleClass(vehicle) ~= 18 then
                     local plate = QBCore.Functions.GetPlate(vehicle)
@@ -55,7 +55,7 @@ CreateThread(function()
     while true do
         Wait(0)
 
-        if IsPedInAnyVehicle(cache.ped, false) then
+        if cache.vehicle then
             for key, value in pairs(Config.Radars) do
                 HandlespeedCam(value, key)
             end

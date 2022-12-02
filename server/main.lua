@@ -665,18 +665,8 @@ RegisterNetEvent('police:server:SendTrackerLocation', function(coords, requestId
         firstname = Player.PlayerData.charinfo.firstname,
         lastname = Player.PlayerData.charinfo.lastname
     })
-    local alertData = {
-        title = Lang:t('info.anklet_location'),
-        coords = {
-            x = coords.x,
-            y = coords.y,
-            z = coords.z
-        },
-        description = msg
-    }
 
     TriggerClientEvent("police:client:TrackerMessage", requestId, msg, coords)
-    TriggerClientEvent("qb-phone:client:addPoliceAlert", requestId, alertData)
 end)
 
 QBCore.Commands.Add('911p', Lang:t("commands.police_report"), {
@@ -684,7 +674,7 @@ QBCore.Commands.Add('911p', Lang:t("commands.police_report"), {
 }, false, function(source, args)
     local message = Lang:t("commands.civilian_call")
 
-	if args[1] then
+    if args[1] then
         message = table.concat(args, " ")
     end
 
@@ -704,7 +694,6 @@ QBCore.Commands.Add('911p', Lang:t("commands.police_report"), {
                 description = message
             }
 
-            TriggerClientEvent("qb-phone:client:addPoliceAlert", v.PlayerData.source, alertData)
             TriggerClientEvent('police:client:policeAlert', v.PlayerData.source, coords, message)
         end
     end
@@ -861,7 +850,6 @@ RegisterNetEvent('police:server:policeAlert', function(text)
                 description = text
             }
 
-            TriggerClientEvent("qb-phone:client:addPoliceAlert", v.PlayerData.source, alertData)
             TriggerClientEvent('police:client:policeAlert', v.PlayerData.source, coords, text)
         end
     end
@@ -871,7 +859,7 @@ RegisterNetEvent('police:server:TakeOutImpound', function(plate, garage)
     local src = source
     local playerPed = GetPlayerPed(src)
     local playerCoords = GetEntityCoords(playerPed)
-    local targetCoords = Config.Locations["impound"][garage]
+    local targetCoords = Config.Locations.impound[garage]
 
     if #(playerCoords - targetCoords) > 10.0 then
         return DropPlayer(src, "Attempted exploit abuse")
