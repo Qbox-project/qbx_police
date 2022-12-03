@@ -1,7 +1,5 @@
 -- Variables
 local currentGarage = 0
-local currentImpound = 0
-local inFingerprint = false
 local FingerPrintSessionId = nil
 
 local inPrompt = false
@@ -39,7 +37,6 @@ local function openFingerprintUI()
     SendNUIMessage({
         type = "fingerprintOpen"
     })
-    inFingerprint = true
     SetNuiFocus(true, true)
 end
 
@@ -257,7 +254,6 @@ end
 --NUI Callbacks
 RegisterNUICallback('closeFingerprint', function(_, cb)
     SetNuiFocus(false, false)
-    inFingerprint = false
     cb('ok')
 end)
 
@@ -411,6 +407,7 @@ RegisterNetEvent('qb-policejob:ToggleDuty', function()
 end)
 
 RegisterNetEvent('qb-police:client:scanFingerPrint', function()
+    if not inPrompt then return end
     local player, distance = GetClosestPlayer()
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
