@@ -37,7 +37,7 @@ function HandlespeedCam(speedCam, hasBeenBusted)
                             local street1 = GetStreetNameFromHashKey(s1)
                             local street2 = GetStreetNameFromHashKey(s2)
 
-                            TriggerServerEvent("police:server:FlaggedPlateTriggered", hasBeenBusted, plate, street1, street2, blipsettings)
+                            TriggerServerEvent('police:server:FlaggedPlateTriggered', hasBeenBusted, plate, street1, street2, blipsettings)
                         end
                     end, plate)
                 end

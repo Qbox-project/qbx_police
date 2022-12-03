@@ -4,11 +4,11 @@ RegisterNetEvent('police:client:CheckDistance', function()
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
 
-        TriggerServerEvent("police:server:SetTracker", playerId)
+        TriggerServerEvent('police:server:SetTracker', playerId)
     else
         lib.notify({
-            description = Lang:t("error.none_nearby"),
-            type = "error"
+            description = Lang:t('error.none_nearby'),
+            type = 'error'
         })
     end
 end)
@@ -16,7 +16,7 @@ end)
 RegisterNetEvent('police:client:SetTracker', function(bool)
     local trackerClothingData = {
         outfitData = {
-            ["accessory"] = {
+            ['accessory'] = {
                 item = -1,
                 texture = 0
             } -- Nek / Das
@@ -25,7 +25,7 @@ RegisterNetEvent('police:client:SetTracker', function(bool)
 
     if bool then
         trackerClothingData.outfitData = {
-            ["accessory"] = {
+            ['accessory'] = {
                 item = 13,
                 texture = 0
             }
@@ -44,7 +44,7 @@ RegisterNetEvent('police:client:SendTrackerLocation', function(requestId)
 end)
 
 RegisterNetEvent('police:client:TrackerMessage', function(msg, coords)
-    PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", 0, 0, 1)
+    PlaySound(-1, 'Lose_1st', 'GTAO_FM_Events_Soundset', 0, 0, 1)
 
     lib.notify({
         description = msg

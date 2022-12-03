@@ -13,7 +13,7 @@ local function GetCurrentTime()
         minutes = tostring(0 .. GetClockMinutes())
     end
 
-    return tostring(hours .. ":" .. minutes)
+    return tostring(hours .. ':' .. minutes)
 end
 
 local function ChangeSecurityCamera(x, y, z, r)
@@ -22,7 +22,7 @@ local function ChangeSecurityCamera(x, y, z, r)
         createdCamera = 0
     end
 
-    local cam = CreateCam("DEFAULT_SCRIPTED_CAMERA", 1)
+    local cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', 1)
 
     SetCamCoord(cam, x, y, z)
     SetCamRot(cam, r.x, r.y, r.z, 2)
@@ -39,7 +39,7 @@ local function CloseSecurityCamera()
 
     createdCamera = 0
 
-    ClearTimecycleModifier("scanline_cam_cheap")
+    ClearTimecycleModifier('scanline_cam_cheap')
     SetFocusEntity(cache.ped)
 
     if Config.SecurityCameras.hideradar then
@@ -54,7 +54,7 @@ local function InstructionButton(ControlButton)
 end
 
 local function InstructionButtonMessage(text)
-    BeginTextCommandScaleformString("STRING")
+    BeginTextCommandScaleformString('STRING')
     AddTextComponentScaleform(text)
     EndTextCommandScaleformString()
 end
@@ -65,14 +65,14 @@ local function CreateInstuctionScaleform(scaleform)
         Wait(0)
     end
 
-    PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
+    PushScaleformMovieFunction(scaleform, 'CLEAR_ALL')
     PopScaleformMovieFunctionVoid()
 
-    PushScaleformMovieFunction(scaleform, "SET_CLEAR_SPACE")
+    PushScaleformMovieFunction(scaleform, 'SET_CLEAR_SPACE')
     PushScaleformMovieFunctionParameterInt(200)
     PopScaleformMovieFunctionVoid()
 
-    PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+    PushScaleformMovieFunction(scaleform, 'SET_DATA_SLOT')
     PushScaleformMovieFunctionParameterInt(1)
 
     InstructionButton(GetControlInstructionalButton(1, 194, true))
@@ -80,10 +80,10 @@ local function CreateInstuctionScaleform(scaleform)
 
     PopScaleformMovieFunctionVoid()
 
-    PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
+    PushScaleformMovieFunction(scaleform, 'DRAW_INSTRUCTIONAL_BUTTONS')
     PopScaleformMovieFunctionVoid()
 
-    PushScaleformMovieFunction(scaleform, "SET_BACKGROUND_COLOUR")
+    PushScaleformMovieFunction(scaleform, 'SET_BACKGROUND_COLOUR')
     PushScaleformMovieFunctionParameterInt(0)
     PushScaleformMovieFunctionParameterInt(0)
     PushScaleformMovieFunctionParameterInt(0)
@@ -102,7 +102,7 @@ RegisterNetEvent('police:client:ActiveCamera', function(cameraId)
         end
 
         SendNUIMessage({
-            type = "enablecam",
+            type = 'enablecam',
             label = Config.SecurityCameras.cameras[cameraId].label,
             id = cameraId,
             connected = Config.SecurityCameras.cameras[cameraId].isOnline,
@@ -130,13 +130,13 @@ RegisterNetEvent('police:client:ActiveCamera', function(cameraId)
         CloseSecurityCamera()
 
         SendNUIMessage({
-            type = "disablecam"
+            type = 'disablecam'
         })
 
         DoScreenFadeIn(250)
     else
         lib.notify({
-            description = Lang:t("error.no_camera"),
+            description = Lang:t('error.no_camera'),
             type = 'error'
         })
     end
@@ -174,10 +174,10 @@ CreateThread(function()
         if createdCamera ~= 0 then
             sleep = 5
 
-            local instructions = CreateInstuctionScaleform("instructional_buttons")
+            local instructions = CreateInstuctionScaleform('instructional_buttons')
 
             DrawScaleformMovieFullscreen(instructions, 255, 255, 255, 255, 0)
-            SetTimecycleModifier("scanline_cam_cheap")
+            SetTimecycleModifier('scanline_cam_cheap')
             SetTimecycleModifierStrength(1.0)
 
             if Config.SecurityCameras.hideradar then
@@ -194,7 +194,7 @@ CreateThread(function()
                 CloseSecurityCamera()
 
                 SendNUIMessage({
-                    type = "disablecam"
+                    type = 'disablecam'
                 })
                 DoScreenFadeIn(250)
             end

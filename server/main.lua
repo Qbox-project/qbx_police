@@ -1466,6 +1466,21 @@ RegisterNetEvent('police:server:SyncSpikes', function(table)
     TriggerClientEvent('police:client:SyncSpikes', -1, table)
 end)
 
+RegisterNetEvent('qb-policejob:server:registerEvidenceStash', function(evidenceId, drawerSlot)
+    local jobs = {}
+
+    for k, v in pairs(QBCore.Shared.Jobs) do
+        if v.type == 'leo' then
+            jobs[k] = 0
+        end
+    end
+
+    exports.ox_inventory:RegisterStash('evidence_' .. evidenceId .. '-' .. drawerSlot, Lang:t('info.current_evidence', {
+        value = evidenceId,
+        value2 = drawerSlot
+    }), 500, 4000000, false, jobs, Config.Locations.evidence[evidenceId])
+end)
+
 AddEventHandler('onServerResourceStart', function(resource)
     if resource ~= 'ox_inventory' then
         return

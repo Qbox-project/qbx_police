@@ -5,27 +5,27 @@ local spikemodel = joaat('P_ld_stinger_s')
 local ClosestSpike = nil
 local tires = {
     {
-        bone = "wheel_lf",
+        bone = 'wheel_lf',
         index = 0
     },
     {
-        bone = "wheel_rf",
+        bone = 'wheel_rf',
         index = 1
     },
     {
-        bone = "wheel_lm",
+        bone = 'wheel_lm',
         index = 2
     },
     {
-        bone = "wheel_rm",
+        bone = 'wheel_rm',
         index = 3
     },
     {
-        bone = "wheel_lr",
+        bone = 'wheel_lr',
         index = 4
     },
     {
-        bone = "wheel_rr",
+        bone = 'wheel_rr',
         index = 5
     }
 }
@@ -80,7 +80,7 @@ end
 RegisterNetEvent('police:client:spawnPObj', function(item)
     if lib.progressBar({
         duration = 2500,
-        label = Lang:t("progressbar.place_object"),
+        label = Lang:t('progressbar.place_object'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -89,15 +89,15 @@ RegisterNetEvent('police:client:spawnPObj', function(item)
             combat = true
         },
         anim = {
-            dict = "anim@narcotics@trash",
-            clip = "drop_front"
+            dict = 'anim@narcotics@trash',
+            clip = 'drop_front'
         }
     }) then
-        TriggerServerEvent("police:server:spawnObject", item)
+        TriggerServerEvent('police:server:spawnObject', item)
     else
         lib.notify({
-            description = Lang:t("error.canceled"),
-            type = "error"
+            description = Lang:t('error.canceled'),
+            type = 'error'
         })
     end
 end)
@@ -115,7 +115,7 @@ RegisterNetEvent('police:client:deleteObject', function()
 
     if lib.progressBar({
         duration = 2500,
-        label = Lang:t("progressbar.remove_object"),
+        label = Lang:t('progressbar.remove_object'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -124,15 +124,15 @@ RegisterNetEvent('police:client:deleteObject', function()
             combat = true
         },
         anim = {
-            dict = "weapons@first_person@aim_rng@generic@projectile@thermal_charge@",
-            clip = "plant_floor"
+            dict = 'weapons@first_person@aim_rng@generic@projectile@thermal_charge@',
+            clip = 'plant_floor'
         }
     }) then
-        TriggerServerEvent("police:server:deleteObject", objectId)
+        TriggerServerEvent('police:server:deleteObject', objectId)
     else
         lib.notify({
-            description = Lang:t("error.canceled"),
-            type = "error"
+            description = Lang:t('error.canceled'),
+            type = 'error'
         })
     end
 end)
@@ -164,9 +164,9 @@ end)
 
 -- Spawn a spike strip.
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
-    if #SpawnedSpikes >= Config.MaxSpikes or PlayerJob.type ~= "leo" or not PlayerJob.onduty then
+    if #SpawnedSpikes >= Config.MaxSpikes or PlayerJob.type ~= 'leo' or not PlayerJob.onduty then
         lib.notify({
-            description = Lang:t("error.no_spikestripe"),
+            description = Lang:t('error.no_spikestripe'),
             type = 'error'
         })
         return
@@ -243,7 +243,7 @@ CreateThread(function()
 
                 if dist < 4 then
                     if not IsPedInAnyVehicle(cache.ped) then
-                        if PlayerJob.type == "leo" and PlayerJob.onduty then
+                        if PlayerJob.type == 'leo' and PlayerJob.onduty then
                             sleep = 0
 
                             lib.showTextUI(Lang:t('info.delete_spike'))

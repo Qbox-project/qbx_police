@@ -19,8 +19,8 @@ local StatusList = {
     ['handbleed'] = Lang:t('evidence.handbleed'),
     ['confused'] = Lang:t('evidence.confused'),
     ['alcohol'] = Lang:t('evidence.alcohol'),
-    ["heavyalcohol"] = Lang:t('evidence.heavy_alcohol'),
-    ["agitated"] = Lang:t('evidence.agitated')
+    ['heavyalcohol'] = Lang:t('evidence.heavy_alcohol'),
+    ['agitated'] = Lang:t('evidence.agitated')
 }
 local closeEvidenceSleep = 5000
 
@@ -130,7 +130,7 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
 
     if lib.progressBar({
         duration = 5000,
-        label = Lang:t("progressbar.blood_clear"),
+        label = Lang:t('progressbar.blood_clear'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -147,13 +147,13 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
             TriggerServerEvent('evidence:server:ClearBlooddrops', blooddropList)
 
             lib.notify({
-                description = Lang:t("success.blood_clear"),
+                description = Lang:t('success.blood_clear'),
                 type = 'success'
             })
         end
     else
         lib.notify({
-            description = Lang:t("success.blood_not_cleared"),
+            description = Lang:t('success.blood_not_cleared'),
             type = 'error'
         })
     end
@@ -182,7 +182,7 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
 
     if lib.progressBar({
         duration = 5000,
-        label = Lang:t("progressbar.bullet_casing"),
+        label = Lang:t('progressbar.bullet_casing'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -199,13 +199,13 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
             TriggerServerEvent('evidence:server:ClearCasings', casingList)
 
             lib.notify({
-                description = Lang:t("success.bullet_casing_removed"),
+                description = Lang:t('success.bullet_casing_removed'),
                 type = 'success'
             })
         end
     else
         lib.notify({
-            description = Lang:t("error.bullet_casing_not_removed"),
+            description = Lang:t('error.bullet_casing_not_removed'),
             type = 'error'
         })
     end
@@ -264,7 +264,9 @@ CreateThread(function()
             local pos = GetEntityCoords(cache.ped)
 
             if #(pos -vec3(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z)) < 1.5 then
-                DrawText3D(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z, Lang:t('info.bullet_casing', {value = Casings[CurrentCasing].type}))
+                DrawText3D(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z, Lang:t('info.bullet_casing', {
+                    value = Casings[CurrentCasing].type
+                }))
 
                 if IsControlJustReleased(0, 47) then
                     local s1, s2 = GetStreetNameAtCoord(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z)
@@ -273,14 +275,14 @@ CreateThread(function()
                     local streetLabel = street1
 
                     if street2 then
-                        streetLabel = streetLabel .. ' | ' .. street2
+                        streetLabel = streetLabel .. " | " .. street2
                     end
 
                     local info = {
                         label = Lang:t('info.casing'),
                         type = 'casing',
-                        street = streetLabel:gsub("%'", ""),
-                        ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[Casings[CurrentCasing].type]['ammotype']],
+                        street = streetLabel:gsub("%'", ''),
+                        ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[Casings[CurrentCasing].type].ammotype],
                         ammotype = Casings[CurrentCasing].type,
                         serie = Casings[CurrentCasing].serie
                     }
@@ -303,13 +305,13 @@ CreateThread(function()
                     local streetLabel = street1
 
                     if street2 then
-                        streetLabel = streetLabel .. ' | ' .. street2
+                        streetLabel = streetLabel .. " | " .. street2
                     end
 
                     local info = {
                         label = Lang:t('info.blood'),
                         type = 'blood',
-                        street = streetLabel:gsub("%'", ""),
+                        street = streetLabel:gsub("%'", ''),
                         dnalabel = DnaHash(Blooddrops[CurrentBlooddrop].citizenid),
                         bloodtype = Blooddrops[CurrentBlooddrop].bloodtype
                     }
@@ -334,13 +336,13 @@ CreateThread(function()
                     local streetLabel = street1
 
                     if street2 then
-                        streetLabel = streetLabel .. ' | ' .. street2
+                        streetLabel = streetLabel .. " | " .. street2
                     end
 
                     local info = {
                         label = Lang:t('info.fingerprint'),
                         type = 'fingerprint',
-                        street = streetLabel:gsub("%'", ""),
+                        street = streetLabel:gsub("%'", ''),
                         fingerprint = Fingerprints[CurrentFingerprint].fingerprint
                     }
 
@@ -357,7 +359,7 @@ CreateThread(function()
     while true do
         if LocalPlayer.state.isLoggedIn then
             if PlayerJob.type == 'leo' and onDuty then
-                if IsPlayerFreeAiming(cache.playerId) and GetSelectedPedWeapon(cache.ped) == `WEAPON_FLASHLIGHT` then
+                if IsPlayerFreeAiming(cache.playerId) and GetSelectedPedWeapon(cache.ped) == joaat('WEAPON_FLASHLIGHT') then
                     closeEvidenceSleep = 10
 
                     if next(Casings) then
