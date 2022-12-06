@@ -110,6 +110,12 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     PlayerData.job = JobInfo
 end)
 
+RegisterNetEvent('QBCore:Player:SetPlayerData', function(val)
+    -- Make sure it can only be triggered from the server
+    if GetInvokingResource() then return end
+    PlayerData = val
+end)
+
 RegisterNetEvent('police:client:sendBillingMail', function(amount)
     SetTimeout(math.random(2500, 4000), function()
         local gender = Lang:t('info.mr')
