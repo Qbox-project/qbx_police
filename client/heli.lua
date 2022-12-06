@@ -12,7 +12,7 @@ local spotlight_state = false
 
 -- Script starts here
 local helicam = false
-local fov = (fov_max+fov_min)*0.5
+local fov = (fov_max + fov_min) * 0.5
 local vision_state = 0 -- 0 is normal, 1 is nightmode, 2 is thermal vision
 
 local isScanning = false
@@ -24,9 +24,7 @@ local locked_on_vehicle = nil
 
 -- Functions
 local function IsPlayerInPolmav()
-	local lPed = PlayerPedId()
-	local vehicle = GetVehiclePedIsIn(lPed)
-	return IsVehicleModel(vehicle, GetHashKey(Config.PoliceHelicopter))
+	return GetEntityModel(cache.vehicle) == joaat(Config.PoliceHelicopter)
 end
 
 local function IsHeliHighEnough(heli)
@@ -67,8 +65,8 @@ local function CheckInputRotation(cam, zoomvalue)
 	local rightAxisY = GetDisabledControlNormal(0, 221)
 	local rotation = GetCamRot(cam, 2)
 	if rightAxisX ~= 0.0 or rightAxisY ~= 0.0 then
-		local new_z = rotation.z + rightAxisX*-1.0*(speed_ud)*(zoomvalue+0.1)
-		local new_x = math.max(math.min(20.0, rotation.x + rightAxisY*-1.0*(speed_lr)*(zoomvalue+0.1)), -89.5) -- Clamping at top (cant see top of heli) and at bottom (doesn't glitch out in -90deg)
+		local new_z = rotation.z + rightAxisX * -1.0 * speed_ud * (zoomvalue + 0.1)
+		local new_x = math.max(math.min(20.0, rotation.x + rightAxisY * -1.0 * speed_lr * (zoomvalue + 0.1)), -89.5) -- Clamping at top (cant see top of heli) and at bottom (doesn't glitch out in -90deg)
 		SetCamRot(cam, new_x, 0.0, new_z, 2)
 	end
 end
@@ -81,30 +79,26 @@ local function HandleZoom(cam)
 		fov = math.min(fov + zoomspeed, fov_max) -- ScrollDown
 	end
 	local current_fov = GetCamFov(cam)
-	if math.abs(fov-current_fov) < 0.1 then -- the difference is too small, just set the value directly to avoid unneeded updates to FOV of order 10^-5
+	if math.abs(fov - current_fov) < 0.1 then -- the difference is too small, just set the value directly to avoid unneeded updates to FOV of order 10^-5
 		fov = current_fov
 	end
-	SetCamFov(cam, current_fov + (fov - current_fov)*0.05) -- Smoothing of camera zoom
+	SetCamFov(cam, current_fov + (fov - current_fov) * 0.05) -- Smoothing of camera zoom
 end
 
 local function RotAnglesToVec(rot) -- input vector3
 	local z = math.rad(rot.z)
 	local x = math.rad(rot.x)
 	local num = math.abs(math.cos(x))
-	return vector3(-math.sin(z)*num, math.cos(z)*num, math.sin(x))
+	return vector3(-math.sin(z) * num, math.cos(z) * num, math.sin(x))
 end
 
 local function GetVehicleInView(cam)
 	local coords = GetCamCoord(cam)
 	local forward_vector = RotAnglesToVec(GetCamRot(cam, 2))
-	--DrawLine(coords, coords+(forward_vector*100.0), 255,0,0,255) -- debug line to show LOS of cam
-	local rayhandle = CastRayPointToPoint(coords, coords+(forward_vector*400.0), 10, GetVehiclePedIsIn(PlayerPedId()), 0)
+	--DrawLine(coords, coords + (forward_vector * 100.0), 255, 0, 0, 255) -- debug line to show LOS of cam
+	local rayhandle = CastRayPointToPoint(coords, coords + (forward_vector * 400.0), 10, cache.vehicle, 0)
 	local _, _, _, _, entityHit = GetRaycastResult(rayhandle)
-	if entityHit>0 and IsEntityAVehicle(entityHit) then
-		return entityHit
-	else
-		return nil
-	end
+	return IsEntityAVehicle(entityHit) and entityHit or 0
 end
 
 local function RenderVehicleInfo(vehicle)
@@ -129,21 +123,19 @@ end
 
 -- Events
 RegisterNetEvent('heli:spotlight', function(serverID, state)
-	local heli = GetVehiclePedIsIn(GetPlayerPed(GetPlayerFromServerId(serverID)), false)
-	SetVehicleSearchlight(heli, state, false)
+	SetVehicleSearchlight(GetVehiclePedIsIn(GetPlayerPed(GetPlayerFromServerId(serverID)), false), state, false)
 end)
 
 -- Threads
 CreateThread(function()
+	local sleep
 	while true do
-		Wait(0)
-		if LocalPlayer.state.isLoggedIn then
-			if PlayerJob.type == 'leo' and onDuty then
+		sleep = 1000
+		if IsLoggedIn then
+			if PlayerData.job.type == 'leo' and PlayerData.job.onduty then
 				if IsPlayerInPolmav() then
-					local lPed = PlayerPedId()
-					local heli = GetVehiclePedIsIn(lPed)
-
-					if IsHeliHighEnough(heli) then
+					sleep = 0
+					if IsHeliHighEnough(cache.vehicle) then
 						if IsControlJustPressed(0, toggle_helicam) then -- Toggle Helicam
 							PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
 							helicam = true
@@ -152,15 +144,13 @@ CreateThread(function()
 							})
 						end
 
-						if IsControlJustPressed(0, toggle_rappel) then -- Initiate rappel
-							if GetPedInVehicleSeat(heli, 1) == lPed or GetPedInVehicleSeat(heli, 2) == lPed then
-								PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
-								TaskRappelFromHeli(PlayerPedId(), 1)
-							end
+						if IsControlJustPressed(0, toggle_rappel) and (cache.seat == 1 or cache.seat == 2) then -- Initiate rappel
+							PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
+							TaskRappelFromHeli(cache.ped, 1)
 						end
 					end
 
-					if IsControlJustPressed(0, toggle_spotlight) and (GetPedInVehicleSeat(heli, -1) == lPed or GetPedInVehicleSeat(heli, 0) == lPed) then
+					if IsControlJustPressed(0, toggle_spotlight) and (cache.seat == -1 or cache.seat == 0) then
 						spotlight_state = not spotlight_state
 						TriggerServerEvent("heli:spotlight", spotlight_state)
 						PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
@@ -174,15 +164,15 @@ CreateThread(function()
 							Wait(0)
 						end
 						local cam = CreateCam("DEFAULT_SCRIPTED_FLY_CAMERA", true)
-						AttachCamToEntity(cam, heli, 0.0,0.0,-1.5, true)
-						SetCamRot(cam, 0.0,0.0,GetEntityHeading(heli))
+						AttachCamToEntity(cam, cache.vehicle, 0.0,0.0,-1.5, true)
+						SetCamRot(cam, 0.0, 0.0, GetEntityHeading(cache.vehicle), 2)
 						SetCamFov(cam, fov)
-						RenderScriptCams(true, false, 0, 1, 0)
+						RenderScriptCams(true, false, 0, true, false)
 						PushScaleformMovieFunction(scaleform, "SET_CAM_LOGO")
 						PushScaleformMovieFunctionParameterInt(0) -- 0 for nothing, 1 for LSPD logo
 						PopScaleformMovieFunctionVoid()
 						locked_on_vehicle = nil
-						while helicam and not IsEntityDead(lPed) and (GetVehiclePedIsIn(lPed) == heli) and IsHeliHighEnough(heli) do
+						while helicam and not IsEntityDead(cache.ped) and cache.vehicle and IsHeliHighEnough(cache.vehicle) do
 							if IsControlJustPressed(0, toggle_helicam) then -- Toggle Helicam
 								PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
 								helicam = false
@@ -211,10 +201,10 @@ CreateThread(function()
 										local old_cam = cam
 										DestroyCam(old_cam, false)
 										cam = CreateCam("DEFAULT_SCRIPTED_FLY_CAMERA", true)
-										AttachCamToEntity(cam, heli, 0.0,0.0,-1.5, true)
-										SetCamRot(cam, rot, 2)
+										AttachCamToEntity(cam, cache.vehicle, 0.0,0.0,-1.5, true)
+										SetCamRot(cam, rot.x, rot.y, rot.z, 2)
 										SetCamFov(cam, fov)
-										RenderScriptCams(true, false, 0, 1, 0)
+										RenderScriptCams(true, false, 0, true, false)
 										isScanned = false
 										scanValue = 0
 										SendNUIMessage({
@@ -229,10 +219,9 @@ CreateThread(function()
 									locked_on_vehicle = nil -- Cam will auto unlock when entity doesn't exist anyway
 								end
 							else
-								zoomvalue = (1.0/(fov_max-fov_min))*(fov-fov_min)
+								zoomvalue = (1.0 / (fov_max - fov_min)) * (fov - fov_min)
 								CheckInputRotation(cam, zoomvalue)
-								vehicle_detected = GetVehicleInView(cam)
-								if DoesEntityExist(vehicle_detected) then
+								if DoesEntityExist(GetVehicleInView(cam)) then
 									isScanning = true
 								else
 									isScanning = false
@@ -241,41 +230,38 @@ CreateThread(function()
 							HandleZoom(cam)
 							HideHUDThisFrame()
 							PushScaleformMovieFunction(scaleform, "SET_ALT_FOV_HEADING")
-							PushScaleformMovieFunctionParameterFloat(GetEntityCoords(heli).z)
+							PushScaleformMovieFunctionParameterFloat(GetEntityCoords(cache.vehicle).z)
 							PushScaleformMovieFunctionParameterFloat(zoomvalue)
 							PushScaleformMovieFunctionParameterFloat(GetCamRot(cam, 2).z)
 							PopScaleformMovieFunctionVoid()
-							DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255)
+							DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255, 0)
 							Wait(0)
 						end
 						helicam = false
 						ClearTimecycleModifier()
-						fov = (fov_max+fov_min)*0.5 -- reset to starting zoom level
-						RenderScriptCams(false, false, 0, 1, 0) -- Return to gameplay camera
+						fov = (fov_max + fov_min) * 0.5 -- reset to starting zoom level
+						RenderScriptCams(false, false, 0, true, false) -- Return to gameplay camera
 						SetScaleformMovieAsNoLongerNeeded(scaleform) -- Cleanly release the scaleform
 						DestroyCam(cam, false)
 						SetNightvision(false)
 						SetSeethrough(false)
 					end
-				else
-					Wait(2000)
 				end
-			else
-				Wait(2000)
 			end
-		else
-			Wait(2000)
 		end
+		Wait(sleep)
 	end
 end)
 
 CreateThread(function()
+	local sleep
 	while true do
-		Wait(1)
+		sleep = 1000
 		if helicam then
+			sleep = 0
 			if isScanning and not isScanned then
 				if scanValue < 100 then
-					scanValue = scanValue + 1
+					scanValue += 1
 					SendNUIMessage({
 						type = "heliscan",
 						scanvalue = scanValue,
@@ -286,19 +272,18 @@ CreateThread(function()
 						isScanning = false
 						isScanned = true
 					end
-					Wait(10)
+					sleep = 10
 				end
 			elseif isScanned and not isScanning and locked_on_vehicle then
 				scanValue = 100
 				RenderVehicleInfo(locked_on_vehicle)
 				isScanning = false
-				Wait(100)
+				sleep = 100
 			else
 				scanValue = 0
-				Wait(500)
+				sleep = 500
 			end
-		else
-			Wait(1000)
 		end
+		Wait(sleep)
 	end
 end)
