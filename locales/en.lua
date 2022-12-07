@@ -41,7 +41,7 @@ local Translations = {
         vehicle_flagged = 'Vehicle %{plate} has been flagged for %{reason}',
         impound_vehicle_removed = 'Vehicle taken out of impound!',
         impounded = 'Vehicle impounded',
- },
+    },
     info = {
         mr = 'Mr.',
         mrs = 'Mrs.',
@@ -101,6 +101,7 @@ local Translations = {
         take_heli = '[E] Take Helicopter',
         impound_veh = '[E] - Impound Vehicle',
         store_veh = '[E] - Store Vehicle',
+        grab_veh = '[E] - Vehicle Garage',
         armory = 'Armory',
         enter_armory = '[E] Armory',
         finger_scan = 'Fingerprint Scanning',
@@ -108,10 +109,13 @@ local Translations = {
         trash = 'Trash',
         trash_enter = '[E] Trash Bin',
         stash_enter = '[E] Enter Locker',
+        evidence = '[E] - Evidence',
         target_location = 'The location of %{firstname} %{lastname} is marked on your map',
         anklet_location = 'Anklet location',
         new_call = 'New Call',
-        officer_down = 'Officer %{lastname} | %{callsign} Down'
+        officer_down = 'Officer %{lastname} | %{callsign} Down',
+        plate_triggered = 'A vehicle with plate %{plate} was flagged on %{street} by radar #%{radar}',
+        plate_triggered_blip = 'Vehicle flagged by radar #%{radar}'
     },
     evidence = {
         red_hands = 'Red hands',
