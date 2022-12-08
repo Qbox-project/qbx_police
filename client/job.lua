@@ -656,7 +656,7 @@ CreateThread(function()
                         lib.showTextUI(Lang:t('info.impound_veh'))
                         uiPrompt('impound')
                     else
-                        lib.showTextUI('[E] - Police Impound')
+                        lib.showTextUI('menu.pol_impound')
                         uiPrompt('impound')
                     end
                 end
