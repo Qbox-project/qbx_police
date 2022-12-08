@@ -507,7 +507,7 @@ if Config.UseTarget then
     end)
 else
     -- Toggle Duty
-    for k, v in pairs(Config.Locations.duty) do
+    for _, v in pairs(Config.Locations.duty) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -531,7 +531,7 @@ end
 
 CreateThread(function()
     -- Evidence Storage
-    for k, v in pairs(Config.Locations.evidence) do
+    for _, v in pairs(Config.Locations.evidence) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -551,7 +551,7 @@ CreateThread(function()
     end
 
     -- Personal Stash
-    for k, v in pairs(Config.Locations.stash) do
+    for _, v in pairs(Config.Locations.stash) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -594,7 +594,7 @@ CreateThread(function()
     end
 
     -- Fingerprints
-    for k, v in pairs(Config.Locations.fingerprint) do
+    for _, v in pairs(Config.Locations.fingerprint) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
@@ -616,7 +616,7 @@ CreateThread(function()
     end
 
     -- Helicopter
-    for k, v in pairs(Config.Locations.helicopter) do
+    for _, v in pairs(Config.Locations.helicopter) do
         lib.zones.box({
             coords = v,
             size = vec3(4, 4, 4),
