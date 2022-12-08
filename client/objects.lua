@@ -171,7 +171,7 @@ AddEventHandler('ox_lib:cache:vehicle', function()
                     end
                 end
             end
-			Wait(3)
+			Wait(100)
 		end
 	end)
 end)
