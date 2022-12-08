@@ -512,7 +512,7 @@ else
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            onEnter = function(_)
+            onEnter = function()
                 inPrompt = true
                 if not PlayerData.job.onduty then
                     lib.showTextUI(Lang:t('info.on_duty'))
@@ -521,7 +521,7 @@ else
                 end
                 uiPrompt('duty')
             end,
-            onExit = function(_)
+            onExit = function()
                 inPrompt = false
                 lib.hideTextUI()
             end
@@ -536,14 +536,14 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            onEnter = function(_)
+            onEnter = function()
                 if PlayerData.job.type == 'leo' and PlayerData.job.onduty then
                     inPrompt = true
                     lib.showTextUI(Lang:t("info.evidence"))
                     uiPrompt('evidence')
                 end
             end,
-            onExit = function(_)
+            onExit = function()
                 lib.hideTextUI()
                 inPrompt = false
             end
@@ -556,13 +556,13 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            onEnter = function(_)
+            onEnter = function()
                 inStash = true
                 inPrompt = true
                 lib.showTextUI(Lang:t('info.stash_enter'))
                 uiPrompt('stash')
             end,
-            onExit = function(_)
+            onExit = function()
                 lib.hideTextUI()
                 inPrompt = false
                 inStash = false
@@ -577,7 +577,7 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            onEnter = function(_)
+            onEnter = function()
                 inTrash = true
                 inPrompt = true
                 if PlayerData.job.onduty then
@@ -585,7 +585,7 @@ CreateThread(function()
                     uiPrompt('trash', i)
                 end
             end,
-            onExit = function(_)
+            onExit = function()
                 inTrash = false
                 inPrompt = false
                 lib.hideTextUI()
@@ -599,7 +599,7 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            onEnter = function(_)
+            onEnter = function()
                 inFingerprint = true
                 inPrompt = true
                 if PlayerData.job.onduty then
@@ -607,7 +607,7 @@ CreateThread(function()
                     uiPrompt('fingerprint')
                 end
             end,
-            onExit = function(_)
+            onExit = function()
                 inFingerprint = false
                 inPrompt = false
                 lib.hideTextUI()
@@ -621,7 +621,7 @@ CreateThread(function()
             coords = v,
             size = vec3(4, 4, 4),
             rotation = 0.0,
-            onEnter = function(_)
+            onEnter = function()
                 inHelicopter = true
                 inPrompt = true
                 if PlayerData.job.onduty then
@@ -633,7 +633,7 @@ CreateThread(function()
                     end
                 end
             end,
-            onExit = function(_)
+            onExit = function()
                 inHelicopter = false
                 inPrompt = false
                 lib.hideTextUI()
@@ -647,7 +647,7 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            onEnter = function(_)
+            onEnter = function()
                 inImpound = true
                 inPrompt = true
                 currentGarage = k
@@ -661,7 +661,7 @@ CreateThread(function()
                     end
                 end
             end,
-            onExit = function(_)
+            onExit = function()
                 inImpound = false
                 inPrompt = false
                 lib.hideTextUI()
@@ -676,7 +676,7 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            onEnter = function(_)
+            onEnter = function()
                 if PlayerData.job.onduty and PlayerData.job.type == 'leo' then
                     inGarage = true
                     inPrompt = true
@@ -689,7 +689,7 @@ CreateThread(function()
                     uiPrompt('garage')
                 end
             end,
-            onExit = function(_)
+            onExit = function()
                 inGarage = false
                 inPrompt = false
                 lib.hideTextUI()
