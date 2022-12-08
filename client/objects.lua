@@ -93,15 +93,15 @@ RegisterNetEvent('police:client:removeObject', function(objectId)
     ObjectList[objectId] = nil
 end)
 
-RegisterNetEvent('police:client:spawnObject', function(objectId, _type)
+RegisterNetEvent('police:client:spawnObject', function(objectId, objectType)
     local coords = GetEntityCoords(cache.ped)
     local heading = GetEntityHeading(cache.ped)
     local forward = GetEntityForwardVector(cache.ped)
     local x, y, z = table.unpack(coords + forward * 0.5)
-    local spawnedObj = CreateObject(Config.Objects[_type].model, x, y, z, true, false, false)
+    local spawnedObj = CreateObject(Config.Objects[objectType].model, x, y, z, true, false, false)
     PlaceObjectOnGroundProperly(spawnedObj)
     SetEntityHeading(spawnedObj, heading)
-    FreezeEntityPosition(spawnedObj, Config.Objects[_type].freeze)
+    FreezeEntityPosition(spawnedObj, Config.Objects[objectType].freeze)
     ObjectList[objectId] = {
         id = objectId,
         object = spawnedObj,
@@ -144,8 +144,6 @@ CreateThread(function()
         Wait(500)
     end
 end)
-
-local spikeSleep = 1000
 
 AddEventHandler('ox_lib:cache:vehicle', function()
 	CreateThread(function()
