@@ -1,6 +1,12 @@
 -- Variables
 local currentGarage = 0
+local inFingerprint = false
 local FingerPrintSessionId = nil
+local inStash = false
+local inTrash = false
+local inHelicopter = false
+local inImpound = false
+local inGarage = false
 local inPrompt = false
 
 local function GetClosestPlayer() -- interactions, job, tracker
@@ -96,6 +102,7 @@ local function doCarDamage(currentVehicle, veh)
 end
 
 local function TakeOutImpound(vehicle)
+    if not inImpound then return end
     local coords = Config.Locations.impound[currentGarage]
     if coords then
         QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
@@ -115,6 +122,7 @@ local function TakeOutImpound(vehicle)
 end
 
 local function TakeOutVehicle(vehicleInfo)
+    if not inGarage then return end
     local coords = Config.Locations.vehicle[currentGarage]
     if not coords then return end
 
@@ -240,6 +248,7 @@ local function uiPrompt(promptType, id)
                     lib.hideTextUI()
                     break
                 elseif promptType == 'garage' then
+                    if not inGarage then return end
                     if cache.vehicle then
                         QBCore.Functions.DeleteVehicle(cache.vehicle)
                         lib.hideTextUI()
@@ -254,6 +263,7 @@ local function uiPrompt(promptType, id)
                     lib.hideTextUI()
                     break
                 elseif promptType == 'impound' then
+                    if not inImpound then return end
                     if cache.vehicle then
                         QBCore.Functions.DeleteVehicle(cache.vehicle)
                         lib.hideTextUI()
@@ -272,9 +282,11 @@ local function uiPrompt(promptType, id)
                     lib.hideTextUI()
                     break
                 elseif promptType == 'trash' then
+                    if not inTrash then return end
                     exports.ox_inventory:openInventory('stash', ('policetrash_%s'):format(id))
                     break
                 elseif promptType == 'stash' then
+                    if not inStash then return end
                     TriggerServerEvent("inventory:server:OpenInventory", "stash", "policestash_"..PlayerData.citizenid)
                     TriggerEvent("inventory:client:SetCurrentStash", "policestash_"..PlayerData.citizenid)
                     break
@@ -396,13 +408,13 @@ RegisterNetEvent('police:client:CheckStatus', function()
 end)
 
 RegisterNetEvent('police:client:TakeOutImpound', function(data)
-    if not inPrompt then return end
+    if not inImpound then return end
 
     TakeOutImpound(data.vehicle)
 end)
 
 RegisterNetEvent('police:client:TakeOutVehicle', function(data)
-    if not inPrompt then return end
+    if not inGarage then return end
 
     TakeOutVehicle(data.vehicle)
 end)
@@ -433,7 +445,7 @@ RegisterNetEvent('qb-policejob:ToggleDuty', function()
 end)
 
 RegisterNetEvent('qb-police:client:scanFingerPrint', function()
-    if not inPrompt then return end
+    if not inFingerprint then return end
     local player, distance = GetClosestPlayer()
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
@@ -444,6 +456,7 @@ RegisterNetEvent('qb-police:client:scanFingerPrint', function()
 end)
 
 RegisterNetEvent('qb-police:client:spawnHelicopter', function(k)
+    if not inHelicopter then return end
     if cache.vehicle then
         QBCore.Functions.DeleteVehicle(cache.vehicle)
     else
@@ -494,230 +507,194 @@ if Config.UseTarget then
     end)
 else
     -- Toggle Duty
-    local dutyZones = {}
     for k, v in pairs(Config.Locations.duty) do
-        dutyZones[#dutyZones + 1] = BoxZone:Create(v, 1.75, 1, {
-            name = "box_zone_police_duty"..k,
-            debugPoly = false,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inPrompt = true
+                if not PlayerData.job.onduty then
+                    lib.showTextUI(Lang:t('info.on_duty'))
+                else
+                    lib.showTextUI(Lang:t('info.off_duty'))
+                end
+                uiPrompt('duty')
+            end,
+            onExit = function(_)
+                inPrompt = false
+                lib.hideTextUI()
+            end
         })
     end
-
-    local dutyCombo = ComboZone:Create(dutyZones, {name = "dutyCombo", debugPoly = false})
-    dutyCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            inPrompt = true
-            if PlayerData.job.onduty then
-                lib.showTextUI(Lang:t('info.off_duty'))
-            else
-                lib.showTextUI(Lang:t('info.on_duty'))
-            end
-            uiPrompt('duty')
-        else
-            inPrompt = false
-            lib.hideTextUI()
-        end
-    end)
 end
 
 CreateThread(function()
     -- Evidence Storage
-    local evidenceZones = {}
     for k, v in pairs(Config.Locations.evidence) do
-        evidenceZones[#evidenceZones + 1] = BoxZone:Create(v, 2, 1, {
-            name = "box_zone_police_evidence_"..k,
-            debugPoly = false,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                if PlayerData.job.type == 'leo' and PlayerData.job.onduty then
+                    inPrompt = true
+                    lib.showTextUI(Lang:t("info.evidence"))
+                    uiPrompt('evidence')
+                end
+            end,
+            onExit = function(_)
+                lib.hideTextUI()
+                inPrompt = false
+            end
         })
     end
-
-    local evidenceCombo = ComboZone:Create(evidenceZones, {name = "evidenceCombo", debugPoly = false})
-    evidenceCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            if PlayerData.job.type == "leo" and PlayerData.job.onduty then
-                inPrompt = true
-                lib.showTextUI(Lang:t("info.evidence"))
-                uiPrompt('evidence')
-            end
-        else
-            lib.hideTextUI()
-            inPrompt = false
-        end
-    end)
 
     -- Personal Stash
-    local stashZones = {}
     for k, v in pairs(Config.Locations.stash) do
-        stashZones[#stashZones + 1] = BoxZone:Create(v, 1.5, 1.5, {
-            name = "box_zone_police_stash_"..k,
-            debugPoly = false,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inStash = true
+                inPrompt = true
+                lib.showTextUI(Lang:t('info.stash_enter'))
+                uiPrompt('stash')
+            end,
+            onExit = function(_)
+                lib.hideTextUI()
+                inPrompt = false
+                inStash = false
+            end
         })
     end
-
-    local stashCombo = ComboZone:Create(stashZones, {name = "stashCombo", debugPoly = false})
-    stashCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            inPrompt = true
-            lib.showTextUI(Lang:t('info.stash_enter'))
-            uiPrompt('stash')
-        else
-            lib.hideTextUI()
-            inPrompt = false
-        end
-    end)
 
     -- Police Trash
     for i = 1, #Config.Locations.trash do
         local v = Config.Locations.trash[i]
-        local trashZone = BoxZone:Create(v, 1, 1.75, {
-            name = "box_zone_police_trash_"..i,
-            debugPoly = false,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
-        })
-        trashZone:onPlayerInOut(function(isPointInside)
-            if isPointInside then
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inTrash = true
                 inPrompt = true
                 if PlayerData.job.onduty then
                     lib.showTextUI(Lang:t('info.trash_enter'))
                     uiPrompt('trash', i)
                 end
-            else
+            end,
+            onExit = function(_)
+                inTrash = false
                 inPrompt = false
                 lib.hideTextUI()
             end
-        end)
+        })
     end
 
     -- Fingerprints
-    local fingerprintZones = {}
     for k, v in pairs(Config.Locations.fingerprint) do
-        fingerprintZones[#fingerprintZones + 1] = BoxZone:Create(v, 2, 1, {
-            name = "box_zone_police_fingerprint_"..k,
-            debugPoly = false,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inFingerprint = true
+                inPrompt = true
+                if PlayerData.job.onduty then
+                    lib.showTextUI(Lang:t('info.scan_fingerprint'))
+                    uiPrompt('fingerprint')
+                end
+            end,
+            onExit = function(_)
+                inFingerprint = false
+                inPrompt = false
+                lib.hideTextUI()
+            end
         })
     end
-
-    local fingerprintCombo = ComboZone:Create(fingerprintZones, {name = "fingerprintCombo", debugPoly = false})
-    fingerprintCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            inPrompt = true
-            if PlayerData.job.onduty then
-                lib.showTextUI(Lang:t('info.scan_fingerprint'))
-                uiPrompt('fingerprint')
-            end
-        else
-            inPrompt = false
-            lib.hideTextUI()
-        end
-    end)
 
     -- Helicopter
-    local helicopterZones = {}
     for k, v in pairs(Config.Locations.helicopter) do
-        helicopterZones[#helicopterZones + 1] = BoxZone:Create(v.xyz, 10, 10, {
-            name = "box_zone_police_helicopter_"..k,
-            debugPoly = false,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
+        lib.zones.box({
+            coords = v,
+            size = vec3(4, 4, 4),
+            rotation = 0.0,
+            onEnter = function(_)
+                inHelicopter = true
+                inPrompt = true
+                if PlayerData.job.onduty then
+                    uiPrompt('heli')
+                    if cache.vehicle then
+                        lib.showTextUI(Lang:t('info.store_heli'))
+                    else
+                        lib.showTextUI(Lang:t('info.take_heli'))
+                    end
+                end
+            end,
+            onExit = function(_)
+                inHelicopter = false
+                inPrompt = false
+                lib.hideTextUI()
+            end
         })
     end
-
-    local helicopterCombo = ComboZone:Create(helicopterZones, {name = "helicopterCombo", debugPoly = false})
-    helicopterCombo:onPlayerInOut(function(isPointInside)
-        if isPointInside then
-            inPrompt = true
-            if PlayerData.job.onduty then
-                uiPrompt('heli')
-                if cache.vehicle then
-                    lib.showTextUI(Lang:t('info.store_heli'))
-                else
-                    lib.showTextUI(Lang:t('info.take_heli'))
-                end
-            end
-        else
-            inPrompt = false
-            lib.hideTextUI()
-        end
-    end)
 
     -- Police Impound
-    local impoundZones = {}
     for k, v in pairs(Config.Locations.impound) do
-        impoundZones[#impoundZones + 1] = BoxZone:Create(v, 1, 1, {
-            name = "box_zone_police_impound"..k,
-            debugPoly = false,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
-            heading = 180,
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                inImpound = true
+                inPrompt = true
+                currentGarage = k
+                if PlayerData.job.onduty then
+                    if cache.vehicle then
+                        lib.showTextUI(Lang:t('info.impound_veh'))
+                        uiPrompt('impound')
+                    else
+                        lib.showTextUI('[E] - Police Impound')
+                        uiPrompt('impound')
+                    end
+                end
+            end,
+            onExit = function(_)
+                inImpound = false
+                inPrompt = false
+                lib.hideTextUI()
+                currentGarage = 0
+            end
         })
     end
-
-    local impoundCombo = ComboZone:Create(impoundZones, {name = "impoundCombo", debugPoly = false})
-    impoundCombo:onPlayerInOut(function(isPointInside, point)
-        if isPointInside then
-            inPrompt = true
-            if PlayerData.job.onduty then
-                if cache.vehicle then
-                    lib.showTextUI(Lang:t('info.impound_veh'))
-                    uiPrompt('impound')
-                else
-                    for k, v in pairs(Config.Locations.impound) do
-                        if #(point - v) < 4 then
-                            currentGarage = k
-                        end
-                    end
-                    lib.showTextUI('[E] - Police Impound')
-                    uiPrompt('impound')
-                end
-            end
-        else
-            inPrompt = false
-            lib.hideTextUI()
-            currentGarage = 0
-        end
-    end)
 
     -- Police Garage
-    local garageZones = {}
     for k, v in pairs(Config.Locations.vehicle) do
-        garageZones[#garageZones + 1] = BoxZone:Create(v.xyz, 3, 3, {
-            name = "box_zone_police_vehicle_"..k,
-            debugPoly = false,
-            minZ = v.z - 1,
-            maxZ = v.z + 1,
-        })
-    end
-
-    local garageCombo = ComboZone:Create(garageZones, {name = "garageCombo", debugPoly = false})
-    garageCombo:onPlayerInOut(function(isPointInside, point)
-        if isPointInside then
-            inPrompt = true
-            if PlayerData.job.onduty and PlayerData.job.type == 'leo' then
-                if cache.vehicle then
-                    lib.showTextUI(Lang:t('info.store_veh'))
-                    uiPrompt('garage')
-                else
-                    for k, v in pairs(Config.Locations.vehicle) do
-                        if #(point - v.xyz) < 4 then
-                            currentGarage = k
-                            break
-                        end
+        lib.zones.box({
+            coords = v,
+            size = vec3(2, 2, 2),
+            rotation = 0.0,
+            onEnter = function(_)
+                if PlayerData.job.onduty and PlayerData.job.type == 'leo' then
+                    print("ENTER")
+                    inGarage = true
+                    inPrompt = true
+                    currentGarage = k
+                    if cache.vehicle then
+                        lib.showTextUI(Lang:t('info.store_veh'))
+                    else
+                        lib.showTextUI('[E] - Vehicle Garage')
                     end
-                    lib.showTextUI(Lang:t("info.grab_veh"))
                     uiPrompt('garage')
                 end
+            end,
+            onExit = function(_)
+                inGarage = false
+                inPrompt = false
+                lib.hideTextUI()
             end
-        else
-            inPrompt = false
-            currentGarage = 0
-            lib.hideTextUI()
-        end
-    end)
+        })
+    end
 end)
