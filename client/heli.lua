@@ -127,18 +127,17 @@ RegisterNetEvent('heli:spotlight', function(serverID, state)
 end)
 
 -- Threads
-CreateThread(function()
-	local sleep
-	while true do
-		sleep = 1000
-		if IsLoggedIn then
-			if PlayerData.job.type == 'leo' and PlayerData.job.onduty then
-				if IsPlayerInPolmav() then
-					sleep = 0
+AddEventHandler('ox_lib:cache:vehicle', function()
+	CreateThread(function()
+		if not IsPlayerInPolmav() then return end
+		while cache.vehicle do
+			if IsLoggedIn then
+				if PlayerData.job.type == 'leo' and PlayerData.job.onduty then
 					if IsHeliHighEnough(cache.vehicle) then
 						if IsControlJustPressed(0, toggle_helicam) then -- Toggle Helicam
 							PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
 							helicam = true
+							helicamThread()
 							SendNUIMessage({
 								type = "heliopen",
 							})
@@ -248,16 +247,15 @@ CreateThread(function()
 					end
 				end
 			end
+			Wait(0)
 		end
-		Wait(sleep)
-	end
+	end)
 end)
 
-CreateThread(function()
-	local sleep
-	while true do
-		sleep = 1000
-		if helicam then
+function helicamThread()
+	CreateThread(function()
+		local sleep
+		while helicam do
 			sleep = 0
 			if isScanning and not isScanned then
 				if scanValue < 100 then
@@ -283,7 +281,7 @@ CreateThread(function()
 				scanValue = 0
 				sleep = 500
 			end
+			Wait(sleep)
 		end
-		Wait(sleep)
-	end
-end)
+	end)
+end

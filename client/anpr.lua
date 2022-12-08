@@ -36,16 +36,14 @@ local function HandleSpeedCam(speedCam, radar)
 	end
 end
 
-CreateThread(function()
-	local sleep
-	while true do
-		sleep = 1000
-		if cache.vehicle then
-			sleep = 200
-			for key, value in pairs(Config.Radars) do
-				HandleSpeedCam(value, key)
+AddEventHandler('ox_lib:cache:vehicle', function()
+	CreateThread(function()
+		while cache.vehicle do
+			for i = 1, #Config.Radars do
+				local value = Config.Radars[i]
+				HandleSpeedCam(value, i)
 			end
+			Wait(200)
 		end
-		Wait(sleep)
-	end
+	end)
 end)

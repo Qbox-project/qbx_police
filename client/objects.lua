@@ -146,38 +146,34 @@ CreateThread(function()
 end)
 
 local spikeSleep = 1000
-CreateThread(function()
-    while true do
-        if IsLoggedIn and cache.vehicle ~= 0 then
-            spikeSleep = 3
-            if ClosestSpike then
-                local tires = {
-                    { bone = "wheel_lf", index = 0 },
-                    { bone = "wheel_rf", index = 1 },
-                    { bone = "wheel_lm", index = 2 },
-                    { bone = "wheel_rm", index = 3 },
-                    { bone = "wheel_lr", index = 4 },
-                    { bone = "wheel_rr", index = 5 }
-                }
 
-                for a = 1, #tires do
-                    local tirePos = GetWorldPositionOfEntityBone(cache.vehicle, GetEntityBoneIndexByName(cache.vehicle, tires[a].bone))
-                    local spike = GetClosestObjectOfType(tirePos.x, tirePos.y, tirePos.z, 15.0, spikemodel, true, true, true)
-                    local spikePos = GetEntityCoords(spike, false)
-                    local distance = #(tirePos - spikePos)
+AddEventHandler('ox_lib:cache:vehicle', function()
+	CreateThread(function()
+		while cache.vehicle do
+			local tires = {
+                { bone = "wheel_lf", index = 0 },
+                { bone = "wheel_rf", index = 1 },
+                { bone = "wheel_lm", index = 2 },
+                { bone = "wheel_rm", index = 3 },
+                { bone = "wheel_lr", index = 4 },
+                { bone = "wheel_rr", index = 5 }
+            }
 
-                    if distance < 1.8 then
-                        if not IsVehicleTyreBurst(cache.vehicle, tires[a].index, true) or IsVehicleTyreBurst(cache.vehicle, tires[a].index, false) then
-                            SetVehicleTyreBurst(cache.vehicle, tires[a].index, false, 1000.0)
-                        end
+            for a = 1, #tires do
+                local tirePos = GetWorldPositionOfEntityBone(cache.vehicle, GetEntityBoneIndexByName(cache.vehicle, tires[a].bone))
+                local spike = GetClosestObjectOfType(tirePos.x, tirePos.y, tirePos.z, 15.0, spikemodel, true, true, true)
+                local spikePos = GetEntityCoords(spike, false)
+                local distance = #(tirePos - spikePos)
+
+                if distance < 1.8 then
+                    if not IsVehicleTyreBurst(cache.vehicle, tires[a].index, true) or IsVehicleTyreBurst(cache.vehicle, tires[a].index, false) then
+                        SetVehicleTyreBurst(cache.vehicle, tires[a].index, false, 1000.0)
                     end
                 end
             end
-        else
-            spikeSleep = 1000
-        end
-        Wait(spikeSleep)
-    end
+			Wait(3)
+		end
+	end)
 end)
 
 CreateThread(function()

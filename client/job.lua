@@ -678,7 +678,6 @@ CreateThread(function()
             rotation = 0.0,
             onEnter = function(_)
                 if PlayerData.job.onduty and PlayerData.job.type == 'leo' then
-                    print("ENTER")
                     inGarage = true
                     inPrompt = true
                     currentGarage = k
