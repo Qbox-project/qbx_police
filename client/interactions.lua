@@ -105,8 +105,8 @@ local function HandcuffedEscorted()
     sleep = 0
     HandcuffActions()
     if PlayerData.metadata.isdead then return sleep end
-    for _, anim in pairs(anim) do
-        if IsEntityPlayingAnim(cache.ped, anim.dict, anim.anim, 3) then return sleep end
+    for i = 1, #anim do
+        if IsEntityPlayingAnim(cache.ped, anim[i].dict, anim[i].anim, 3) then return sleep end
     end
     lib.requestAnimDict("mp_arresting")
     TaskPlayAnim(cache.ped, "mp_arresting", "idle", 8.0, -8, -1, cuffType, 0, false, false, false)
