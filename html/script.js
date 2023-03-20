@@ -91,7 +91,7 @@ Fingerprint.Open = () => {
 
 Fingerprint.Close = () => {
     $(".fingerprint-container").fadeOut(150);
-    $.post('https://qb-policejob/closeFingerprint');
+    $.post(`https://${GetParentResourceName()}/closeFingerprint`);
 }
 
 Fingerprint.Update = (data) => {
@@ -99,7 +99,7 @@ Fingerprint.Update = (data) => {
 }
 
 $(document).on('click', '.take-fingerprint', () => {
-    $.post('https://qb-policejob/doFingerScan');
+    $.post(`https://${GetParentResourceName()}/doFingerScan`);
 })
 
 document.onreadystatechange = () => {
