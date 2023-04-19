@@ -382,7 +382,8 @@ QBCore.Commands.Add("takedna", Lang:t("commands.takedna"), {{name = "id", help =
         local info = {
             label = Lang:t('info.dna_sample'),
             type = "dna",
-            dnalabel = DnaHash(OtherPlayer.PlayerData.citizenid)
+            dnalabel = DnaHash(OtherPlayer.PlayerData.citizenid),
+            description = DnaHash(OtherPlayer.PlayerData.citizenid)
         }
         if not Player.Functions.AddItem("filled_evidence_bag", 1, false, info) then return end
         TriggerClientEvent("inventory:client:ItemBox", source, QBCore.Shared.Items.filled_evidence_bag, "add")
