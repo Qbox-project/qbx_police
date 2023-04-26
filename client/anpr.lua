@@ -38,7 +38,7 @@ end
 CreateThread(function()
 	for _,value in pairs(Config.Radars) do
 		SpeedCams[#SpeedCams+1] = lib.points.new({
-			coords = vec3(value.coords.xyz),
+			coords = value.coords.xyz,
 			distance = 20.0,
 			speed = value.speedlimit,
 		})
