@@ -30,7 +30,7 @@ local function HandlespeedCam(speedCam, radar)
 			TriggerServerEvent("police:server:FlaggedPlateTriggered", radar, plate, street)
 		end, plate)
 
-		if OverLimit < 0 then return end
+		if not Config.SpeedFines or OverLimit < 0 then return end
 		SpeedRange(OverLimit)
 	end
 end

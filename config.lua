@@ -179,6 +179,7 @@ Config.AmmoLabels = {
 Config.UseRadars = false 
 
 -- /!\ The maxspeed(s) need to be in an increasing order /!\ 
+-- If you don't want to fine people just do that: 'Config.SpeedFines = false'
 Config.SpeedFines = {
     {
         fine = 25, -- fine if you're maxspeed or less over the speedlimit 
