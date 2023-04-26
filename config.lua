@@ -173,7 +173,8 @@ Config.AmmoLabels = {
     AMMO_SNIPER = "Large caliber bullet",
 }
 
--- Radars will fine the driver if the vehicle is over the defined speed limit and if the vehicle is flagged it sends a notification to the police
+-- Radars will fine the driver if the vehicle is over the defined speed limit 
+-- Regardless of the speed, If the vehicle is flagged it sends a notification to the police
 -- It is disable by default, change to true to enable!
 Config.UseRadars = false 
 
