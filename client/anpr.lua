@@ -5,7 +5,7 @@ local SpeedCams = {}
 local function SpeedRange(speed)
 	speed = math.ceil(speed)
 	for k, v in pairs(Config.SpeedFines) do
-		if speed > v.maxspeed then
+		if speed < v.maxspeed then
 			TriggerServerEvent('police:server:Radar', k)
 			TriggerServerEvent("InteractSound_SV:PlayOnSource", 'speedcamera', 0.25)
 			break
