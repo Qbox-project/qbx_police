@@ -173,19 +173,66 @@ Config.AmmoLabels = {
     AMMO_SNIPER = "Large caliber bullet",
 }
 
--- These radars will send a notification to police if a flagged vehicle passes one of them, they are commented so they're not enabled by default
+-- Radars will fine the driver if the vehicle is over the defined speed limit 
+-- Regardless of the speed, If the vehicle is flagged it sends a notification to the police
+-- It is disable by default, change to true to enable!
+Config.UseRadars = false 
+
+-- /!\ The maxspeed(s) need to be in an increasing order /!\ 
+-- If you don't want to fine people just do that: 'Config.SpeedFines = false'
+Config.SpeedFines = {
+    {
+        fine = 25, -- fine if you're maxspeed or less over the speedlimit 
+        maxspeed = 10 -- (i.e if you're at 41 mph and the radar's limit is 35 you're 6mph over so a 25$ fine)
+    },{
+        fine = 50,
+        maxspeed = 30
+    },{
+        fine = 250,
+        maxspeed = 80
+    },{
+        fine = 500,
+        maxspeed = 180
+    }
+}
+
+Config.MPH = true -- Whether or not to use the imperial system (For Radars) 
+
 Config.Radars = {
-	-- vec4(-623.44421386719, -823.08361816406, 25.25704574585, 145.0),
-	-- vec4(-652.44421386719, -854.08361816406, 24.55704574585, 325.0),
-	-- vec4(1623.0114746094, 1068.9924316406, 80.903594970703, 84.0),
-	-- vec4(-2604.8994140625, 2996.3391113281, 27.528566360474, 175.0),
-	-- vec4(2136.65234375, -591.81469726563, 94.272926330566, 318.0),
-	-- vec4(2117.5764160156, -558.51013183594, 95.683128356934, 158.0),
-	-- vec4(406.89505004883, -969.06286621094, 29.436267852783, 33.0),
-	-- vec4(657.315, -218.819, 44.06, 320.0),
-	-- vec4(2118.287, 6040.027, 50.928, 172.0),
-	-- vec4(-106.304, -1127.5530, 30.778, 230.0),
-	-- vec4(-823.3688, -1146.980, 8.0, 300.0),
+    {
+        coords = vec4(-623.44421386719, -823.08361816406, 25.25704574585, 145.0),
+        speedlimit = 35 -- SpeedLimit in mph or kmh depending on Config.MPH
+    },{
+        coords = vec4(-652.44421386719, -854.08361816406, 24.55704574585, 325.0),
+        speedlimit = 50
+    },{
+        coords = vec4(1623.0114746094, 1068.9924316406, 80.903594970703, 84.0),
+        speedlimit = 65
+    },{
+        coords = vec4(-2604.8994140625, 2996.3391113281, 27.528566360474, 175.0),
+        speedlimit = 65
+    },{
+        coords = vec4(2136.65234375, -591.81469726563, 94.272926330566, 318.0),
+        speedlimit = 65
+    },{
+        coords = vec4(2117.5764160156, -558.51013183594, 95.683128356934, 158.0),
+        speedlimit = 65
+    },{
+        coords = vec4(406.89505004883, -969.06286621094, 29.436267852783, 33.0),
+        speedlimit = 35
+    },{
+        coords = vec4(657.315, -218.819, 44.06, 320.0),
+        speedlimit = 65
+    },{
+        coords = vec4(2118.287, 6040.027, 50.928, 172.0),
+        speedlimit = 65
+    },{
+        coords = vec4(-106.304, -1127.5530, 30.778, 230.0),
+        speedlimit = 35
+    },{
+        coords = vec4(-823.3688, -1146.980, 8.0, 300.0),
+        speedlimit = 35
+    }
 }
 
 Config.CarItems = {

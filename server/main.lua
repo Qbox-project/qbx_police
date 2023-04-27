@@ -531,6 +531,15 @@ QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_
 end)
 
 -- Events
+RegisterNetEvent('police:server:Radar', function(fine)
+    local source = source
+    local price  = Config.SpeedFines[fine].fine
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player.Functions.RemoveMoney("bank", math.floor(price), "Radar Fine") then return end
+    exports['qbx-management']:AddMoney('police', price)
+    TriggerClientEvent('QBCore:Notify', source, Lang:t("info.fine_received", {fine = price}))
+end)
+
 RegisterNetEvent('police:server:policeAlert', function(text)
     local src = source
     local ped = GetPlayerPed(src)
