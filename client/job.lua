@@ -188,7 +188,7 @@ local function MenuImpound()
 
     QBCore.Functions.TriggerCallback("police:GetImpoundedVehicles", function(result)
         if not result then
-            QBCore.Functions.Notify(Lang:t("error.no_impound"), "error", 5000)
+            lib.notify({ description = Lang:t("error.no_impound"), type = 'error', })
         else
             for _, v in pairs(result) do
                 local enginePercent = QBCore.Shared.Round(v.engine / 10, 0)
@@ -287,8 +287,8 @@ local function uiPrompt(promptType, id)
                     break
                 elseif promptType == 'stash' then
                     if not inStash then return end
-                    TriggerServerEvent("inventory:server:OpenInventory", "stash", "policestash_"..PlayerData.citizenid)
-                    TriggerEvent("inventory:client:SetCurrentStash", "policestash_"..PlayerData.citizenid)
+                    print("Trigger?")
+                    exports.ox_inventory:openInventory('stash', { id = 'policelocker'})
                     break
                 end
             end
@@ -358,35 +358,48 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
 
     if #(GetEntityCoords(cache.ped) - GetEntityCoords(vehicle)) > 5.0 or cache.vehicle then return end
 
-    QBCore.Functions.Progressbar('impound', Lang:t('progressbar.impound'), 5000, false, true, {
-        disableMovement = true,
-        disableCarMovement = true,
-        disableMouse = false,
-        disableCombat = true,
-    }, {
-        animDict = 'missheistdockssetup1clipboard@base',
-        anim = 'base',
-        flags = 1,
-    }, {
-        model = 'prop_notepad_01',
-        bone = 18905,
-        coords = { x = 0.1, y = 0.02, z = 0.05 },
-        rotation = { x = 10.0, y = 0.0, z = 0.0 },
-    },{
-        model = 'prop_pencil_01',
-        bone = 58866,
-        coords = { x = 0.11, y = -0.02, z = 0.001 },
-        rotation = { x = -120.0, y = 0.0, z = 0.0 },
-    }, function() -- Play When Done
+    if lib.progressCircle({
+        duration = 5000,
+        position = 'bottom',
+        label = Lang:t("progressbar.impound"),
+        useWhileDead = false,
+        canCancel = true,
+        disable = {
+            move = true,
+            car = true,
+            combat = true,
+            mouse = false,
+        },
+        anim = {
+            dict = 'missheistdockssetup1clipboard@base',
+            clip = 'base',
+            flags = 1
+        },
+        prop = {
+            {
+            model = `prop_notepad_01`,
+            bone = 18905,
+            pos = { x = 0.1, y = 0.02, z = 0.05 },
+            rot = { x = 10.0, y = 0.0, z = 0.0 },
+            },
+            {
+                model = 'prop_pencil_01',
+                bone = 58866,
+                pos = { x = 0.11, y = -0.02, z = 0.001 },
+                rot = { x = -120.0, y = 0.0, z = 0.0 },
+            },
+        },
+    }) 
+    then 
         local plate = QBCore.Functions.GetPlate(vehicle)
         TriggerServerEvent("police:server:Impound", plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
         QBCore.Functions.DeleteVehicle(vehicle)
-        TriggerEvent('QBCore:Notify', Lang:t('success.impounded'), 'success')
+        lib.notify({ description = Lang:t('success.impounded'), type = 'success' })
         ClearPedTasks(cache.ped)
-    end, function() -- Play When Cancel
+    else
         ClearPedTasks(cache.ped)
-        TriggerEvent('QBCore:Notify', Lang:t('error.canceled'), 'error')
-    end)
+        lib.notify({ description = Lang:t('error.canceled'), type = 'error' })
+    end
 end)
 
 RegisterNetEvent('police:client:CheckStatus', function()
@@ -399,11 +412,11 @@ RegisterNetEvent('police:client:CheckStatus', function()
             if not result then return end
 
             for _, v in pairs(result) do
-                QBCore.Functions.Notify(v)
+                lib.notify({ description = v, type = 'success' })
             end
         end, playerId)
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
     end
 end)
 
@@ -451,7 +464,7 @@ RegisterNetEvent('qb-police:client:scanFingerPrint', function()
         local playerId = GetPlayerServerId(player)
         TriggerServerEvent("police:server:showFingerprint", playerId)
     else
-        QBCore.Functions.Notify(Lang:t("error.none_nearby"), "error")
+        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error', })
     end
 end)
 

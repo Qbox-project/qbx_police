@@ -117,12 +117,25 @@ end)
 RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
     local pos = GetEntityCoords(cache.ped)
     local blooddropList = {}
-    QBCore.Functions.Progressbar('clear_blooddrops', Lang:t("progressbar.blood_clear"), 5000, false, true, {
-        disableMovement = false,
-        disableCarMovement = false,
-        disableMouse = false,
-        disableCombat = true
-    }, {}, {}, {}, function() -- Done
+    if lib.progressCircle({
+        duration = 5000,
+        position = 'bottom',
+        label = Lang:t('progressbar.blood_clear'),
+        useWhileDead = false,
+        canCancel = true,
+        disable = {
+            move = false,
+            car = false,
+            combat = true,
+            mouse = false,
+        },
+        anim = {
+            dict = HealAnimDict,
+            clip = HealAnim,
+        },
+    })
+    then
+        TriggerEvent('animations:client:EmoteCommandStart', { "c" })
         if Blooddrops and next(Blooddrops) then
             for bloodId in pairs(Blooddrops) do
                 if #(pos - Blooddrops[bloodId].coords) < 10.0 then
@@ -130,11 +143,12 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
                 end
             end
             TriggerServerEvent('evidence:server:ClearBlooddrops', blooddropList)
-            QBCore.Functions.Notify(Lang:t("success.blood_clear"), "success")
+            lib.notify({ description = Lang:t('success.blood_clear'), type = 'success' })
         end
-    end, function() -- Cancel
-        QBCore.Functions.Notify(Lang:t("error.blood_not_cleared"), "error")
-    end)
+    else
+        TriggerEvent('animations:client:EmoteCommandStart', { "c" })
+        lib.notify({ description = Lang:t('error.blood_not_cleared'), type = 'error' })
+    end
 end)
 
 RegisterNetEvent('evidence:client:AddCasing', function(casingId, weapon, coords, serie)
@@ -153,12 +167,26 @@ end)
 RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
     local pos = GetEntityCoords(cache.ped)
     local casingList = {}
-    QBCore.Functions.Progressbar('clear_casings', Lang:t("progressbar.bullet_casing"), 5000, false, true, {
-        disableMovement = false,
-        disableCarMovement = false,
-        disableMouse = false,
-        disableCombat = true
-    }, {}, {}, {}, function() -- Done
+
+    if lib.progressCircle({
+        duration = 5000,
+        position = 'bottom',
+        label = Lang:t('progressbar.bullet_casing'),
+        useWhileDead = false,
+        canCancel = true,
+        disable = {
+            move = false,
+            car = false,
+            combat = true,
+            mouse = false,
+        },
+        anim = {
+            dict = HealAnimDict,
+            clip = HealAnim,
+        },
+    })
+    then
+        TriggerEvent('animations:client:EmoteCommandStart', { "c" })
         if Casings and next(Casings) then
             for casingId in pairs(Casings) do
                 if #(pos - Casings[casingId].coords) < 10.0 then
@@ -166,12 +194,12 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
                 end
             end
             TriggerServerEvent('evidence:server:ClearCasings', casingList)
-            QBCore.Functions.Notify(Lang:t("success.bullet_casing_removed"), "success")
-
+            lib.notify({ description = Lang:t('success.bullet_casing_removed'), type = 'success' })
         end
-    end, function() -- Cancel
-        QBCore.Functions.Notify(Lang:t("error.bullet_casing_not_removed"), "error")
-    end)
+    else
+        TriggerEvent('animations:client:EmoteCommandStart', { "c" })
+        lib.notify({ description = Lang:t('error.bullet_casing_not_removed'), type = 'error' })
+    end
 end)
 
 -- Threads
@@ -230,8 +258,7 @@ CreateThread(function()
                         streetLabel = streetLabel .. ' | ' .. street2
                     end
                     local info = {
-                        label = Lang:t('info.casing'),
-                        type = 'casing',
+                        type = Lang:t('info.casing'),
                         street = streetLabel:gsub("%'", ""),
                         ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[Casings[CurrentCasing].type].ammotype],
                         ammotype = Casings[CurrentCasing].type,
@@ -255,8 +282,7 @@ CreateThread(function()
                         streetLabel = streetLabel .. ' | ' .. street2
                     end
                     local info = {
-                        label = Lang:t('info.blood'),
-                        type = 'blood',
+                        type = Lang:t('info.blood'),
                         street = streetLabel:gsub("%'", ""),
                         dnalabel = DnaHash(Blooddrops[CurrentBlooddrop].citizenid),
                         bloodtype = Blooddrops[CurrentBlooddrop].bloodtype
@@ -279,8 +305,7 @@ CreateThread(function()
                         streetLabel = streetLabel .. ' | ' .. street2
                     end
                     local info = {
-                        label = Lang:t('info.fingerprint'),
-                        type = 'fingerprint',
+                        type = Lang:t('info.fingerprint'),
                         street = streetLabel:gsub("%'", ""),
                         fingerprint = Fingerprints[CurrentFingerprint].fingerprint
                     }
@@ -327,4 +352,9 @@ CreateThread(function()
         end
         Wait(closeEvidenceSleep)
     end
+end)
+
+
+RegisterCommand('fptest', function()
+    TriggerServerEvent('evidence:server:CreateFingerDrop', GetEntityCoords(cache.ped))
 end)
