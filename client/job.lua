@@ -287,7 +287,6 @@ local function uiPrompt(promptType, id)
                     break
                 elseif promptType == 'stash' then
                     if not inStash then return end
-                    print("Trigger?")
                     exports.ox_inventory:openInventory('stash', { id = 'policelocker'})
                     break
                 end

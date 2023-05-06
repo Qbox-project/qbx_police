@@ -880,8 +880,8 @@ RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
     local weaponData = exports.ox_inventory:GetCurrentWeapon(src)
     local serieNumber = nil
     if weaponData then
-        if weaponData.metadata and weaponData.metadata ~= "" then
-            if weaponData.metadata.serial and weaponData.metadata.serial ~= "" then
+        if weaponData.metadata then
+            if weaponData.metadata.serial then
                 serieNumber = weaponData.metadata.serial
             end
         end

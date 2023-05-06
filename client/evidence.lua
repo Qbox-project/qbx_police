@@ -353,8 +353,3 @@ CreateThread(function()
         Wait(closeEvidenceSleep)
     end
 end)
-
-
-RegisterCommand('fptest', function()
-    TriggerServerEvent('evidence:server:CreateFingerDrop', GetEntityCoords(cache.ped))
-end)

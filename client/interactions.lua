@@ -144,7 +144,7 @@ RegisterNetEvent('police:client:SearchPlayer', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
-        exports.ox_inventory:openInventory('player', playerId)
+        exports.ox_inventory:openNearbyInventory()
         TriggerServerEvent("police:server:SearchPlayer", playerId)
     else
         lib.notify({
@@ -198,8 +198,8 @@ RegisterNetEvent('police:client:RobPlayer', function()
                 local pos = GetEntityCoords(cache.ped)
                 if #(pos - plyCoords) < 2.5 then
                     StopAnimTask(cache.ped, "random@shop_robbery", "robbery_action_b", 1.0)
-                    TriggerServerEvent("inventory:server:OpenInventory", "otherplayer", playerId)
-                    TriggerEvent("inventory:server:RobPlayer", playerId)
+                    exports.ox_inventory:openNearbyInventory()
+                    TriggerServerEvent("inventory:server:RobPlayer", playerId)
                 else
                     lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
                 end
