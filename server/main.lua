@@ -32,40 +32,29 @@ local function UpdateBlips()
     TriggerClientEvent("police:client:UpdateBlips", -1, dutyPlayers)
 end
 
-local function CreateBloodId()
-    local bloodId = math.random(10000, 99999)
-    if not BloodDrops then return bloodId end
-    while BloodDrops[bloodId] do
-        bloodId = math.random(10000, 99999)
+local function generateId(table)
+    local id = math.random(10000, 99999)
+    if not table then return id end
+    while table[id] do
+        id = math.random(10000, 99999)
     end
-    return bloodId
+    return id
+end
+
+local function CreateBloodId()
+    return generateId(BloodDrops)
 end
 
 local function CreateFingerId()
-    local fingerId = math.random(10000, 99999)
-    if not FingerDrops then return fingerId end
-    while FingerDrops[fingerId] do
-        fingerId = math.random(10000, 99999)
-    end
-    return fingerId
+    return generateId(FingerDrops)
 end
 
 local function CreateCasingId()
-    local caseId = math.random(10000, 99999)
-    if not Casings then return caseId end
-    while Casings[caseId] do
-        caseId = math.random(10000, 99999)
-    end
-    return caseId
+    return generateId(Casings)
 end
 
 local function CreateObjectId()
-    local objectId = math.random(10000, 99999)
-    if not Objects then return objectId end
-    while Objects[objectId] do
-        objectId = math.random(10000, 99999)
-    end
-    return objectId
+    return generateId(Objects)
 end
 
 local function IsVehicleOwned(plate)
