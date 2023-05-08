@@ -45,17 +45,6 @@ local function IsVehicleOwned(plate)
     return MySQL.scalar.await('SELECT plate FROM player_vehicles WHERE plate = ?', {plate})
 end
 
-local function GetCurrentCops()
-    local amount = 0
-    local players = QBCore.Functions.GetQBPlayers()
-    for _, v in pairs(players) do
-        if v and v.PlayerData.job.type == "leo" and v.PlayerData.job.onduty then
-            amount += 1
-        end
-    end
-    return amount
-end
-
 local function DnaHash(s)
     return string.gsub(s, ".", function(c)
         return string.format("%02x", string.byte(c))
@@ -948,7 +937,7 @@ CreateThread(function()
     end
     while true do
         Wait(1000 * 60 * 10)
-        local curCops = GetCurrentCops()
+        local curCops = QBCore.Functions.GetDutyCountType('leo')
         TriggerClientEvent("police:SetCopCount", -1, curCops)
     end
 end)
