@@ -41,22 +41,6 @@ local function generateId(table)
     return id
 end
 
-local function CreateBloodId()
-    return generateId(BloodDrops)
-end
-
-local function CreateFingerId()
-    return generateId(FingerDrops)
-end
-
-local function CreateCasingId()
-    return generateId(Casings)
-end
-
-local function CreateObjectId()
-    return generateId(Objects)
-end
-
 local function IsVehicleOwned(plate)
     return MySQL.scalar.await('SELECT plate FROM player_vehicles WHERE plate = ?', {plate})
 end
@@ -767,7 +751,7 @@ end)
 
 RegisterNetEvent('police:server:spawnObject', function(type)
     local src = source
-    local objectId = CreateObjectId()
+    local objectId = generateId(Objects)
     Objects[objectId] = type
     TriggerClientEvent("police:client:spawnObject", src, objectId, type)
 end)
@@ -795,7 +779,7 @@ RegisterNetEvent('evidence:server:UpdateStatus', function(data)
 end)
 
 RegisterNetEvent('evidence:server:CreateBloodDrop', function(citizenid, bloodtype, coords)
-    local bloodId = CreateBloodId()
+    local bloodId = generateId(BloodDrops)
     BloodDrops[bloodId] = {
         dna = citizenid,
         bloodtype = bloodtype
@@ -805,7 +789,7 @@ end)
 
 RegisterNetEvent('evidence:server:CreateFingerDrop', function(coords)
     local Player = QBCore.Functions.GetPlayer(source)
-    local fingerId = CreateFingerId()
+    local fingerId = generateId(FingerDrops)
     FingerDrops[fingerId] = Player.PlayerData.metadata.fingerprint
     TriggerClientEvent("evidence:client:AddFingerPrint", -1, fingerId, Player.PlayerData.metadata.fingerprint, coords)
 end)
@@ -850,7 +834,7 @@ end)
 RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    local casingId = CreateCasingId()
+    local casingId = generateId(Casings)
     local weaponInfo = QBCore.Shared.Weapons[weapon]
     local serieNumber = nil
     if weaponInfo then
