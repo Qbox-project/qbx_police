@@ -32,55 +32,17 @@ local function UpdateBlips()
     TriggerClientEvent("police:client:UpdateBlips", -1, dutyPlayers)
 end
 
-local function CreateBloodId()
-    local bloodId = math.random(10000, 99999)
-    if not BloodDrops then return bloodId end
-    while BloodDrops[bloodId] do
-        bloodId = math.random(10000, 99999)
+local function generateId(table)
+    local id = math.random(10000, 99999)
+    if not table then return id end
+    while table[id] do
+        id = math.random(10000, 99999)
     end
-    return bloodId
-end
-
-local function CreateFingerId()
-    local fingerId = math.random(10000, 99999)
-    if not FingerDrops then return fingerId end
-    while FingerDrops[fingerId] do
-        fingerId = math.random(10000, 99999)
-    end
-    return fingerId
-end
-
-local function CreateCasingId()
-    local caseId = math.random(10000, 99999)
-    if not Casings then return caseId end
-    while Casings[caseId] do
-        caseId = math.random(10000, 99999)
-    end
-    return caseId
-end
-
-local function CreateObjectId()
-    local objectId = math.random(10000, 99999)
-    if not Objects then return objectId end
-    while Objects[objectId] do
-        objectId = math.random(10000, 99999)
-    end
-    return objectId
+    return id
 end
 
 local function IsVehicleOwned(plate)
     return MySQL.scalar.await('SELECT plate FROM player_vehicles WHERE plate = ?', {plate})
-end
-
-local function GetCurrentCops()
-    local amount = 0
-    local players = QBCore.Functions.GetQBPlayers()
-    for _, v in pairs(players) do
-        if v and v.PlayerData.job.type == "leo" and v.PlayerData.job.onduty then
-            amount += 1
-        end
-    end
-    return amount
 end
 
 local function DnaHash(s)
@@ -778,7 +740,7 @@ end)
 
 RegisterNetEvent('police:server:spawnObject', function(type)
     local src = source
-    local objectId = CreateObjectId()
+    local objectId = generateId(Objects)
     Objects[objectId] = type
     TriggerClientEvent("police:client:spawnObject", src, objectId, type)
 end)
@@ -806,7 +768,7 @@ RegisterNetEvent('evidence:server:UpdateStatus', function(data)
 end)
 
 RegisterNetEvent('evidence:server:CreateBloodDrop', function(citizenid, bloodtype, coords)
-    local bloodId = CreateBloodId()
+    local bloodId = generateId(BloodDrops)
     BloodDrops[bloodId] = {
         dna = citizenid,
         bloodtype = bloodtype
@@ -816,7 +778,7 @@ end)
 
 RegisterNetEvent('evidence:server:CreateFingerDrop', function(coords)
     local Player = QBCore.Functions.GetPlayer(source)
-    local fingerId = CreateFingerId()
+    local fingerId = generateId(FingerDrops)
     FingerDrops[fingerId] = Player.PlayerData.metadata.fingerprint
     TriggerClientEvent("evidence:client:AddFingerPrint", -1, fingerId, Player.PlayerData.metadata.fingerprint, coords)
 end)
@@ -876,8 +838,8 @@ end)
 RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    local casingId = CreateCasingId()
-    local weaponData = exports.ox_inventory:GetCurrentWeapon(src)
+    local casingId = generateId(Casings)
+    local weaponInfo = QBCore.Shared.Weapons[weapon]
     local serieNumber = nil
     if weaponData then
         if weaponData.metadata then
@@ -999,7 +961,7 @@ CreateThread(function()
     end
     while true do
         Wait(1000 * 60 * 10)
-        local curCops = GetCurrentCops()
+        local curCops = QBCore.Functions.GetDutyCountType('leo')
         TriggerClientEvent("police:SetCopCount", -1, curCops)
     end
 end)
