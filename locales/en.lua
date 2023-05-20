@@ -25,6 +25,7 @@ local Translations = {
         have_evidence_bag = 'You must have an empty evidence bag with you',
         no_driver_license = 'No drivers license',
         not_cuffed_dead = 'Civilian isn\'t cuffed or dead',
+        no_rob = 'This person isn\'t cuffed, dead, or hands up',
     },
     success = {
         uncuffed = 'You have been uncuffed',
@@ -70,6 +71,7 @@ local Translations = {
         cash_robbed = 'You have been robbed of $%{money}',
         driving_license_confiscated = 'Your driving license has been confiscated',
         cash_confiscated = 'Your cash was confiscated',
+        searched_success = 'You completed a search on this person',
         being_searched = 'You are being searched',
         cash_found = 'Found $%{cash} on the civilian',
         sent_jail_for = 'You sent the person to prison for %{time} months',

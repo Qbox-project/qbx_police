@@ -696,7 +696,7 @@ RegisterNetEvent('police:server:SearchPlayer', function(playerId)
     local SearchedPlayer = QBCore.Functions.GetPlayer(playerId)
     if not QBCore.Functions.GetPlayer(src) or not SearchedPlayer then return end
 
-    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.cash_found", {cash = SearchedPlayer.PlayerData.money.cash})})
+    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.searched_success")})
     TriggerClientEvent('ox_lib:notify', SearchedPlayer.PlayerData.source, {description = Lang:t("info.being_searched")})
 end)
 
@@ -795,9 +795,17 @@ end)
 RegisterNetEvent('evidence:server:AddBlooddropToInventory', function(bloodId, bloodInfo)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if Player.Functions.RemoveItem("empty_evidence_bag", 1) then
-        if Player.Functions.AddItem("filled_evidence_bag", 1, false, bloodInfo) then
-            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items.filled_evidence_bag, "add")
+    local playerName = Player.PlayerData.charinfo.firstname.." "..Player.PlayerData.charinfo.lastname
+    local streetName = bloodInfo.street
+    local bloodType = bloodInfo.bloodtype
+    local bloodDNA = bloodInfo.dnalabe
+    local metadata = {}
+        metadata.type = 'Blood Evidence'
+        metadata.description = "DNA ID: "..bloodDNA
+        metadata.description = metadata.description.."\n\nCollected By: "..playerName
+        metadata.description = metadata.description.."\n\nCollected At: "..streetName
+    if exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
+        if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
             TriggerClientEvent("evidence:client:RemoveBlooddrop", -1, bloodId)
             BloodDrops[bloodId] = nil
         end
@@ -809,9 +817,16 @@ end)
 RegisterNetEvent('evidence:server:AddFingerprintToInventory', function(fingerId, fingerInfo)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if Player.Functions.RemoveItem("empty_evidence_bag", 1) then
-        if Player.Functions.AddItem("filled_evidence_bag", 1, false, fingerInfo) then
-            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items.filled_evidence_bag, "add")
+    local playerName = Player.PlayerData.charinfo.firstname.." "..Player.PlayerData.charinfo.lastname
+    local streetName = fingerInfo.street
+    local fingerPrint = fingerInfo.fingerprint
+    local metadata = {}
+        metadata.type = 'Fingerprint Evidence'
+        metadata.description = "Fingerprint ID: "..fingerPrint
+        metadata.description = metadata.description.."\n\nCollected By: "..playerName
+        metadata.description = metadata.description.."\n\nCollected At: "..streetName
+    if exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
+        if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
             TriggerClientEvent("evidence:client:RemoveFingerprint", -1, fingerId)
             FingerDrops[fingerId] = nil
         end
@@ -826,11 +841,10 @@ RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
     local casingId = generateId(Casings)
     local weaponInfo = QBCore.Shared.Weapons[weapon]
     local serieNumber = nil
-    if weaponInfo then
-        local weaponItem = Player.Functions.GetItemByName(weaponInfo.name)
-        if weaponItem then
-            if weaponItem.info and weaponItem.info ~= "" then
-                serieNumber = weaponItem.info.serie
+    if weaponData then
+        if weaponData.metadata then
+            if weaponData.metadata.serial then
+                serieNumber = weaponData.metadata.serial
             end
         end
     end
@@ -863,9 +877,18 @@ end)
 RegisterNetEvent('evidence:server:AddCasingToInventory', function(casingId, casingInfo)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if Player.Functions.RemoveItem("empty_evidence_bag", 1) then
-        if Player.Functions.AddItem("filled_evidence_bag", 1, false, casingInfo) then
-            TriggerClientEvent("inventory:client:ItemBox", src, QBCore.Shared.Items.filled_evidence_bag, "add")
+    local playerName = Player.PlayerData.charinfo.firstname.." "..Player.PlayerData.charinfo.lastname
+    local streetName = casingInfo.street
+    local ammoType = casingInfo.ammolabel
+    local serialNumber = casingInfo.serie
+    local metadata = {}
+        metadata.type = 'Casing Evidence'
+        metadata.description = "Ammo Type: "..ammoType
+        metadata.description = metadata.description.."\n\nSerial #: "..serialNumber
+        metadata.description = metadata.description.."\n\nCollected By: "..playerName
+        metadata.description = metadata.description.."\n\nCollected At: "..streetName
+    if exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
+        if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
             TriggerClientEvent("evidence:client:RemoveCasing", -1, casingId)
             Casings[casingId] = nil
         end
@@ -928,6 +951,7 @@ AddEventHandler('onServerResourceStart', function(resource)
     for i = 1, #Config.Locations.trash do
         exports.ox_inventory:RegisterStash(('policetrash_%s'):format(i), 'Police Trash', 300, 4000000, nil, jobs, Config.Locations.trash[i])
     end
+    exports.ox_inventory:RegisterStash('policelocker', 'Police Locker', 30, 100000, true)
 end)
 
 -- Threads
