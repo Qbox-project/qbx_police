@@ -193,7 +193,6 @@ RegisterNetEvent('police:client:RobPlayer', function()
                 },
             })
             then
-                TriggerEvent('animations:client:EmoteCommandStart', { "c" })
                 local plyCoords = GetEntityCoords(playerPed)
                 local pos = GetEntityCoords(cache.ped)
                 if #(pos - plyCoords) < 2.5 then
@@ -204,7 +203,6 @@ RegisterNetEvent('police:client:RobPlayer', function()
                     lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
                 end
             else
-                TriggerEvent('animations:client:EmoteCommandStart', { "c" })
                 StopAnimTask(cache.ped, "random@shop_robbery", "robbery_action_b", 1.0)
                 lib.notify({ description = Lang:t('error.canceled'), type = 'error' })
             end
@@ -222,9 +220,7 @@ RegisterNetEvent('police:client:JailPlayer', function()
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
         local dialog = lib.inputDialog(Lang:t('info.jail_time_input'), {
-            type = "number",
-            label = Lang:t('info.time_months'),
-            default = 1
+            { type = "number", label = Lang:t('info.time_months'), default = 1 }
         })
         if dialog and dialog[1] > 0 then
             TriggerServerEvent("police:server:JailPlayer", playerId, dialog[1])
