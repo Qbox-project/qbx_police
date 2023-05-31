@@ -19,7 +19,7 @@ local function HandlespeedCam(speedCam, radar)
 	local speed = GetEntitySpeed(cache.vehicle) * (Config.MPH and 2.236936 or 3.6)
 	local OverLimit = speed - speedCam.speed
 
-	QBCore.Functions.TriggerCallback('police:IsPlateFlagged', function(result)
+	lib.callback('police:server:isPlateFlagged', false, function(result)
  		if not result then return end
 		local s1, s2 = GetStreetNameAtCoord(speedCam.coords.x, speedCam.coords.y, speedCam.coords.z)
 		local street = GetStreetNameFromHashKey(s1)
