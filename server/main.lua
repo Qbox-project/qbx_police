@@ -410,7 +410,7 @@ lib.callback.register('police:GetPlayerStatus', function(_, playerId)
             end
         end
     end
-    cb(statList)
+    return statList
 end)
 
 lib.callback.register('police:GetImpoundedVehicles', function()
