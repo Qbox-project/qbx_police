@@ -7,11 +7,7 @@ exports('IsHandcuffed', function()
 end)
 
 local function IsTargetDead(playerId)
-    local p = promise.new()
-    QBCore.Functions.TriggerCallback('police:server:isPlayerDead', function(result)
-        p:resolve(result)
-    end, playerId)
-    return Citizen.Await(p)
+    return lib.callback.await('police:server:isPlayerDead', false, playerId)
 end
 
 local function HandCuffAnimation()

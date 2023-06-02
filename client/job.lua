@@ -186,7 +186,7 @@ local function MenuImpound()
         options = {}
     }
 
-    QBCore.Functions.TriggerCallback("police:GetImpoundedVehicles", function(result)
+    lib.callback("police:GetImpoundedVehicles", false, function(result)
         if not result then
             lib.notify({ description = Lang:t("error.no_impound"), type = 'error', })
         else
@@ -407,13 +407,12 @@ RegisterNetEvent('police:client:CheckStatus', function()
     local player, distance = GetClosestPlayer()
     if player ~= -1 and distance < 5.0 then
         local playerId = GetPlayerServerId(player)
-        QBCore.Functions.TriggerCallback('police:GetPlayerStatus', function(result)
-            if not result then return end
+        local result = lib.callback.await('police:GetPlayerStatus', false, playerId)
+        if not result then return end
 
-            for _, v in pairs(result) do
-                lib.notify({ description = v, type = 'success' })
-            end
-        end, playerId)
+        for _, v in pairs(result) do
+            lib.notify({ description = v, type = 'success' })
+        end
     else
         lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
     end

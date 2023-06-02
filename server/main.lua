@@ -395,12 +395,12 @@ QBCore.Functions.CreateUseableItem("moneybag", function(source, item)
 end)
 
 -- Callbacks
-QBCore.Functions.CreateCallback('police:server:isPlayerDead', function(_, cb, playerId)
+lib.callback.register('police:server:isPlayerDead', function(_, playerId)
     local Player = QBCore.Functions.GetPlayer(playerId)
-    cb(Player.PlayerData.metadata.idead)
+    return Player.PlayerData.metadata.idead
 end)
 
-QBCore.Functions.CreateCallback('police:GetPlayerStatus', function(_, cb, playerId)
+lib.callback.register('police:GetPlayerStatus', function(_, playerId)
     local Player = QBCore.Functions.GetPlayer(playerId)
     local statList = {}
     if Player then
@@ -410,86 +410,51 @@ QBCore.Functions.CreateCallback('police:GetPlayerStatus', function(_, cb, player
             end
         end
     end
-    cb(statList)
+    return statList
 end)
 
-QBCore.Functions.CreateCallback('police:IsSilencedWeapon', function(source, cb, weapon)
-    local Player = QBCore.Functions.GetPlayer(source)
-    local itemInfo = Player.Functions.GetItemByName(QBCore.Shared.Weapons[weapon].name)
-    local retval = false
-    if itemInfo then
-        if itemInfo.info and itemInfo.info.attachments then
-            for k in pairs(itemInfo.info.attachments) do
-                if itemInfo.info.attachments[k].component == "COMPONENT_AT_AR_SUPP_02" or
-                    itemInfo.info.attachments[k].component == "COMPONENT_AT_AR_SUPP" or
-                    itemInfo.info.attachments[k].component == "COMPONENT_AT_PI_SUPP_02" or
-                    itemInfo.info.attachments[k].component == "COMPONENT_AT_PI_SUPP"
-                then
-                    retval = true
-                    break
-                end
-            end
-        end
+lib.callback.register('police:GetImpoundedVehicles', function()
+    local result = MySQL.query.await('SELECT * FROM player_vehicles WHERE state = ?', {2})
+    if result[1] then
+        return result
     end
-    cb(retval)
 end)
 
-QBCore.Functions.CreateCallback('police:GetDutyPlayers', function(_, cb)
-    local dutyPlayers = {}
-    local players = QBCore.Functions.GetQBPlayers()
-    for _, v in pairs(players) do
-        if v and v.PlayerData.job.type == "leo" and v.PlayerData.job.onduty then
-            dutyPlayers[#dutyPlayers + 1] = {
-                source = v.PlayerData.source,
-                label = v.PlayerData.metadata.callsign,
-                job = v.PlayerData.job.name
-            }
-        end
-    end
-    cb(dutyPlayers)
-end)
+local function isPlateFlagged(plate)
+    if Plates and Plates[plate] and Plates[plate].isflagged then
+        return true
+     end
+     return false
+end
 
-QBCore.Functions.CreateCallback('police:GetImpoundedVehicles', function(_, cb)
-    local vehicles = {}
-    MySQL.query('SELECT * FROM player_vehicles WHERE state = ?', {2}, function(result)
-        if result[1] then
-            vehicles = result
-        end
-        cb(vehicles)
-    end)
-end)
-
+---@deprecated use qbx-police:server:isPlateFlagged
 QBCore.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
-    local retval = false
-    if Plates and Plates[plate] then
-        if Plates[plate].isflagged then
-            retval = true
-        end
-    end
-    cb(retval)
+    print(string.format("%s invoked deprecated callback police:IsPlateFlagged. Use police:server:IsPoliceForcePresent instead.", GetInvokingResource()))
+    cb(isPlateFlagged(plate))
 end)
 
-QBCore.Functions.CreateCallback('police:GetCops', function(_, cb)
-    local amount = 0
-    local players = QBCore.Functions.GetQBPlayers()
-    for _, v in pairs(players) do
-        if v and v.PlayerData.job.type == "leo" and v.PlayerData.job.onduty then
-            amount += 1
-        end
-    end
-    cb(amount)
+lib.callback.register('qbx-police:server:isPlateFlagged', function(_, plate)
+    return isPlateFlagged(plate)
 end)
 
-QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
-    local retval = false
+local function isPoliceForcePresent()
     local players = QBCore.Functions.GetQBPlayers()
     for _, v in pairs(players) do
         if v and v.PlayerData.job.type == "leo" and v.PlayerData.job.grade.level >= 2 then
-            retval = true
-            break
+            return true
         end
     end
-    cb(retval)
+    return false
+end
+
+---@deprecated
+QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
+    print(string.format("%s invoked deprecated callback police:server:IsPoliceForcePresent. Use police:server:isPoliceForcePresent instead.", GetInvokingResource()))
+    cb(isPoliceForcePresent())
+end)
+
+lib.callback.register('police:server:isPoliceForcePresent', function()
+    return isPoliceForcePresent()
 end)
 
 -- Events
