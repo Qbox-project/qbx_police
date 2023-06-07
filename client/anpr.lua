@@ -1,8 +1,8 @@
 if not Config.UseRadars then return end
 
-local SpeedCams = {}
+local speedCams = {}
 
-local function SpeedRange(speed)
+local function speedRange(speed)
 	speed = math.ceil(speed)
 	for k, v in pairs(Config.SpeedFines) do
 		if speed < v.maxspeed then
@@ -13,11 +13,11 @@ local function SpeedRange(speed)
 	end
 end
 
-local function HandlespeedCam(speedCam, radar)
+local function handleSpeedCam(speedCam, radar)
 	if not cache.vehicle or cache.seat ~= -1 or GetVehicleClass(cache.vehicle) == 18 then return end
 	local plate = QBCore.Functions.GetPlate(cache.vehicle)
 	local speed = GetEntitySpeed(cache.vehicle) * (Config.MPH and 2.236936 or 3.6)
-	local OverLimit = speed - speedCam.speed
+	local overlimit = speed - speedCam.speed
 
 	lib.callback('police:server:isPlateFlagged', false, function(result)
  		if not result then return end
@@ -30,22 +30,22 @@ local function HandlespeedCam(speedCam, radar)
 		TriggerServerEvent("police:server:FlaggedPlateTriggered", radar, plate, street)
 	end, plate)
 
-	if not Config.SpeedFines or OverLimit < 0 then return end
-	SpeedRange(OverLimit)
+	if not Config.SpeedFines or overlimit < 0 then return end
+	speedRange(overlimit)
 end
 
 
 CreateThread(function()
 	for _,value in pairs(Config.Radars) do
-		SpeedCams[#SpeedCams+1] = lib.points.new({
+		speedCams[#speedCams+1] = lib.points.new({
 			coords = value.coords.xyz,
 			distance = 20.0,
 			speed = value.speedlimit,
 		})
 	end
-	for k, v in pairs(SpeedCams) do
+	for k, v in pairs(speedCams) do
 		function v:onEnter()
-			HandlespeedCam(self, k)
+			handleSpeedCam(self, k)
 		end
 	end
 end)

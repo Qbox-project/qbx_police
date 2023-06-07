@@ -6,11 +6,11 @@ exports('IsHandcuffed', function()
     return PlayerData.metadata.ishandcuffed
 end)
 
-local function IsTargetDead(playerId)
+local function isTargetDead(playerId)
     return lib.callback.await('police:server:isPlayerDead', false, playerId)
 end
 
-local function HandCuffAnimation()
+local function handCuffAnimation()
     if PlayerData.metadata.ishandcuffed then
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "Cuff", 0.2)
     else
@@ -25,7 +25,7 @@ local function HandCuffAnimation()
     TaskPlayAnim(cache.ped, "mp_arrest_paired", "exit", 3.0, 3.0, -1, 48, 0, false, false, false)
 end
 
-local function GetCuffedAnimation(playerId)
+local function getCuffedAnimation(playerId)
     local cuffer = GetPlayerPed(GetPlayerFromServerId(playerId))
     local heading = GetEntityHeading(cuffer)
     TriggerServerEvent("InteractSound_SV:PlayOnSource", "Cuff", 0.2)
@@ -38,7 +38,7 @@ local function GetCuffedAnimation(playerId)
     Wait(2500)
 end
 
-local function EscortActions()
+local function escortActions()
     DisableAllControlActions(0)
     EnableControlAction(0, 1, true)
     EnableControlAction(0, 2, true)
@@ -49,7 +49,7 @@ local function EscortActions()
     EnableControlAction(0, 46, true)
 end
 
-local function HandcuffActions()
+local function handcuffActions()
     DisableControlAction(0, 24, true) -- Attack
     DisableControlAction(0, 257, true) -- Attack 2
     DisableControlAction(0, 25, true) -- Aim
@@ -88,18 +88,18 @@ local function HandcuffActions()
     EnableControlAction(0, 46, true)  -- Added for talking while cuffed
 end
 
-local function HandcuffedEscorted()
+local function handcuffedEscorted()
     local sleep = 1000
     local anim = {{dict = "mp_arresting", anim = "idle"}, {dict = "mp_arrest_paired", anim = "crook_p2_back_right"}}
     
     if not IsLoggedIn then return sleep end
     if isEscorted then
         sleep = 0
-        EscortActions()
+        escortActions()
     end
     if not PlayerData.metadata.ishandcuffed then return sleep end
     sleep = 0
-    HandcuffActions()
+    handcuffActions()
     if PlayerData.metadata.isdead then return sleep end
     for i = 1, #anim do
         if IsEntityPlayingAnim(cache.ped, anim[i].dict, anim[i].anim, 3) then return sleep end
@@ -136,201 +136,166 @@ RegisterNetEvent('police:client:PutInVehicle', function()
     end
 end)
 
-RegisterNetEvent('police:client:SearchPlayer', function()
-    local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 2.5 then
-        local playerId = GetPlayerServerId(player)
-        exports.ox_inventory:openNearbyInventory()
-        TriggerServerEvent("police:server:SearchPlayer", playerId)
-    else
+---@param player number
+---@param distance number
+---@param maxDistance? number
+---@return boolean
+local function isTooFar(player, distance, maxDistance)
+    if player == -1 or distance >= (maxDistance or 2.5) then
         lib.notify({
             description = Lang:t("error.none_nearby"),
             type = 'error'
         })
+        return true
     end
+    return false
+end
+
+RegisterNetEvent('police:client:SearchPlayer', function()
+    local player, distance = QBCore.Functions.GetClosestPlayer()
+    if isTooFar(player, distance) then return end
+    local playerId = GetPlayerServerId(player)
+    exports.ox_inventory:openNearbyInventory()
+    TriggerServerEvent("police:server:SearchPlayer", playerId)
 end)
 
 RegisterNetEvent('police:client:SeizeCash', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 2.5 then
-        local playerId = GetPlayerServerId(player)
-        TriggerServerEvent("police:server:SeizeCash", playerId)
-    else
-        lib.notify({
-            description = Lang:t("error.none_nearby"),
-            type = 'error'
-        })
-    end
+    if isTooFar(player, distance) then return end
+    local playerId = GetPlayerServerId(player)
+    TriggerServerEvent("police:server:SeizeCash", playerId)
 end)
 
 RegisterNetEvent('police:client:RobPlayer', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 2.5 then
-        local playerPed = GetPlayerPed(player)
-        local playerId = GetPlayerServerId(player)
-        if IsEntityPlayingAnim(playerPed, "missminuteman_1ig_2", "handsup_base", 3) or IsEntityPlayingAnim(playerPed, "mp_arresting", "idle", 3) or IsTargetDead(playerId) then
-            
-            if lib.progressCircle({
-                duration = math.random(5000, 7000),
-                position = 'bottom',
-                label = Lang:t("progressbar.robbing"),
-                useWhileDead = false,
-                canCancel = true,
-                disable = {
-                    move = true,
-                    car = true,
-                    combat = true,
-                    mouse = false,
-                },
-                anim = {
-                    dict = "random@shop_robbery",
-                    clip = 'robbery_action_b',
-                    flags = 16,
-                },
-            })
-            then
-                local plyCoords = GetEntityCoords(playerPed)
-                local pos = GetEntityCoords(cache.ped)
-                if #(pos - plyCoords) < 2.5 then
-                    StopAnimTask(cache.ped, "random@shop_robbery", "robbery_action_b", 1.0)
-                    exports.ox_inventory:openNearbyInventory()
-                    TriggerServerEvent("inventory:server:RobPlayer", playerId)
-                else
-                    lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
-                end
-            else
-                StopAnimTask(cache.ped, "random@shop_robbery", "robbery_action_b", 1.0)
-                lib.notify({ description = Lang:t('error.canceled'), type = 'error' })
-            end
-        end return lib.notify({ description = Lang:t("error.no_rob"), type = 'error' })
+    if isTooFar(player, distance) then return end
+    local playerPed = GetPlayerPed(player)
+    local playerId = GetPlayerServerId(player)
+    if not (IsEntityPlayingAnim(playerPed, "missminuteman_1ig_2", "handsup_base", 3) or IsEntityPlayingAnim(playerPed, "mp_arresting", "idle", 3) or isTargetDead(playerId)) then
+        lib.notify({ description = Lang:t("error.no_rob"), type = 'error' })
+        return
+    end
+    if lib.progressCircle({
+        duration = math.random(5000, 7000),
+        position = 'bottom',
+        label = Lang:t("progressbar.robbing"),
+        useWhileDead = false,
+        canCancel = true,
+        disable = {
+            move = true,
+            car = true,
+            combat = true,
+            mouse = false,
+        },
+        anim = {
+            dict = "random@shop_robbery",
+            clip = 'robbery_action_b',
+            flags = 16,
+        },
+    })
+    then
+        local plyCoords = GetEntityCoords(playerPed)
+        local pos = GetEntityCoords(cache.ped)
+        if #(pos - plyCoords) < 2.5 then
+            StopAnimTask(cache.ped, "random@shop_robbery", "robbery_action_b", 1.0)
+            exports.ox_inventory:openNearbyInventory()
+            TriggerServerEvent("inventory:server:RobPlayer", playerId)
+        else
+            lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
+        end
     else
-        lib.notify({
-            description = Lang:t("error.none_nearby"),
-            type = 'error'
-        })
+        StopAnimTask(cache.ped, "random@shop_robbery", "robbery_action_b", 1.0)
+        lib.notify({ description = Lang:t('error.canceled'), type = 'error' })
     end
 end)
 
 RegisterNetEvent('police:client:JailPlayer', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 2.5 then
-        local playerId = GetPlayerServerId(player)
-        local dialog = lib.inputDialog(Lang:t('info.jail_time_input'), {
-            { type = "number", label = Lang:t('info.time_months'), default = 1 }
-        })
-        if dialog and dialog[1] > 0 then
-            TriggerServerEvent("police:server:JailPlayer", playerId, dialog[1])
-        else
-            lib.notify({ description = Lang:t("error.time_higher"), type = 'error' })
-        end
+    if isTooFar(player, distance) then return end
+    local playerId = GetPlayerServerId(player)
+    local dialog = lib.inputDialog(Lang:t('info.jail_time_input'), {
+        { type = "number", label = Lang:t('info.time_months'), default = 1 }
+    })
+    if dialog and dialog[1] > 0 then
+        TriggerServerEvent("police:server:JailPlayer", playerId, dialog[1])
     else
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
+        lib.notify({ description = Lang:t("error.time_higher"), type = 'error' })
     end
 end)
 
 RegisterNetEvent('police:client:BillPlayer', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 2.5 then
-        local playerId = GetPlayerServerId(player)
-        local dialog = lib.inputDialog(Lang:t('info.bill'), {
-            type = "number",
-            label = Lang:t('info.amount'),
-            default = 1
-        })
-        if dialog and dialog[1] > 0 then
-            TriggerServerEvent("police:server:BillPlayer", playerId, dialog[1])
-        else
-            lib.notify({ description = Lang:t("error.time_higher"), type = 'error' })
-        end
+    if isTooFar(player, distance) then return end
+    local playerId = GetPlayerServerId(player)
+    local dialog = lib.inputDialog(Lang:t('info.bill'), {
+        type = "number",
+        label = Lang:t('info.amount'),
+        default = 1
+    })
+    if dialog and dialog[1] > 0 then
+        TriggerServerEvent("police:server:BillPlayer", playerId, dialog[1])
     else
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
+        lib.notify({ description = Lang:t("error.time_higher"), type = 'error' })
     end
 end)
 
-RegisterNetEvent('police:client:PutPlayerInVehicle', function()
+local function triggerIfHandsFree(eventName)
     local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 2.5 then
-        local playerId = GetPlayerServerId(player)
-        if not PlayerData.metadata.ishandcuffed and not isEscorted then
-            TriggerServerEvent("police:server:PutPlayerInVehicle", playerId)
-        end
-    else
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
-    end
+    if isTooFar(player, distance) then return end
+    local playerId = GetPlayerServerId(player)
+    if PlayerData.metadata.ishandcuffed or isEscorted then return end
+    TriggerServerEvent(eventName, playerId)
+end
+
+RegisterNetEvent('police:client:PutPlayerInVehicle', function()
+    triggerIfHandsFree("police:server:PutPlayerInVehicle")
 end)
 
 RegisterNetEvent('police:client:SetPlayerOutVehicle', function()
-    local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 2.5 then
-        local playerId = GetPlayerServerId(player)
-        if not PlayerData.metadata.ishandcuffed and not isEscorted then
-            TriggerServerEvent("police:server:SetPlayerOutVehicle", playerId)
-        end
-    else
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
-    end
+    triggerIfHandsFree("police:server:SetPlayerOutVehicle")
 end)
 
 RegisterNetEvent('police:client:EscortPlayer', function()
-    local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 2.5 then
-        local playerId = GetPlayerServerId(player)
-        if not PlayerData.metadata.ishandcuffed and not isEscorted then
-            TriggerServerEvent("police:server:EscortPlayer", playerId)
-        end
-    else
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
-    end
+    triggerIfHandsFree("police:server:EscortPlayer")
 end)
 
 RegisterNetEvent('police:client:KidnapPlayer', function()
     local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 2.5 then
-        local playerId = GetPlayerServerId(player)
-        if not IsPedInAnyVehicle(GetPlayerPed(player), false) and not PlayerData.metadata.ishandcuffed and not isEscorted then
-            TriggerServerEvent("police:server:KidnapPlayer", playerId)
-        end
-    else
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
-    end
+    if isTooFar(player, distance) then return end
+    local playerId = GetPlayerServerId(player)
+    if IsPedInAnyVehicle(GetPlayerPed(player), false) or PlayerData.metadata.ishandcuffed or isEscorted then return end
+    TriggerServerEvent("police:server:KidnapPlayer", playerId)
 end)
 
 RegisterNetEvent('police:client:CuffPlayerSoft', function()
     if IsPedRagdoll(cache.ped) then return end
-
     local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 1.5 then
-        local playerId = GetPlayerServerId(player)
-        if not IsPedInAnyVehicle(GetPlayerPed(player), false) and not cache.vehicle then
-            TriggerServerEvent("police:server:CuffPlayer", playerId, true)
-            HandCuffAnimation()
-        else
-            lib.notify({ description = Lang:t("error.vehicle_cuff"), type = 'error' })
-        end
-    else
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
+    if isTooFar(player, distance, 1.5) then return end
+    local playerId = GetPlayerServerId(player)
+    if IsPedInAnyVehicle(GetPlayerPed(player), false) or cache.vehicle then
+        lib.notify({ description = Lang:t("error.vehicle_cuff"), type = 'error' })
+        return
     end
+    TriggerServerEvent("police:server:CuffPlayer", playerId, true)
+    handCuffAnimation()
 end)
 
 RegisterNetEvent('police:client:CuffPlayer', function()
     if IsPedRagdoll(cache.ped) then return end
 
     local player, distance = QBCore.Functions.GetClosestPlayer()
-    if player ~= -1 and distance < 1.5 then
-        if QBCore.Functions.HasItem(Config.HandCuffItem) then
-            local playerId = GetPlayerServerId(player)
-            if not IsPedInAnyVehicle(GetPlayerPed(player), false) and not cache.vehicle then
-                TriggerServerEvent("police:server:CuffPlayer", playerId, false)
-                HandCuffAnimation()
-            else
-                lib.notify({ description = Lang:t("error.vehicle_cuff"), type = 'error' })
-            end
-        else
-            lib.notify({ description = Lang:t("error.no_cuff"), type = 'error' })
-        end
-    else
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
+    if isTooFar(player, distance) then return end
+    if exports.ox_inventory:Search('count', Config.HandCuffItem) == 0 then
+        lib.notify({ description = Lang:t("error.no_cuff"), type = 'error' })
+        return
     end
+    local playerId = GetPlayerServerId(player)
+    if IsPedInAnyVehicle(GetPlayerPed(player), false) or cache.vehicle then
+        lib.notify({ description = Lang:t("error.vehicle_cuff"), type = 'error' })
+        return
+    end
+    TriggerServerEvent("police:server:CuffPlayer", playerId, false)
+    handCuffAnimation()
 end)
 
 RegisterNetEvent('police:client:GetEscorted', function(playerId)
@@ -395,13 +360,12 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
         end
         if not isSoftcuff then
             cuffType = 16
-            GetCuffedAnimation(playerId)
             lib.notify({ description = Lang:t("info.cuff"), type = 'success' })
         else
             cuffType = 49
-            GetCuffedAnimation(playerId)
             lib.notify({ description = Lang:t("info.cuffed_walk"), type = 'success' })
         end
+        getCuffedAnimation(playerId)
     else
         isEscorted = false
         TriggerEvent('hospital:client:isEscorted', isEscorted)
@@ -416,6 +380,6 @@ end)
 -- Threads
 CreateThread(function()
     while true do
-        Wait(HandcuffedEscorted())
+        Wait(handcuffedEscorted())
     end
 end)
