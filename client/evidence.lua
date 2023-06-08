@@ -1,14 +1,14 @@
 -- Variables
-local CurrentStatusList = {}
-local Casings = {}
-local CurrentCasing = nil
-local Blooddrops = {}
-local CurrentBlooddrop = nil
-local Fingerprints = {}
-local CurrentFingerprint = 0
+local currentStatusList = {}
+local casings = {}
+local currentCasing = nil
+local bloodDrops = {}
+local currentBloodDrop = nil
+local fingerprints = {}
+local currentFingerprint = 0
 local shotAmount = 0
 
-local StatusList = {
+local statusList = {
     fight = Lang:t('evidence.red_hands'),
     widepupils = Lang:t('evidence.wide_pupils'),
     redeyes = Lang:t('evidence.red_eyes'),
@@ -24,17 +24,19 @@ local StatusList = {
     agitated = Lang:t('evidence.agitated')
 }
 
-local WhitelistedWeapons = {
-    `weapon_unarmed`,
-    `weapon_snowball`,
-    `weapon_stungun`,
-    `weapon_petrolcan`,
-    `weapon_hazardcan`,
-    `weapon_fireextinguisher`
+local ignoredWeapons = {
+    [`weapon_unarmed`] = true,
+    [`weapon_snowball`] = true,
+    [`weapon_stungun`] = true,
+    [`weapon_petrolcan`] = true,
+    [`weapon_hazardcan`] = true,
+    [`weapon_fireextinguisher`] = true,
 }
 
 -- Functions
-local function DrawText3D(x, y, z, text)
+---@param coords vector3
+---@param text string
+local function drawText3D(coords, text)
     SetTextScale(0.35, 0.35)
     SetTextFont(4)
     SetTextProportional(true)
@@ -42,23 +44,14 @@ local function DrawText3D(x, y, z, text)
     SetTextEntry('STRING')
     SetTextCentre(true)
     AddTextComponentString(text)
-    SetDrawOrigin(x,y,z, 0)
+    SetDrawOrigin(coords.x, coords.y, coords.z, 0)
     DrawText(0.0, 0.0)
     local factor = (string.len(text)) / 370
     DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
     ClearDrawOrigin()
 end
 
-local function WhitelistedWeapon(weapon)
-    for i = 1, #WhitelistedWeapons do
-        if WhitelistedWeapons[i] == weapon then
-            return true
-        end
-    end
-    return false
-end
-
-local function DropBulletCasing(weapon, ped)
+local function dropBulletCasing(weapon, ped)
     local randX = math.random() + math.random(-1, 1)
     local randY = math.random() + math.random(-1, 1)
     local coords = GetOffsetFromEntityInWorldCoords(ped, randX, randY, 0)
@@ -66,7 +59,7 @@ local function DropBulletCasing(weapon, ped)
     Wait(300)
 end
 
-local function DnaHash(s)
+local function dnaHash(s)
     local h = string.gsub(s, '.', function(c)
         return string.format('%02x', string.byte(c))
     end)
@@ -75,22 +68,22 @@ end
 
 -- Events
 RegisterNetEvent('evidence:client:SetStatus', function(statusId, time)
-    if time > 0 and StatusList[statusId] then
-        if (not CurrentStatusList or not CurrentStatusList[statusId]) or (CurrentStatusList[statusId] and CurrentStatusList[statusId].time < 20) then
-            CurrentStatusList[statusId] = {
-                text = StatusList[statusId],
+    if time > 0 and statusList[statusId] then
+        if not currentStatusList?[statusId] or currentStatusList[statusId].time < 20 then
+            currentStatusList[statusId] = {
+                text = statusList[statusId],
                 time = time
             }
-            QBCore.Functions.Notify(CurrentStatusList[statusId].text, 'error')
+            QBCore.Functions.Notify(currentStatusList[statusId].text, 'error')
         end
-    elseif StatusList[statusId] then
-        CurrentStatusList[statusId] = nil
+    elseif statusList[statusId] then
+        currentStatusList[statusId] = nil
     end
-    TriggerServerEvent('evidence:server:UpdateStatus', CurrentStatusList)
+    TriggerServerEvent('evidence:server:UpdateStatus', currentStatusList)
 end)
 
 RegisterNetEvent('evidence:client:AddBlooddrop', function(bloodId, citizenid, bloodtype, coords)
-    Blooddrops[bloodId] = {
+    bloodDrops[bloodId] = {
         citizenid = citizenid,
         bloodtype = bloodtype,
         coords = vec3(coords.x, coords.y, coords.z - 0.9)
@@ -98,20 +91,20 @@ RegisterNetEvent('evidence:client:AddBlooddrop', function(bloodId, citizenid, bl
 end)
 
 RegisterNetEvent('evidence:client:RemoveBlooddrop', function(bloodId)
-    Blooddrops[bloodId] = nil
-    CurrentBlooddrop = 0
+    bloodDrops[bloodId] = nil
+    currentBloodDrop = 0
 end)
 
 RegisterNetEvent('evidence:client:AddFingerPrint', function(fingerId, fingerprint, coords)
-    Fingerprints[fingerId] = {
+    fingerprints[fingerId] = {
         fingerprint = fingerprint,
         coords = vec3(coords.x, coords.y, coords.z - 0.9)
     }
 end)
 
 RegisterNetEvent('evidence:client:RemoveFingerprint', function(fingerId)
-    Fingerprints[fingerId] = nil
-    CurrentFingerprint = 0
+    fingerprints[fingerId] = nil
+    currentFingerprint = 0
 end)
 
 RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
@@ -136,9 +129,9 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
     })
     then
         TriggerEvent('animations:client:EmoteCommandStart', { "c" })
-        if Blooddrops and next(Blooddrops) then
-            for bloodId in pairs(Blooddrops) do
-                if #(pos - Blooddrops[bloodId].coords) < 10.0 then
+        if bloodDrops and next(bloodDrops) then
+            for bloodId in pairs(bloodDrops) do
+                if #(pos - bloodDrops[bloodId].coords) < 10.0 then
                     blooddropList[#blooddropList + 1] = bloodId
                 end
             end
@@ -152,7 +145,7 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
 end)
 
 RegisterNetEvent('evidence:client:AddCasing', function(casingId, weapon, coords, serie)
-    Casings[casingId] = {
+    casings[casingId] = {
         type = weapon,
         serie = serie and serie or Lang:t('evidence.serial_not_visible'),
         coords = vec3(coords.x, coords.y, coords.z - 0.9)
@@ -160,8 +153,8 @@ RegisterNetEvent('evidence:client:AddCasing', function(casingId, weapon, coords,
 end)
 
 RegisterNetEvent('evidence:client:RemoveCasing', function(casingId)
-    Casings[casingId] = nil
-    CurrentCasing = 0
+    casings[casingId] = nil
+    currentCasing = 0
 end)
 
 RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
@@ -187,9 +180,9 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
     })
     then
         TriggerEvent('animations:client:EmoteCommandStart', { "c" })
-        if Casings and next(Casings) then
-            for casingId in pairs(Casings) do
-                if #(pos - Casings[casingId].coords) < 10.0 then
+        if casings and next(casings) then
+            for casingId in pairs(casings) do
+                if #(pos - casings[casingId].coords) < 10.0 then
                     casingList[#casingList + 1] = casingId
                 end
             end
@@ -204,151 +197,147 @@ end)
 
 -- Threads
 
+local function updateStatus()
+    if not IsLoggedIn then return end
+    if currentStatusList and next(currentStatusList) then
+        for k in pairs(currentStatusList) do
+            if currentStatusList[k].time > 0 then
+                currentStatusList[k].time -= 10
+            else
+                currentStatusList[k].time = 0
+            end
+        end
+        TriggerServerEvent('evidence:server:UpdateStatus', currentStatusList)
+    end
+    if shotAmount > 0 then
+        shotAmount = 0
+    end
+end
+
 CreateThread(function()
     while true do
         Wait(10000)
-        if IsLoggedIn then
-            if CurrentStatusList and next(CurrentStatusList) then
-                for k in pairs(CurrentStatusList) do
-                    if CurrentStatusList[k].time > 0 then
-                        CurrentStatusList[k].time = CurrentStatusList[k].time - 10
-                    else
-                        CurrentStatusList[k].time = 0
-                    end
-                end
-                TriggerServerEvent('evidence:server:UpdateStatus', CurrentStatusList)
-            end
-            if shotAmount > 0 then
-                shotAmount = 0
-            end
-        end
+        updateStatus()
     end
 end)
+
+local function onPlayerShooting()
+    shotAmount += 1
+    if shotAmount > 5 and not currentStatusList?.gunpowder then
+        if math.random(1, 10) <= 7 then
+            TriggerEvent('evidence:client:SetStatus', 'gunpowder', 200)
+        end
+    end
+    dropBulletCasing(cache.weapon, cache.ped)
+end
 
 CreateThread(function() -- Gunpowder Status when shooting
     while true do
         Wait(0)
-        if IsPedShooting(cache.ped) then
-            if not WhitelistedWeapon(cache.weapon) then
-                shotAmount += 1
-                if shotAmount > 5 and (not CurrentStatusList or not CurrentStatusList.gunpowder) then
-                    if math.random(1, 10) <= 7 then
-                        TriggerEvent('evidence:client:SetStatus', 'gunpowder', 200)
-                    end
-                end
-                DropBulletCasing(cache.weapon, cache.ped)
-            end
+        if IsPedShooting(cache.ped) and not ignoredWeapons[cache.weapon] then
+            onPlayerShooting()
         end
     end
 end)
 
+---@param coords vector3
+---@return string
+local function getStreetLabel(coords)
+    local s1, s2 = GetStreetNameAtCoord(coords.x, coords.y, coords.z)
+    local street1 = GetStreetNameFromHashKey(s1)
+    local street2 = GetStreetNameFromHashKey(s2)
+    local streetLabel = street1
+    if street2 then
+        streetLabel = streetLabel .. ' | ' .. street2
+    end
+    local sanitized = streetLabel:gsub("%'", "")
+    return sanitized
+end
+
+local function getPlayerDistanceFromCoords(coords)
+    local pos = GetEntityCoords(cache.ped)
+    return #(pos - coords)
+end
+
+--- draw 3D text on the ground to show evidence, if they press pickup button, set metadata and add it to their inventory.
 CreateThread(function()
     while true do
         Wait(0)
-        if CurrentCasing and CurrentCasing ~= 0 then
-            local pos = GetEntityCoords(cache.ped)
-            if #(pos - Casings[CurrentCasing].coords) < 1.5 then
-                DrawText3D(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z, Lang:t('info.bullet_casing', {value = Casings[CurrentCasing].type}))
+        if currentCasing and currentCasing ~= 0 then
+            if getPlayerDistanceFromCoords(casings[currentCasing].coords) < 1.5 then
+                drawText3D(casings[currentCasing].coords, Lang:t('info.bullet_casing', {value = casings[currentCasing].type}))
                 if IsControlJustReleased(0, 47) then
-                    local s1, s2 = GetStreetNameAtCoord(Casings[CurrentCasing].coords.x, Casings[CurrentCasing].coords.y, Casings[CurrentCasing].coords.z)
-                    local street1 = GetStreetNameFromHashKey(s1)
-                    local street2 = GetStreetNameFromHashKey(s2)
-                    local streetLabel = street1
-                    if street2 then
-                        streetLabel = streetLabel .. ' | ' .. street2
-                    end
                     local info = {
                         type = Lang:t('info.casing'),
-                        street = streetLabel:gsub("%'", ""),
-                        ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[Casings[CurrentCasing].type].ammotype],
-                        ammotype = Casings[CurrentCasing].type,
-                        serie = Casings[CurrentCasing].serie
+                        street = getStreetLabel(casings[currentCasing].coords),
+                        ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[casings[currentCasing].type].ammotype],
+                        ammotype = casings[currentCasing].type,
+                        serie = casings[currentCasing].serie
                     }
-                    TriggerServerEvent('evidence:server:AddCasingToInventory', CurrentCasing, info)
+                    TriggerServerEvent('evidence:server:AddCasingToInventory', currentCasing, info)
                 end
             end
         end
 
-        if CurrentBlooddrop and CurrentBlooddrop ~= 0 then
-            local pos = GetEntityCoords(cache.ped)
-            if #(pos - Blooddrops[CurrentBlooddrop].coords) < 1.5 then
-                DrawText3D(Blooddrops[CurrentBlooddrop].coords.x, Blooddrops[CurrentBlooddrop].coords.y, Blooddrops[CurrentBlooddrop].coords.z, Lang:t('info.blood_text', {value = DnaHash(Blooddrops[CurrentBlooddrop].citizenid)}))
+        if currentBloodDrop and currentBloodDrop ~= 0 then
+            if getPlayerDistanceFromCoords(bloodDrops[currentBloodDrop].coords) < 1.5 then
+                drawText3D(bloodDrops[currentBloodDrop].coords, Lang:t('info.blood_text', {value = dnaHash(bloodDrops[currentBloodDrop].citizenid)}))
                 if IsControlJustReleased(0, 47) then
-                    local s1, s2 = GetStreetNameAtCoord(Blooddrops[CurrentBlooddrop].coords.x, Blooddrops[CurrentBlooddrop].coords.y, Blooddrops[CurrentBlooddrop].coords.z)
-                    local street1 = GetStreetNameFromHashKey(s1)
-                    local street2 = GetStreetNameFromHashKey(s2)
-                    local streetLabel = street1
-                    if street2 then
-                        streetLabel = streetLabel .. ' | ' .. street2
-                    end
                     local info = {
                         type = Lang:t('info.blood'),
-                        street = streetLabel:gsub("%'", ""),
-                        dnalabel = DnaHash(Blooddrops[CurrentBlooddrop].citizenid),
-                        bloodtype = Blooddrops[CurrentBlooddrop].bloodtype
+                        street = getStreetLabel(bloodDrops[currentBloodDrop].coords),
+                        dnalabel = dnaHash(bloodDrops[currentBloodDrop].citizenid),
+                        bloodtype = bloodDrops[currentBloodDrop].bloodtype
                     }
-                    TriggerServerEvent('evidence:server:AddBlooddropToInventory', CurrentBlooddrop, info)
+                    TriggerServerEvent('evidence:server:AddBlooddropToInventory', currentBloodDrop, info)
                 end
             end
         end
 
-        if CurrentFingerprint and CurrentFingerprint ~= 0 then
-            local pos = GetEntityCoords(cache.ped)
-            if #(pos - Fingerprints[CurrentFingerprint].coords) < 1.5 then
-                DrawText3D(Fingerprints[CurrentFingerprint].coords.x, Fingerprints[CurrentFingerprint].coords.y, Fingerprints[CurrentFingerprint].coords.z, Lang:t('info.fingerprint_text'))
+        if currentFingerprint and currentFingerprint ~= 0 then
+            if getPlayerDistanceFromCoords(fingerprints[currentFingerprint].coords) < 1.5 then
+                drawText3D(fingerprints[currentFingerprint].coords, Lang:t('info.fingerprint_text'))
                 if IsControlJustReleased(0, 47) then
-                    local s1, s2 = GetStreetNameAtCoord(Fingerprints[CurrentFingerprint].coords.x,Fingerprints[CurrentFingerprint].coords.y, Fingerprints[CurrentFingerprint].coords.z)
-                    local street1 = GetStreetNameFromHashKey(s1)
-                    local street2 = GetStreetNameFromHashKey(s2)
-                    local streetLabel = street1
-                    if street2 then
-                        streetLabel = streetLabel .. ' | ' .. street2
-                    end
                     local info = {
                         type = Lang:t('info.fingerprint'),
-                        street = streetLabel:gsub("%'", ""),
-                        fingerprint = Fingerprints[CurrentFingerprint].fingerprint
+                        street = getStreetLabel(fingerprints[currentFingerprint].coords),
+                        fingerprint = fingerprints[currentFingerprint].fingerprint
                     }
-                    TriggerServerEvent('evidence:server:AddFingerprintToInventory', CurrentFingerprint, info)
+                    TriggerServerEvent('evidence:server:AddFingerprintToInventory', currentFingerprint, info)
                 end
             end
         end
     end
 end)
 
+local function canDiscoverEvidence()
+    return IsLoggedIn
+        and PlayerData.job.type == 'leo'
+        and PlayerData.job.onduty
+        and IsPlayerFreeAiming(cache.playerId)
+        and cache.weapon == `WEAPON_FLASHLIGHT`
+end
+
+---@param evidence table<number, {coords: vector3}>
+---@return number? evidenceId
+local function getCloseEvidence(evidence)
+    local pos = GetEntityCoords(cache.ped, true)
+    for evidenceId, v in pairs(evidence) do
+        local dist = #(pos - v.coords)
+        if dist < 1.5 then
+            return evidenceId
+        end
+    end
+end
+
 CreateThread(function()
-    local closeEvidenceSleep
     while true do
-        closeEvidenceSleep = 1000
-        if IsLoggedIn and PlayerData.job.type == 'leo' and PlayerData.job.onduty and IsPlayerFreeAiming(cache.playerId) and cache.weapon == `WEAPON_FLASHLIGHT` then
+        local closeEvidenceSleep = 1000
+        if canDiscoverEvidence() then
             closeEvidenceSleep = 10
-            if next(Casings) then
-                local pos = GetEntityCoords(cache.ped, true)
-                for k, v in pairs(Casings) do
-                    local dist = #(pos - v.coords)
-                    if dist < 1.5 then
-                        CurrentCasing = k
-                    end
-                end
-            end
-            if next(Blooddrops) then
-                local pos = GetEntityCoords(cache.ped, true)
-                for k, v in pairs(Blooddrops) do
-                    local dist = #(pos - v.coords)
-                    if dist < 1.5 then
-                        CurrentBlooddrop = k
-                    end
-                end
-            end
-            if next(Fingerprints) then
-                local pos = GetEntityCoords(cache.ped, true)
-                for k, v in pairs(Fingerprints) do
-                    local dist = #(pos - v.coords)
-                    if dist < 1.5 then
-                        CurrentFingerprint = k
-                    end
-                end
-            end
+            currentCasing = getCloseEvidence(casings) or currentCasing
+            currentBloodDrop = getCloseEvidence(bloodDrops) or currentBloodDrop
+            currentFingerprint = getCloseEvidence(fingerprints) or currentFingerprint
         end
         Wait(closeEvidenceSleep)
     end
