@@ -717,7 +717,7 @@ end)
 
 RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
     local casingId = generateId(casings)
-    local serialNumber = exports.ox_inventory:GetCurrentWeapon(source).metadata.serial
+    local serieNumber = exports.ox_inventory:GetCurrentWeapon(source).metadata.serial
     TriggerClientEvent("evidence:client:AddCasing", -1, casingId, weapon, coords, serieNumber)
 end)
 
