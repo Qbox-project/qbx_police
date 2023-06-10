@@ -717,9 +717,7 @@ end)
 
 RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
     local casingId = generateId(casings)
-    local weaponInfo = QBCore.Shared.Weapons[weapon]
-    local weaponData = exports.ox_inventory:Search(source, 'slots', weaponInfo.name, 'serial')
-    local serieNumber = weaponData[1]?.metadata?.serial
+    local serialNumber = exports.ox_inventory:GetCurrentWeapon(source).metadata.serial
     TriggerClientEvent("evidence:client:AddCasing", -1, casingId, weapon, coords, serieNumber)
 end)
 
