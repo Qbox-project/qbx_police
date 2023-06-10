@@ -1,7 +1,7 @@
 -- Variables
 local currentGarage = 0
 local inFingerprint = false
-local FingerPrintSessionId = nil
+local fingerPrintSessionId = nil
 local inStash = false
 local inTrash = false
 local inHelicopter = false
@@ -9,35 +9,14 @@ local inImpound = false
 local inGarage = false
 local inPrompt = false
 
-local function GetClosestPlayer() -- interactions, job, tracker
-    local closestPlayers = QBCore.Functions.GetPlayersFromCoords()
-    local closestDistance = -1
-    local closestPlayer = -1
-    local coords = GetEntityCoords(cache.ped)
-
-    for i = 1, #closestPlayers, 1 do
-        if closestPlayers[i] ~= cache.playerId then
-            local pos = GetEntityCoords(GetPlayerPed(closestPlayers[i]))
-            local distance = #(pos - coords)
-
-            if closestDistance == -1 or closestDistance > distance then
-                closestPlayer = closestPlayers[i]
-                closestDistance = distance
-            end
-        end
-    end
-
-    return closestPlayer, closestDistance
-end
-
-local function openFingerprintUI()
+local function openFingerprintUi()
     SendNUIMessage({
         type = "fingerprintOpen"
     })
     SetNuiFocus(true, true)
 end
 
-local function SetCarItemsInfo()
+local function setCarItemsInfo()
 	local items = {}
 	for _, item in pairs(Config.CarItems) do
 		local itemInfo = QBCore.Shared.Items[item.name:lower()]
@@ -46,7 +25,7 @@ local function SetCarItemsInfo()
 			amount = tonumber(item.amount),
 			info = item.info,
 			label = itemInfo.label,
-			description = itemInfo.description and itemInfo.description or "",
+			description = itemInfo.description or "",
 			weight = itemInfo.weight,
 			type = itemInfo.type,
 			unique = itemInfo.unique,
@@ -101,34 +80,33 @@ local function doCarDamage(currentVehicle, veh)
 	end
 end
 
-local function TakeOutImpound(vehicle)
+local function takeOutImpound(vehicle)
     if not inImpound then return end
     local coords = Config.Locations.impound[currentGarage]
-    if coords then
-        QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
-            local veh = NetToVeh(netId)
-            QBCore.Functions.TriggerCallback('qb-garage:server:GetVehicleProperties', function(properties)
-                QBCore.Functions.SetVehicleProperties(veh, properties)
-                SetVehicleNumberPlateText(veh, vehicle.plate)
-                SetVehicleFuelLevel(veh, vehicle.fuel)
-                doCarDamage(veh, vehicle)
-                TriggerServerEvent('police:server:TakeOutImpound', vehicle.plate, currentGarage)
-                TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-                TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-                SetVehicleEngineOn(veh, true, true, false)
-            end, vehicle.plate)
-        end, vehicle.vehicle, coords, true)
-    end
+    if not coords then return end
+    QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
+        local veh = NetToVeh(netId)
+        QBCore.Functions.TriggerCallback('qb-garage:server:GetVehicleProperties', function(properties)
+            QBCore.Functions.SetVehicleProperties(veh, properties)
+            SetVehicleNumberPlateText(veh, vehicle.plate)
+            SetVehicleFuelLevel(veh, vehicle.fuel)
+            doCarDamage(veh, vehicle)
+            TriggerServerEvent('police:server:TakeOutImpound', vehicle.plate, currentGarage)
+            TaskWarpPedIntoVehicle(cache.ped, veh, -1)
+            TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
+            SetVehicleEngineOn(veh, true, true, false)
+        end, vehicle.plate)
+    end, vehicle.vehicle, coords, true)
 end
 
-local function TakeOutVehicle(vehicleInfo)
+local function takeOutVehicle(vehicleInfo)
     if not inGarage then return end
     local coords = Config.Locations.vehicle[currentGarage]
     if not coords then return end
 
     QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
         local veh = NetToVeh(netId)
-        SetCarItemsInfo()
+        setCarItemsInfo()
         SetVehicleNumberPlateText(veh, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)))
         SetEntityHeading(veh, coords.w)
         SetVehicleFuelLevel(veh, 100.0)
@@ -147,94 +125,119 @@ local function TakeOutVehicle(vehicleInfo)
     end, vehicleInfo, coords, true)
 end
 
-local function MenuGarage()
+local function openGarageMenu()
     local authorizedVehicles = Config.AuthorizedVehicles[PlayerData.job.grade.level]
-    local registeredMenu = {
-        id = 'qb_policejob_vehicles_menu',
-        title = Lang:t('menu.garage_title'),
-        options = {}
-    }
+    local options = {}
 
     for veh, label in pairs(authorizedVehicles) do
-        registeredMenu.options[#registeredMenu.options + 1] = {
+        options[#options+1] = {
             title = label,
-            description = '',
-            event = 'police:client:TakeOutVehicle',
-            args = {vehicle = veh}
+            onSelect = function()
+                takeOutVehicle(veh)
+            end,
         }
     end
 
-    if PlayerData.job.type == 'leo' then
-        for veh, label in pairs(Config.WhitelistedVehicles) do
-            registeredMenu.options[#registeredMenu.options + 1] = {
-                title = label,
-                description = '',
-                event = 'police:client:TakeOutVehicle',
-                args = {vehicle = veh}
-            }
-        end
+    for veh, label in pairs(Config.WhitelistedVehicles) do
+        options[#options+1] = {
+            title = label,
+            onSelect = function()
+                takeOutVehicle(veh)
+            end,
+        }
     end
 
-    lib.registerContext(registeredMenu)
+    lib.registerContext({
+        id = 'qb_policejob_vehicles_menu',
+        title = Lang:t('menu.garage_title'),
+        options = options,
+    })
     lib.showContext('qb_policejob_vehicles_menu')
 end
 
-local function MenuImpound()
-    local registeredMenu = {
-        id = 'qb_policejob_impound_menu',
-        title = Lang:t('menu.impound'),
-        options = {}
-    }
+local function openImpoundMenu()
+    local options = {}
+    local result = lib.callback.await("police:GetImpoundedVehicles", false)
+    if not result then
+        lib.notify({ description = Lang:t("error.no_impound"), type = 'error', })
+    else
+        for _, v in pairs(result) do
+            local enginePercent = QBCore.Shared.Round(v.engine / 10, 0)
+            local currentFuel = v.fuel
+            local vName = QBCore.Shared.Vehicles[v.vehicle].name
 
-    lib.callback("police:GetImpoundedVehicles", false, function(result)
-        if not result then
-            lib.notify({ description = Lang:t("error.no_impound"), type = 'error', })
-        else
-            for _, v in pairs(result) do
-                local enginePercent = QBCore.Shared.Round(v.engine / 10, 0)
-                local currentFuel = v.fuel
-                local vname = QBCore.Shared.Vehicles[v.vehicle].name
-
-                registeredMenu.options[#registeredMenu.options + 1] = {
-                    title = vname.." ["..v.plate.."]",
-                    description = '',
-                    event = 'police:client:TakeOutImpound',
-                    args = {vehicle = v},
-                    metadata = {
-                        {label = 'Engine', value = enginePercent .. ' %'},
-                        {label = 'Fuel', value = currentFuel .. ' %'},
-                    },
-                }
-            end
-        end
-
-        lib.registerContext(registeredMenu)
-        lib.showContext('qb_policejob_impound_menu')
-    end)
-end
-
-local function MenuEvidence()
-    local currentEvidence = 0
-    local pos = GetEntityCoords(cache.ped)
-
-    for k, v in pairs(Config.Locations.evidence) do
-        if #(pos - v) < 2 then
-            currentEvidence = k
+            options[#options+1] = {
+                title = vName.." ["..v.plate.."]",
+                onSelect = function()
+                    takeOutImpound(v)
+                end,
+                metadata = {
+                    {label = 'Engine', value = enginePercent .. ' %'},
+                    {label = 'Fuel', value = currentFuel .. ' %'},
+                },
+            }
         end
     end
+
     lib.registerContext({
-        id = 'qb_policejob_evidence_menu',
-        title = Lang:t('info.evidence_stash', {value = currentEvidence}),
-        options = {
-            {
-                title = 'Police Evidence Stash '..currentEvidence,
-                description = 'Open evidence stash',
-                event = 'police:client:EvidenceStashDrawer',
-                args = {currentEvidence = currentEvidence}
-            }
-        },
+        id = 'qb_policejob_impound_menu',
+        title = Lang:t('menu.impound'),
+        options = options,
     })
-    lib.showContext('qb_policejob_evidence_menu')
+    lib.showContext('qb_policejob_impound_menu')
+end
+
+---TODO: global evidence lockers instead of location specific
+local function openEvidenceLockerSelectInput(currentEvidence)
+    local input = lib.inputDialog(Lang:t('info.evidence_stash', {value = currentEvidence}), {Lang:t('info.slot')})
+    if not input then return end
+    local slotNumber = tonumber(input[1])
+    TriggerServerEvent("inventory:server:OpenInventory", "stash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = slotNumber}), {
+        maxweight = 4000000,
+        slots = 500,
+    })
+    TriggerEvent("inventory:client:SetCurrentStash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = slotNumber}))
+end
+
+local function openEvidenceMenu()
+    local pos = GetEntityCoords(cache.ped)
+    for k, v in pairs(Config.Locations.evidence) do
+        if #(pos - v) < 1 then
+            openEvidenceLockerSelectInput(k)
+            return
+        end
+    end
+end
+
+local function spawnHelicopter()
+    if not inHelicopter then return end
+    if cache.vehicle then
+        QBCore.Functions.DeleteVehicle(cache.vehicle)
+    else
+        local plyCoords = GetEntityCoords(cache.ped)
+        local coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
+        QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
+            local veh = NetToVeh(netId)
+            SetVehicleLivery(veh , 0)
+            SetVehicleMod(veh, 0, 48, false)
+            SetVehicleNumberPlateText(veh, "ZULU"..tostring(math.random(1000, 9999)))
+            SetEntityHeading(veh, coords.w)
+            SetVehicleFuelLevel(veh, 100.0)
+            TaskWarpPedIntoVehicle(cache.ped, veh, -1)
+            TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
+            SetVehicleEngineOn(veh, true, true, false)
+        end, Config.PoliceHelicopter, coords, true)
+    end
+end
+
+local function scanFingerprint()
+    if not inFingerprint then return end
+    local playerId = lib.getClosestPlayer(GetEntityCoords(cache.ped), 2.5, false)
+    if not playerId then
+        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error', })
+        return
+    end
+    TriggerServerEvent("police:server:showFingerprint", playerId)
 end
 
 local function uiPrompt(promptType, id)
@@ -244,7 +247,7 @@ local function uiPrompt(promptType, id)
             Wait(0)
             if IsControlJustReleased(0, 38) then
                 if promptType == 'duty' then
-                    TriggerEvent('qb-policejob:ToggleDuty')
+                    ToggleDuty()
                     lib.hideTextUI()
                     break
                 elseif promptType == 'garage' then
@@ -254,12 +257,12 @@ local function uiPrompt(promptType, id)
                         lib.hideTextUI()
                         break
                     else
-                        MenuGarage()
+                        openGarageMenu()
                         lib.hideTextUI()
                         break
                     end
                 elseif promptType == 'evidence' then
-                    MenuEvidence()
+                    openEvidenceMenu()
                     lib.hideTextUI()
                     break
                 elseif promptType == 'impound' then
@@ -269,16 +272,16 @@ local function uiPrompt(promptType, id)
                         lib.hideTextUI()
                         break
                     else
-                        MenuImpound()
+                        openImpoundMenu()
                         lib.hideTextUI()
                         break
                     end
                 elseif promptType == 'heli' then
-                    TriggerEvent("qb-police:client:spawnHelicopter")
+                    spawnHelicopter()
                     lib.hideTextUI()
                     break
                 elseif promptType == 'fingerprint' then
-                    TriggerEvent("qb-police:client:scanFingerPrint")
+                    scanFingerprint()
                     lib.hideTextUI()
                     break
                 elseif promptType == 'trash' then
@@ -303,8 +306,8 @@ end)
 
 --Events
 RegisterNetEvent('police:client:showFingerprint', function(playerId)
-    openFingerprintUI()
-    FingerPrintSessionId = playerId
+    openFingerprintUi()
+    fingerPrintSessionId = playerId
 end)
 
 RegisterNetEvent('police:client:showFingerprintId', function(fid)
@@ -316,7 +319,7 @@ RegisterNetEvent('police:client:showFingerprintId', function(fid)
 end)
 
 RegisterNUICallback('doFingerScan', function(_, cb)
-    TriggerServerEvent('police:server:showFingerprintId', FingerPrintSessionId)
+    TriggerServerEvent('police:server:showFingerprintId', fingerPrintSessionId)
     cb("ok")
 end)
 
@@ -404,91 +407,22 @@ end)
 RegisterNetEvent('police:client:CheckStatus', function()
     if PlayerData.job.type ~= "leo" then return end
 
-    local player, distance = GetClosestPlayer()
-    if player ~= -1 and distance < 5.0 then
-        local playerId = GetPlayerServerId(player)
-        local result = lib.callback.await('police:GetPlayerStatus', false, playerId)
-        if not result then return end
-
-        for _, v in pairs(result) do
-            lib.notify({ description = v, type = 'success' })
-        end
-    else
+    local playerId = lib.getClosestPlayer(GetEntityCoords(cache.ped), 5.0, false)
+    if not playerId then
         lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
+        return
+    end
+    local result = lib.callback.await('police:GetPlayerStatus', false, playerId)
+    if not result then return end
+    for _, v in pairs(result) do
+        lib.notify({ description = v, type = 'success' })
     end
 end)
 
-RegisterNetEvent('police:client:TakeOutImpound', function(data)
-    if not inImpound then return end
-
-    TakeOutImpound(data.vehicle)
-end)
-
-RegisterNetEvent('police:client:TakeOutVehicle', function(data)
-    if not inGarage then return end
-
-    TakeOutVehicle(data.vehicle)
-end)
-
-RegisterNetEvent('police:client:EvidenceStashDrawer', function(data)
-    local currentEvidence = data.currentEvidence
-    local takeLoc = Config.Locations.evidence[currentEvidence]
-
-    if not takeLoc then return end
-
-    if #(GetEntityCoords(cache.ped) - takeLoc) <= 1.0 then
-        local input = lib.inputDialog(Lang:t('info.evidence_stash', {value = currentEvidence}), {Lang:t('info.slot')})
-
-        if not input then return end
-        local slotNumber = tonumber(input[1])
-        TriggerServerEvent("inventory:server:OpenInventory", "stash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = slotNumber}), {
-            maxweight = 4000000,
-            slots = 500,
-        })
-        TriggerEvent("inventory:client:SetCurrentStash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = slotNumber}))
-    end
-end)
-
--- Toggle Duty in an event.
-RegisterNetEvent('qb-policejob:ToggleDuty', function()
+function ToggleDuty()
     TriggerServerEvent("QBCore:ToggleDuty")
     TriggerServerEvent("police:server:UpdateCurrentCops")
-end)
-
-RegisterNetEvent('qb-police:client:scanFingerPrint', function()
-    if not inFingerprint then return end
-    local player, distance = GetClosestPlayer()
-    if player ~= -1 and distance < 2.5 then
-        local playerId = GetPlayerServerId(player)
-        TriggerServerEvent("police:server:showFingerprint", playerId)
-    else
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error', })
-    end
-end)
-
-RegisterNetEvent('qb-police:client:spawnHelicopter', function(k)
-    if not inHelicopter then return end
-    if cache.vehicle then
-        QBCore.Functions.DeleteVehicle(cache.vehicle)
-    else
-        local coords = Config.Locations.helicopter[k]
-        if not coords then
-            local plyCoords = GetEntityCoords(cache.ped)
-            coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
-        end
-        QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
-            local veh = NetToVeh(netId)
-            SetVehicleLivery(veh , 0)
-            SetVehicleMod(veh, 0, 48, false)
-            SetVehicleNumberPlateText(veh, "ZULU"..tostring(math.random(1000, 9999)))
-            SetEntityHeading(veh, coords.w)
-            SetVehicleFuelLevel(veh, 100.0)
-            TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-            TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-            SetVehicleEngineOn(veh, true, true, false)
-        end, Config.PoliceHelicopter, coords, true)
-    end
-end)
+end
 
 -- Threads
 
@@ -506,7 +440,7 @@ if Config.UseTarget then
                 options = {
                     {
                         type = "client",
-                        event = "qb-policejob:ToggleDuty",
+                        action = ToggleDuty,
                         icon = "fas fa-sign-in-alt",
                         label = "Sign In",
                         job = "police",
