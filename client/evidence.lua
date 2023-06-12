@@ -62,7 +62,8 @@ local function DropBulletCasing(weapon, ped)
     local randX = math.random() + math.random(-1, 1)
     local randY = math.random() + math.random(-1, 1)
     local coords = GetOffsetFromEntityInWorldCoords(ped, randX, randY, 0)
-    TriggerServerEvent('evidence:server:CreateCasing', weapon, coords)
+    local serial = exports.ox_inventory:GetCurrentWeapon().metadata.serial
+    TriggerServerEvent('evidence:server:CreateCasing', weapon, serial, coords)
     Wait(300)
 end
 
