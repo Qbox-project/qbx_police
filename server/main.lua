@@ -715,9 +715,12 @@ RegisterNetEvent('evidence:server:AddFingerprintToInventory', function(fingerId,
     end
 end)
 
-RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
+RegisterNetEvent('evidence:server:CreateCasing', function(weapon, serial, coords)
     local casingId = generateId(casings)
     local serieNumber = exports.ox_inventory:GetCurrentWeapon(source).metadata.serial
+    if not serieNumber then
+	serieNumber = serial
+    end
     TriggerClientEvent("evidence:client:AddCasing", -1, casingId, weapon, coords, serieNumber)
 end)
 
