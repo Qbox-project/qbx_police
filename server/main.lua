@@ -684,6 +684,7 @@ RegisterNetEvent('evidence:server:AddBlooddropToInventory', function(bloodId, bl
     local metadata = {}
         metadata.type = 'Blood Evidence'
         metadata.description = "DNA ID: "..bloodDNA
+        metadata.description = metadata.description.."\n\nBlood Type: "..bloodType
         metadata.description = metadata.description.."\n\nCollected By: "..playerName
         metadata.description = metadata.description.."\n\nCollected At: "..streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
