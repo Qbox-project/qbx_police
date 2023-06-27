@@ -271,7 +271,7 @@ RegisterNetEvent('police:client:CuffPlayerSoft', function()
     if IsPedRagdoll(cache.ped) then return end
     local player, distance = QBCore.Functions.GetClosestPlayer()
     if isTooFar(player, distance, 1.5) then return end
-    local playerId = GetPlayerServerId(player)
+    local playerId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(player))
     if IsPedInAnyVehicle(GetPlayerPed(player), false) or cache.vehicle then
         lib.notify({ description = Lang:t("error.vehicle_cuff"), type = 'error' })
         return
@@ -289,7 +289,7 @@ RegisterNetEvent('police:client:CuffPlayer', function()
         lib.notify({ description = Lang:t("error.no_cuff"), type = 'error' })
         return
     end
-    local playerId = GetPlayerServerId(player)
+    local playerId = GetPlayerServerId(NetworkGetPlayerIndexFromPed(player))
     if IsPedInAnyVehicle(GetPlayerPed(player), false) or cache.vehicle then
         lib.notify({ description = Lang:t("error.vehicle_cuff"), type = 'error' })
         return
