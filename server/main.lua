@@ -26,7 +26,7 @@ end
 ---@return boolean
 local function checkLeoAndOnDuty(player, minGrade)
     if type(player) == "number" then
-        player = QBCore.Functions.GetPlayer(source)
+        player = QBCore.Functions.GetPlayer(player)
     end
     if not isLeoAndOnDuty(player, minGrade) then
         TriggerClientEvent('ox_lib:notify', player.PlayerData.source, {description = Lang:t("error.on_duty_police_only"), type = 'error'})
