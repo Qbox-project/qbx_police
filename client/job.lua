@@ -104,25 +104,23 @@ local function takeOutVehicle(vehicleInfo)
     local coords = Config.Locations.vehicle[currentGarage]
     if not coords then return end
 
-    QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
-        local veh = NetToVeh(netId)
-        setCarItemsInfo()
-        SetVehicleNumberPlateText(veh, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)))
-        SetEntityHeading(veh, coords.w)
-        SetVehicleFuelLevel(veh, 100.0)
-        if Config.VehicleSettings[vehicleInfo] then
-            if Config.VehicleSettings[vehicleInfo].extras then
-                QBCore.Shared.SetDefaultVehicleExtras(veh, Config.VehicleSettings[vehicleInfo].extras)
-            end
-            if Config.VehicleSettings[vehicleInfo].livery then
-                SetVehicleLivery(veh, Config.VehicleSettings[vehicleInfo].livery)
-            end
+    local netId = lib.callback.await('qbx-policejob:server:spawnVehicle', false, vehicleInfo, coords, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)))
+    local veh = NetToVeh(netId)
+    setCarItemsInfo()
+    SetEntityHeading(veh, coords.w)
+    SetVehicleFuelLevel(veh, 100.0)
+    if Config.VehicleSettings[vehicleInfo] then
+        if Config.VehicleSettings[vehicleInfo].extras then
+            SetVehicleExtras(veh, Config.VehicleSettings[vehicleInfo].extras)
         end
-        TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-        TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-        TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
-        SetVehicleEngineOn(veh, true, true, false)
-    end, vehicleInfo, coords, true)
+        if Config.VehicleSettings[vehicleInfo].livery then
+            SetVehicleLivery(veh, Config.VehicleSettings[vehicleInfo].livery)
+        end
+    end
+    TaskWarpPedIntoVehicle(cache.ped, veh, -1)
+    TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
+    TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
+    SetVehicleEngineOn(veh, true, true, false)
 end
 
 local function openGarageMenu()
