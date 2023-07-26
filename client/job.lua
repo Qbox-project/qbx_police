@@ -426,33 +426,27 @@ end
 
 if Config.UseTarget then
     CreateThread(function()
-        -- Toggle Duty
-        for k, v in pairs(Config.Locations.duty) do
-            exports['qb-target']:AddBoxZone("box_zone_police_duty_"..k, v, 1, 1, {
-                name = "box_zone_police_duty_"..k,
-                heading = 11,
-                debugPoly = false,
-                minZ = v.z - 1,
-                maxZ = v.z + 1,
-            }, {
+        for i = 1, #Config.Locations.duty do
+            exports.ox_target:addBoxZone({
+                coords = Config.Locations.duty[i],
+                size = vec3(1,1,3),
+                distance = 1.5,
+                debug = Config.debug,
                 options = {
                     {
-                        type = "client",
-                        action = ToggleDuty,
-                        icon = "fas fa-sign-in-alt",
-                        label = "Sign In",
-                        job = "police",
-                    },
-                },
-                distance = 1.5
+                        label = Lang:t("info.onoff_duty"),
+                        icon = 'fa-solid fa-sign-in-alt',
+                        onSelect = ToggleDuty,
+                        groups = 'police',
+                    }
+                }
             })
         end
     end)
 else
-    -- Toggle Duty
-    for _, v in pairs(Config.Locations.duty) do
+    for i = 1, #Config.Locations.duty do
         lib.zones.box({
-            coords = v,
+            coords = Config.Locations.duty[i],
             size = vec3(2, 2, 2),
             rotation = 0.0,
             onEnter = function()
