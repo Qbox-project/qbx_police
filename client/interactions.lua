@@ -141,7 +141,7 @@ end)
 ---@param maxDistance? number
 ---@return boolean
 local function isTooFar(player, distance, maxDistance)
-    if player == -1 or distance >= (maxDistance or 2.5) then
+    if not player or distance >= (maxDistance or 2.5) then
         lib.notify({
             description = Lang:t("error.none_nearby"),
             type = 'error'

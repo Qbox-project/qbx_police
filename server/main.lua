@@ -187,7 +187,7 @@ QBCore.Commands.Add("sc", Lang:t("commands.softcuff"), {}, false, function(sourc
     TriggerClientEvent("police:client:CuffPlayerSoft", source)
 end)
 
-QBCore.Commands.Add("cam", Lang:t("commands.camera"), {{name = "camid", help = Lang:t('info.camera_id')}}, false, function(source, args)
+QBCore.Commands.Add("cam", Lang:t("commands.camera"), {{name = "camid", help = Lang:t('info.camera_id_help')}}, false, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent("police:client:ActiveCamera", source, tonumber(args[1]))
 end)
@@ -427,19 +427,21 @@ RegisterNetEvent('police:server:Radar', function(fine)
     TriggerClientEvent('QBCore:Notify', source, Lang:t("info.fine_received", {fine = price}))
 end)
 
-RegisterNetEvent('police:server:policeAlert', function(text, camId, source)
-    local ped = GetPlayerPed(source)
+RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource)
+    local ped = GetPlayerPed(playerSource)
     local coords = GetEntityCoords(ped)
     local players = QBCore.Functions.GetQBPlayers()
     for k, v in pairs(players) do
-        if isLeoAndOnDuty(v) and not camId then
-            local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text}
-            TriggerClientEvent("qb-phone:client:addPoliceAlert", k, alertData)
-            TriggerClientEvent('police:client:policeAlert', k, coords, text)
-        elseif isLeoAndOnDuty(v) then
-            local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text .. ' - Camera ID: ' .. camId}
-            TriggerClientEvent("qb-phone:client:addPoliceAlert", k, alertData)
-            TriggerClientEvent('police:client:policeAlert', k, coords, text, camId)
+        if isLeoAndOnDuty(v) then
+            if camId then
+                local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text .. Lang:t('info.camera_id') .. camId}
+                TriggerClientEvent("qb-phone:client:addPoliceAlert", k, alertData)
+                TriggerClientEvent('police:client:policeAlert', k, coords, text, camId)
+            else
+                local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text}
+                TriggerClientEvent("qb-phone:client:addPoliceAlert", k, alertData)
+                TriggerClientEvent('police:client:policeAlert', k, coords, text)
+            end
         end
     end
 end)
