@@ -149,11 +149,15 @@ RegisterNetEvent('police:client:UpdateBlips', function(players)
     end
 end)
 
-RegisterNetEvent('police:client:policeAlert', function(coords, text)
+RegisterNetEvent('police:client:policeAlert', function(coords, text, camId)
     local street1, street2 = GetStreetNameAtCoord(coords.x, coords.y, coords.z)
     local street1name = GetStreetNameFromHashKey(street1)
     local street2name = GetStreetNameFromHashKey(street2)
-    lib.notify({ title = text, description = street1name.. ' ' ..street2name, type = 'inform' })
+    if camId then
+        lib.notify({ title = text, description = street1name.. ' ' ..street2name.. '- Camera ID: ' .. camId, type = 'inform' })
+    else
+        lib.notify({ title = text, description = street1name.. ' ' ..street2name, type = 'inform' })
+    end
     PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", false, 0, true)
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)

@@ -427,16 +427,19 @@ RegisterNetEvent('police:server:Radar', function(fine)
     TriggerClientEvent('QBCore:Notify', source, Lang:t("info.fine_received", {fine = price}))
 end)
 
-RegisterNetEvent('police:server:policeAlert', function(text)
-    local src = source
-    local ped = GetPlayerPed(src)
+RegisterNetEvent('police:server:policeAlert', function(text, camId, source)
+    local ped = GetPlayerPed(source)
     local coords = GetEntityCoords(ped)
     local players = QBCore.Functions.GetQBPlayers()
     for k, v in pairs(players) do
-        if isLeoAndOnDuty(v) then
+        if isLeoAndOnDuty(v) and not camId then
             local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text}
             TriggerClientEvent("qb-phone:client:addPoliceAlert", k, alertData)
             TriggerClientEvent('police:client:policeAlert', k, coords, text)
+        elseif isLeoAndOnDuty(v) then
+            local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text .. ' - Camera ID: ' .. camId}
+            TriggerClientEvent("qb-phone:client:addPoliceAlert", k, alertData)
+            TriggerClientEvent('police:client:policeAlert', k, coords, text, camId)
         end
     end
 end)
@@ -691,13 +694,13 @@ RegisterNetEvent('evidence:server:AddBlooddropToInventory', function(bloodId, bl
     local playerName = player.PlayerData.charinfo.firstname.." "..player.PlayerData.charinfo.lastname
     local streetName = bloodInfo.street
     local bloodType = bloodInfo.bloodtype
-    local bloodDNA = bloodInfo.dnalabe
+    local bloodDNA = bloodInfo.dnalabel
     local metadata = {}
-        metadata.type = 'Blood Evidence'
-        metadata.description = "DNA ID: "..bloodDNA
-        metadata.description = metadata.description.."\n\nBlood Type: "..bloodType
-        metadata.description = metadata.description.."\n\nCollected By: "..playerName
-        metadata.description = metadata.description.."\n\nCollected At: "..streetName
+    metadata.type = 'Blood Evidence'
+    metadata.description = "DNA ID: "..bloodDNA
+    metadata.description = metadata.description.."\n\nBlood Type: "..bloodType
+    metadata.description = metadata.description.."\n\nCollected By: "..playerName
+    metadata.description = metadata.description.."\n\nCollected At: "..streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
         return TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.have_evidence_bag"), type = "error"})
     end
