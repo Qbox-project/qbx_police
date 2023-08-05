@@ -1,6 +1,8 @@
 Config = {}
 
-Config.debug = false
+Config.UseTarget = GetConvar('UseTarget', 'false') == 'true'
+
+Config.PolyDebug = false
 
 Config.Objects = {
     cone = {model = `prop_roadcone02a`, freeze = false},
@@ -11,24 +13,22 @@ Config.Objects = {
 }
 
 Config.MaxSpikes = 5
-
 Config.HandCuffItem = 'handcuffs'
-
 Config.LicenseRank = 2
 
-Config.UseTarget = GetConvar('UseTarget', 'false') == 'true'
 Config.Locations = {
     duty = {
         vec3(440.085, -974.924, 30.689),
         vec3(-449.811, 6012.909, 31.815),
     },
     vehicle = {
-        vec4(448.159, -1017.41, 28.562, 90.654),
-        vec4(471.13, -1024.05, 28.17, 274.5),
-        vec4(-455.39, 6002.02, 31.34, 87.93),
+        vec4(452.0, -996.0, 26.0, 175.0),
+        vec4(447.0, -997.0, 26.0, 178.0),
+        vec4(463.0, -1019.0, 28.0, 87.0),
+        vec4(463.0, -1015.0, 28.0, 87.0)
     },
-    stash = {
-        vec3(453.075, -980.124, 30.889),
+    stash = { -- Not currently used, use ox_inventory stashes
+        -- vec3(453.075, -980.124, 30.889),
     },
     impound = {
         vec3(436.68, -1007.42, 27.32),
@@ -38,8 +38,8 @@ Config.Locations = {
         vec4(449.168, -981.325, 43.691, 87.234),
         vec4(-475.43, 5988.353, 31.716, 31.34),
     },
-    armory = {
-        vec3(462.23, -981.12, 30.68),
+    armory = { -- Not currently used, use ox_inventory shops
+        -- vec3(462.23, -981.12, 30.68),
     },
     trash = {
         vec3(439.0907, -976.746, 30.776),
@@ -47,10 +47,7 @@ Config.Locations = {
     fingerprint = {
         vec3(460.9667, -989.180, 24.92),
     },
-    evidence = {
-        vec3(442.1722, -996.067, 30.689),
-        vec3(451.7031, -973.232, 30.689),
-        vec3(455.1456, -985.462, 30.689),
+    evidence = { -- Not currently used, use ox_inventory evidence system
     },
     stations = {
         {label = "Police Station", coords = vec4(428.23, -984.28, 29.76, 3.5)},
@@ -66,42 +63,53 @@ Config.PoliceHelicopter = "POLMAV"
 Config.SecurityCameras = {
     hideradar = false,
     cameras = {
-        {label = "Pacific Bank CAM#1", coords = vec3(257.45, 210.07, 109.08), r = {x = -25.0, y = 0.0, z = 28.05}, canRotate = false, isOnline = true},
-        {label = "Pacific Bank CAM#2", coords = vec3(232.86, 221.46, 107.83), r = {x = -25.0, y = 0.0, z = -140.91}, canRotate = false, isOnline = true},
-        {label = "Pacific Bank CAM#3", coords = vec3(252.27, 225.52, 103.99), r = {x = -35.0, y = 0.0, z = -74.87}, canRotate = false, isOnline = true},
-        {label = "Limited Ltd Grove St. CAM#1", coords = vec3(-53.1433, -1746.714, 31.546), r = {x = -35.0, y = 0.0, z = -168.9182}, canRotate = false, isOnline = true},
-        {label = "Rob's Liqour Prosperity St. CAM#1", coords = vec3(-1482.9, -380.463, 42.363), r = {x = -35.0, y = 0.0, z = 79.53281}, canRotate = false, isOnline = true},
-        {label = "Rob's Liqour San Andreas Ave. CAM#1", coords = vec3(-1224.874, -911.094, 14.401), r = {x = -35.0, y = 0.0, z = -6.778894}, canRotate = false, isOnline = true},
-        {label = "Limited Ltd Ginger St. CAM#1", coords = vec3(-718.153, -909.211, 21.49), r = {x = -35.0, y = 0.0, z = -137.1431}, canRotate = false, isOnline = true},
-        {label = "24/7 Supermarkt Innocence Blvd. CAM#1", coords = vec3(23.885, -1342.441, 31.672), r = {x = -35.0, y = 0.0, z = -142.9191}, canRotate = false, isOnline = true},
-        {label = "Rob's Liqour El Rancho Blvd. CAM#1", coords = vec3(1133.024, -978.712, 48.515), r = {x = -35.0, y = 0.0, z = -137.302}, canRotate = false, isOnline = true},
-        {label = "Limited Ltd West Mirror Drive CAM#1", coords = vec3(1151.93, -320.389, 71.33), r = {x = -35.0, y = 0.0, z = -119.4468}, canRotate = false, isOnline = true},
-        {label = "24/7 Supermarkt Clinton Ave CAM#1", coords = vec3(383.402, 328.915, 105.541), r = {x = -35.0, y = 0.0, z = 118.585}, canRotate = false, isOnline = true},
-        {label = "Limited Ltd Banham Canyon Dr CAM#1", coords = vec3(-1832.057, 789.389, 140.436), r = {x = -35.0, y = 0.0, z = -91.481}, canRotate = false, isOnline = true},
-        {label = "Rob's Liqour Great Ocean Hwy CAM#1", coords = vec3(-2966.15, 387.067, 17.393), r = {x = -35.0, y = 0.0, z = 32.92229}, canRotate = false, isOnline = true},
-        {label = "24/7 Supermarkt Ineseno Road CAM#1", coords = vec3(-3046.749, 592.491, 9.808), r = {x = -35.0, y = 0.0, z = -116.673}, canRotate = false, isOnline = true},
-        {label = "24/7 Supermarkt Barbareno Rd. CAM#1", coords = vec3(-3246.489, 1010.408, 14.705), r = {x = -35.0, y = 0.0, z = -135.2151}, canRotate = false, isOnline = true},
-        {label = "24/7 Supermarkt Route 68 CAM#1", coords = vec3(539.773, 2664.904, 44.056), r = {x = -35.0, y = 0.0, z = -42.947}, canRotate = false, isOnline = true},
-        {label = "Rob's Liqour Route 68 CAM#1", coords = vec3(1169.855, 2711.493, 40.432), r = {x = -35.0, y = 0.0, z = 127.17}, canRotate = false, isOnline = true},
-        {label = "24/7 Supermarkt Senora Fwy CAM#1", coords = vec3(2673.579, 3281.265, 57.541), r = {x = -35.0, y = 0.0, z = -80.242}, canRotate = false, isOnline = true},
-        {label = "24/7 Supermarkt Alhambra Dr. CAM#1", coords = vec3(1966.24, 3749.545, 34.143), r = {x = -35.0, y = 0.0, z = 163.065}, canRotate = false, isOnline = true},
-        {label = "24/7 Supermarkt Senora Fwy CAM#2", coords = vec3(1729.522, 6419.87, 37.262), r = {x = -35.0, y = 0.0, z = -160.089}, canRotate = false, isOnline = true},
-        {label = "Fleeca Bank Hawick Ave CAM#1", coords = vec3(309.341, -281.439, 55.88), r = {x = -35.0, y = 0.0, z = -146.1595}, canRotate = false, isOnline = true},
-        {label = "Fleeca Bank Legion Square CAM#1", coords = vec3(144.871, -1043.044, 31.017), r = {x = -35.0, y = 0.0, z = -143.9796}, canRotate = false, isOnline = true},
-        {label = "Fleeca Bank Hawick Ave CAM#2", coords = vec3(-355.7643, -52.506, 50.746), r = {x = -35.0, y = 0.0, z = -143.8711}, canRotate = false, isOnline = true},
-        {label = "Fleeca Bank Del Perro Blvd CAM#1", coords = vec3(-1214.226, -335.86, 39.515), r = {x = -35.0, y = 0.0, z = -97.862}, canRotate = false, isOnline = true},
-        {label = "Fleeca Bank Great Ocean Hwy CAM#1", coords = vec3(-2958.885, 478.983, 17.406), r = {x = -35.0, y = 0.0, z = -34.69595}, canRotate = false, isOnline = true},
-        {label = "Paleto Bank CAM#1", coords = vec3(-102.939, 6467.668, 33.424), r = {x = -35.0, y = 0.0, z = 24.66}, canRotate = false, isOnline = true},
-        {label = "Del Vecchio Liquor Paleto Bay", coords = vec3(-163.75, 6323.45, 33.424), r = {x = -35.0, y = 0.0, z = 260.00}, canRotate = false, isOnline = true},
-        {label = "Don's Country Store Paleto Bay CAM#1", coords = vec3(166.42, 6634.4, 33.69), r = {x = -35.0, y = 0.0, z = 32.00}, canRotate = false, isOnline = true},
-        {label = "Don's Country Store Paleto Bay CAM#2", coords = vec3(163.74, 6644.34, 33.69), r = {x = -35.0, y = 0.0, z = 168.00}, canRotate = false, isOnline = true},
-        {label = "Don's Country Store Paleto Bay CAM#3", coords = vec3(169.54, 6640.89, 33.69), r = {x = -35.0, y = 0.0, z = 5.78}, canRotate = false, isOnline = true},
-        {label = "Vangelico Jewelery CAM#1", coords = vec3(-627.54, -239.74, 40.33), r = {x = -35.0, y = 0.0, z = 5.78}, canRotate = true, isOnline = true},
-        {label = "Vangelico Jewelery CAM#2", coords = vec3(-627.51, -229.51, 40.24), r = {x = -35.0, y = 0.0, z = -95.78}, canRotate = true, isOnline = true},
-        {label = "Vangelico Jewelery CAM#3", coords = vec3(-620.3, -224.31, 40.23), r = {x = -35.0, y = 0.0, z = 165.78}, canRotate = true, isOnline = true},
-        {label = "Vangelico Jewelery CAM#4", coords = vec3(-622.57, -236.3, 40.31), r = {x = -35.0, y = 0.0, z = 5.78}, canRotate = true, isOnline = true},
-        {label = "Limited Ltd GrapeSeed CAM#1", coords = vec3(1709.0, 4930.3, 44.00), r = {x = -25.0, y = 0.0, z = 98.0}, canRotate = false, isOnline = true},
-        {label = "24/7 Tataviam Mountains CAM#1", coords = vec3(2558.8, 390.44, 110.8), r = {x = -25.0, y = 0.0, z = 140.0}, canRotate = false, isOnline = true},
+        {label = "LTD Gasoline - Palomino Ave. - CAM#1", coords = vec3(-705.79, -909.91, 20.9), r = {x = -30.0, y = 0.0, z = -210.0}, canRotate = false, isOnline = true},
+        {label = "LTD Gasoline - Palomino Ave. - CAM#2", coords = vec3(-710.23, -904.35, 20.78), r = {x = -55.0, y = 0.0, z = -130.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Innocence Blvd. - CAM#1", coords = vec3(25.28, -1348.78, 31.22), r = {x = -40.0, y = 0.0, z = -25.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Innocence Blvd. - CAM#2", coords = vec3(23.8, -1339.77, 30.79), r = {x = -20.0, y = 0.0, z = -92.0}, canRotate = false, isOnline = true},
+        {label = "LTD Gasoline - Davis Ave. - CAM#1", coords = vec3(-43.08, -1755.2, 31.61), r = {x = -30.0, y = 0.0, z = -260.0}, canRotate = false, isOnline = true},
+        {label = "LTD Gasoline - Davis Ave. - CAM#2", coords = vec3(-43.97, -1747.98, 31.21), r = {x = -55.0, y = 0.0, z = -160.0}, canRotate = false, isOnline = true},
+        {label = "LTD Gasoline - Mirror Park Blvd. - CAM#1", coords = vec3(1164.9, -318.34, 71.28), r = {x = -30.0, y = 0.0, z = -210.0}, canRotate = false, isOnline = true},
+        {label = "LTD Gasoline - Mirror Park Blvd. - CAM#2", coords = vec3(1158.9, -314.25, 71.05), r = {x = -55.0, y = 0.0, z = -110.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Clinton Ave - CAM#1", coords = vec3(373.21, 324.7, 105.24), r = {x = -40.0, y = 0.0, z = -35.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Clinton Ave - CAM#2", coords = vec3(373.73, 333.89, 104.86), r = {x = -20.0, y = 0.0, z = -105.0}, canRotate = false, isOnline = true},
+        {label = "LTD Gasoline - Banham Canyon Dr - CAM#1", coords = vec3(-1822.22, 798.55, 139.73), r = {x = -30.0, y = 0.0, z = -180.0}, canRotate = false, isOnline = true},
+        {label = "LTD Gasoline - Banham Canyon Dr - CAM#2", coords = vec3(-1829.57, 798.34, 140.0), r = {x = -55.0, y = 0.0, z = -91.481}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Palomino Freeway - CAM#1", coords = vec3(2558.76, 381.7, 110.33), r = {x = -40.0, y = 0.0, z = 60.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Palomino Freeway - CAM#2", coords = vec3(2549.13, 380.56, 109.58), r = {x = -20.0, y = 0.0, z = -10.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Señora Freeway - CAM#1", coords = vec3(2679.56, 3279.89, 56.67), r = {x = -40.0, y = 0.0, z = 40.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Señora Freeway - CAM#2", coords = vec3(2670.66, 3282.85, 56.09), r = {x = -10.0, y = 0.0, z = -40.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Niland Ave. - CAM#1", coords = vec3(1961.97, 3739.42, 33.77), r = {x = -40.0, y = 0.0, z = 20.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Niland Ave. - CAM#2", coords = vec3(1955.55, 3746.76, 33.2), r = {x = -10.0, y = 0.0, z = -70.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Route 68 - CAM#1", coords = vec3(547.68, 2672.88, 44.02), r = {x = -40.0, y = 0.0, z = 160.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Route 68 - CAM#2", coords = vec3(550.93, 2662.73, 44.37), r = {x = -40.0, y = 0.0, z = 60.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Señora Freeway, Mount Chillad - CAM#1", coords = vec3(1726.85, 6413.76, 37.64), r = {x = -40.0, y = 0.0, z = -80.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Señora Freeway, Mount Chillad - CAM#2", coords = vec3(1731.16, 6423.27, 37.28), r = {x = -40.0, y = 0.0, z = 210.0}, canRotate = false, isOnline = true},
+        {label = "LTD Gasoline - Grapeseed Main St. - CAM#1", coords = vec3(1700.33, 4919.91, 44.04), r = {x = -30.0, y = 0.0, z = 0.0}, canRotate = false, isOnline = true},
+        {label = "LTD Gasoline - Grapeseed Main St. - CAM#2", coords = vec3(1708.34, 4920.88, 43.68), r = {x = -55.0, y = 0.0, z = 100.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Barbareno Rd. - CAM#1", coords = vector3(-3240.69, 1000.9, 14.51), r = {x = -40.0, y = 0.0, z = 65.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Barbareno Rd. - CAM#2", coords = vector3(-3249.74, 999.95, 14.13), r = {x = -10.0, y = 0.0, z = -5.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Ineseno Rd. - CAM#1", coords = vector3(-3037.53, 584.58, 10.15), r = {x = -40.0, y = 0.0, z = 65.0}, canRotate = false, isOnline = true},
+        {label = "24/7 Supermarket - Ineseno Rd. - CAM#2", coords = vector3(-3047.28, 582.21, 9.93), r = {x = -30.0, y = 0.0, z = -5.0}, canRotate = false, isOnline = true},
+        {label = "Rob's Liquors - San Andreas Ave. - CAM#1", coords = vec3(-1224.874, -911.094, 14.401), r = {x = -35.0, y = 0.0, z = -6.778894}, canRotate = false, isOnline = true},
+        {label = "Rob's Liquors - Prosperity St. - CAM#1", coords = vec3(-1482.9, -380.463, 42.363), r = {x = -35.0, y = 0.0, z = 79.53281}, canRotate = false, isOnline = true},
+        {label = "Rob's Liquors - El Rancho Blvd. - CAM#1", coords = vec3(1133.024, -978.712, 48.515), r = {x = -35.0, y = 0.0, z = -137.302}, canRotate = false, isOnline = true},
+        {label = "Rob's Liquors - Route 68 - CAM#1", coords = vec3(1169.855, 2711.493, 40.432), r = {x = -35.0, y = 0.0, z = 127.17}, canRotate = false, isOnline = true},
+        {label = "Rob's Liquors - Autopista de Great Ocean - CAM#1", coords = vector3(-2966.1, 386.92, 17.39), r = {x = -35.0, y = 0.0, z = 20.0}, canRotate = false, isOnline = true},
+        {label = "Fleeca Bank - Meteor St. - CAM#1", coords = vec3(309.341, -281.439, 55.88), r = {x = -35.0, y = 0.0, z = -146.1595}, canRotate = false, isOnline = true},
+        {label = "Fleeca Bank - Vespucci Blvd. - CAM#1", coords = vec3(144.871, -1043.044, 31.017), r = {x = -35.0, y = 0.0, z = -143.9796}, canRotate = false, isOnline = true},
+        {label = "Fleeca Bank - Hawick Ave. - CAM#1 ", coords = vec3(-355.7643, -52.506, 50.746), r = {x = -35.0, y = 0.0, z = -143.8711}, canRotate = false, isOnline = true},
+        {label = "Fleeca Bank - Del Perro Blvd. - CAM#1", coords = vec3(-1214.226, -335.86, 39.515), r = {x = -35.0, y = 0.0, z = -97.862}, canRotate = false, isOnline = true},
+        {label = "Fleeca Bank - Great Ocean Hwy. - CAM#1", coords = vec3(-2958.885, 478.983, 17.406), r = {x = -35.0, y = 0.0, z = -34.69595}, canRotate = false, isOnline = true},
+        {label = "Fleeca Bank - Route 68 - CAM#1", coords = vec3(1178.8, 2710.78, 39.66), r = {x = -35.0, y = 0.0, z = 50.0}, canRotate = false, isOnline = true},
+        {label = "Pacific Bank - CAM#1", coords = vec3(265.61, 212.97, 111.28), r = {x = -25.0, y = 0.0, z = 28.05}, canRotate = false, isOnline = true},
+        {label = "Pacific Bank - CAM#2", coords = vec3(232.86, 221.46, 107.83), r = {x = -25.0, y = 0.0, z = -140.91}, canRotate = false, isOnline = true},
+        {label = "Pacific Bank - CAM#3", coords = vec3(232.21, 233.69, 99.42), r = {x = -45.05, y = 10.0, z = 120.0}, canRotate = false, isOnline = true},
+        {label = "Paleto Bank - CAM#1", coords = vec3(-102.939, 6467.668, 33.424), r = {x = -35.0, y = 0.0, z = 24.66}, canRotate = false, isOnline = true},
+        {label = "Vangelico Jewelery - CAM#1", coords = vec3(-627.54, -239.74, 40.33), r = {x = -35.0, y = 0.0, z = 5.78}, canRotate = true, isOnline = true},
+        {label = "Vangelico Jewelery - CAM#2", coords = vec3(-627.51, -229.51, 40.24), r = {x = -35.0, y = 0.0, z = -95.78}, canRotate = true, isOnline = true},
+        {label = "Vangelico Jewelery - CAM#3", coords = vec3(-620.3, -224.31, 40.23), r = {x = -35.0, y = 0.0, z = 165.78}, canRotate = true, isOnline = true},
+        {label = "Vangelico Jewelery - CAM#4", coords = vec3(-622.57, -236.3, 40.31), r = {x = -35.0, y = 0.0, z = 5.78}, canRotate = true, isOnline = true},
     },
 }
 

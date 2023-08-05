@@ -187,7 +187,7 @@ QBCore.Commands.Add("sc", Lang:t("commands.softcuff"), {}, false, function(sourc
     TriggerClientEvent("police:client:CuffPlayerSoft", source)
 end)
 
-QBCore.Commands.Add("cam", Lang:t("commands.camera"), {{name = "camid", help = Lang:t('info.camera_id')}}, false, function(source, args)
+QBCore.Commands.Add("cam", Lang:t("commands.camera"), {{name = "camid", help = Lang:t('info.camera_id_help')}}, false, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent("police:client:ActiveCamera", source, tonumber(args[1]))
 end)
@@ -427,16 +427,21 @@ RegisterNetEvent('police:server:Radar', function(fine)
     TriggerClientEvent('QBCore:Notify', source, Lang:t("info.fine_received", {fine = price}))
 end)
 
-RegisterNetEvent('police:server:policeAlert', function(text)
-    local src = source
-    local ped = GetPlayerPed(src)
+RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource)
+    local ped = GetPlayerPed(playerSource)
     local coords = GetEntityCoords(ped)
     local players = QBCore.Functions.GetQBPlayers()
     for k, v in pairs(players) do
         if isLeoAndOnDuty(v) then
-            local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text}
-            TriggerClientEvent("qb-phone:client:addPoliceAlert", k, alertData)
-            TriggerClientEvent('police:client:policeAlert', k, coords, text)
+            if camId then
+                local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text .. Lang:t('info.camera_id') .. camId}
+                TriggerClientEvent("qb-phone:client:addPoliceAlert", k, alertData)
+                TriggerClientEvent('police:client:policeAlert', k, coords, text, camId)
+            else
+                local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text}
+                TriggerClientEvent("qb-phone:client:addPoliceAlert", k, alertData)
+                TriggerClientEvent('police:client:policeAlert', k, coords, text)
+            end
         end
     end
 end)
@@ -691,13 +696,13 @@ RegisterNetEvent('evidence:server:AddBlooddropToInventory', function(bloodId, bl
     local playerName = player.PlayerData.charinfo.firstname.." "..player.PlayerData.charinfo.lastname
     local streetName = bloodInfo.street
     local bloodType = bloodInfo.bloodtype
-    local bloodDNA = bloodInfo.dnalabe
+    local bloodDNA = bloodInfo.dnalabel
     local metadata = {}
-        metadata.type = 'Blood Evidence'
-        metadata.description = "DNA ID: "..bloodDNA
-        metadata.description = metadata.description.."\n\nBlood Type: "..bloodType
-        metadata.description = metadata.description.."\n\nCollected By: "..playerName
-        metadata.description = metadata.description.."\n\nCollected At: "..streetName
+    metadata.type = 'Blood Evidence'
+    metadata.description = "DNA ID: "..bloodDNA
+    metadata.description = metadata.description.."\n\nBlood Type: "..bloodType
+    metadata.description = metadata.description.."\n\nCollected By: "..playerName
+    metadata.description = metadata.description.."\n\nCollected At: "..streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
         return TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.have_evidence_bag"), type = "error"})
     end
