@@ -47,12 +47,7 @@ local function updateBlips()
                 source = v.PlayerData.source,
                 label = v.PlayerData.metadata.callsign,
                 job = v.PlayerData.job.name,
-                location = {
-                    x = coords.x,
-                    y = coords.y,
-                    z = coords.z,
-                    w = heading
-                }
+                location = vec4(coords.x, coords.y. coords.z, heading)
             }
         end
     end
@@ -66,11 +61,6 @@ local function generateId(table)
         id = math.random(10000, 99999)
     end
     return id
-end
-
-local function isVehicleOwned(plate)
-    local count = MySQL.scalar.await('SELECT count(*) FROM player_vehicles WHERE plate = ?', {plate})
-    return count > 0
 end
 
 local function dnaHash(s)
@@ -366,10 +356,7 @@ lib.callback.register('police:GetPlayerStatus', function(_, playerId)
 end)
 
 lib.callback.register('police:GetImpoundedVehicles', function()
-    local result = MySQL.query.await('SELECT * FROM player_vehicles WHERE state = ?', {2})
-    if result[1] then
-        return result
-    end
+    return FetchImpoundedVehicles()
 end)
 
 lib.callback.register('qbx-policejob:server:spawnVehicle', function(source, model, coords, plate)
@@ -453,7 +440,7 @@ RegisterNetEvent('police:server:TakeOutImpound', function(plate, garage)
     local targetCoords = Config.Locations.impound[garage]
     if #(playerCoords - targetCoords) > 10.0 then return DropPlayer(src, "Attempted exploit abuse") end
 
-    MySQL.update('UPDATE player_vehicles SET state = ? WHERE plate = ?', {0, plate})
+    Unimpound(plate)
     TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.impound_vehicle_removed"), type = 'success'})
 end)
 
@@ -652,12 +639,12 @@ end)
 RegisterNetEvent('police:server:Impound', function(plate, fullImpound, price, body, engine, fuel)
     local src = source
     price = price or 0
-    if not isVehicleOwned(plate) then return end
+    if not IsVehicleOwned(plate) then return end
     if not fullImpound then
-        MySQL.query('UPDATE player_vehicles SET state = ?, depotprice = ?, body = ?, engine = ?, fuel = ? WHERE plate = ?', {0, price, body, engine, fuel, plate})
+        ImpoundWithPrice(price, body, engine, fuel, plate)
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.vehicle_taken_depot", {price = price})})
     else
-        MySQL.query('UPDATE player_vehicles SET state = ?, body = ?, engine = ?, fuel = ? WHERE plate = ?', {2, body, engine, fuel, plate})
+        ImpoundForever(body, engine, fuel, plate)
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.vehicle_seized")})
     end
 end)
