@@ -76,44 +76,60 @@ QBCore.Commands.Add("spikestrip", Lang:t("commands.place_spike"), {}, false, fun
 end)
 
 QBCore.Commands.Add("grantlicense", Lang:t("commands.license_grant"), {{name = "id", help = Lang:t('info.player_id')}, {name = "license", help = Lang:t('info.license_type')}}, true, function(source, args)
+    local licenseTypes = { "driver", "weapon", "hunting", "mmj" }
+    local validLicenseType = nil
     if not checkLeoAndOnDuty(source, Config.LicenseRank) then
-        TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.error_rank_license"), type = 'error'})
+        TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.rank_license"), type = 'error'})
         return
     end
-    if args[2] ~= "driver" and args[2] ~= "weapon" then
+    for _, licenseType in ipairs(licenseTypes) do
+        if args[1] == licenseType then
+            validLicenseType = licenseType
+            break
+        end
+    end
+    if not validLicenseType then
         TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.license_type"), type = 'error'})
         return
     end
-    local searchedPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
+    local searchedPlayer = QBCore.Functions.GetPlayer(tonumber(args[2]))
     if not searchedPlayer then return end
     local licenseTable = searchedPlayer.PlayerData.metadata.licences
-    if licenseTable[args[2]] then
+    if licenseTable[args[1]] then
         TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.license_already"), type = 'error'})
         return
     end
-    licenseTable[args[2]] = true
+    licenseTable[args[1]] = true
     searchedPlayer.Functions.SetMetaData("licences", licenseTable)
     TriggerClientEvent('ox_lib:notify', searchedPlayer.PlayerData.source, {description = Lang:t("success.granted_license"), type = 'success'})
     TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("success.grant_license"), type = 'success'})
 end)
 
 QBCore.Commands.Add("revokelicense", Lang:t("commands.license_revoke"), {{name = "id", help = Lang:t('info.player_id')}, {name = "license", help = Lang:t('info.license_type')}}, true, function(source, args)
+    local licenseTypes = { "driver", "weapon", "hunting", "mmj" }
+    local validLicenseType = nil
     if not checkLeoAndOnDuty(source, Config.LicenseRank) then
         TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.rank_revoke"), type = "error"})
         return
     end
-    if args[2] ~= "driver" and args[2] ~= "weapon" then
-        TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.error_license"), type = "error"})
+    for _, licenseType in ipairs(licenseTypes) do
+        if args[1] == licenseType then
+            validLicenseType = true
+            break
+        end
+    end
+    if not validLicenseType then
+        TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.license_type"), type = 'error'})
         return
     end
-    local searchedPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
+    local searchedPlayer = QBCore.Functions.GetPlayer(tonumber(args[2]))
     if not searchedPlayer then return end
     local licenseTable = searchedPlayer.PlayerData.metadata.licences
-    if not licenseTable[args[2]] then
-        TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.error_license"), type = "error"})
+    if not licenseTable[args[1]] then
+        TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.license"), type = "error"})
         return
     end
-    licenseTable[args[2]] = false
+    licenseTable[args[1]] = false
     searchedPlayer.Functions.SetMetaData("licences", licenseTable)
     TriggerClientEvent('ox_lib:notify', searchedPlayer.PlayerData.source, {description = Lang:t("error.revoked_license"), type = "error"})
     TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("success.revoke_license"), type = "success"})
@@ -415,7 +431,7 @@ RegisterNetEvent('police:server:Radar', function(fine)
 end)
 
 RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource)
-    local ped = GetPlayerPed(playerSource)
+    local ped = GetPlayerPed(playerSource and playerSource or source)
     local coords = GetEntityCoords(ped)
     local players = QBCore.Functions.GetQBPlayers()
     for k, v in pairs(players) do
