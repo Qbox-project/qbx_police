@@ -47,7 +47,7 @@ local function updateBlips()
                 source = v.PlayerData.source,
                 label = v.PlayerData.metadata.callsign,
                 job = v.PlayerData.job.name,
-                location = vec4(coords, heading)
+                location = vec4(coords.x, coords.y, coords.z, heading)
             }
         end
     end
