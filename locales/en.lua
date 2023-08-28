@@ -1,7 +1,7 @@
 local Translations = {
     error = {
         license_already = 'Player already has a license',
-        error_license = 'Player doesn\'t have that license',
+        license = 'Player doesn\'t have that license',
         no_camera = 'Camera doesn\'t exist',
         blood_not_cleared = 'Blood NOT cleared',
         bullet_casing_not_removed = 'Bullet Casings NOT Removed',
@@ -13,7 +13,7 @@ local Translations = {
         no_cuff = 'You don\'t have handcuffs on you',
         no_impound = 'There are no impounded vehicles',
         no_spikestripe = 'Cannot place anymore spike strips',
-        error_license_type = 'Invalid license type',
+        license_type = 'Invalid license type',
         rank_license = 'You are not a high enough rank to grant a license',
         revoked_license = 'You\'ve had a license revoked',
         rank_revoke = 'You are not a high enough rank to revoke a license',
