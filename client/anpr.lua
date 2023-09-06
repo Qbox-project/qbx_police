@@ -20,7 +20,7 @@ local function handleSpeedCam(speedCam, radar)
 	local overlimit = speed - speedCam.speed
 
 	lib.callback('police:server:isPlateFlagged', false, function(result)
- 		if not result then return end
+		if not result then return end
 		local s1, s2 = GetStreetNameAtCoord(speedCam.coords.x, speedCam.coords.y, speedCam.coords.z)
 		local street = GetStreetNameFromHashKey(s1)
 		local street2 = GetStreetNameFromHashKey(s2)
