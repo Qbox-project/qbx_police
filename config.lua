@@ -183,16 +183,16 @@ Config.AmmoLabels = {
     AMMO_SNIPER = "Large caliber bullet",
 }
 
--- Radars will fine the driver if the vehicle is over the defined speed limit 
+-- Radars will fine the driver if the vehicle is over the defined speed limit
 -- Regardless of the speed, If the vehicle is flagged it sends a notification to the police
 -- It is disable by default, change to true to enable!
-Config.UseRadars = false 
+Config.UseRadars = false
 
--- /!\ The maxspeed(s) need to be in an increasing order /!\ 
+-- /!\ The maxspeed(s) need to be in an increasing order /!\
 -- If you don't want to fine people just do that: 'Config.SpeedFines = false'
 Config.SpeedFines = {
     {
-        fine = 25, -- fine if you're maxspeed or less over the speedlimit 
+        fine = 25, -- fine if you're maxspeed or less over the speedlimit
         maxspeed = 10 -- (i.e if you're at 41 mph and the radar's limit is 35 you're 6mph over so a 25$ fine)
     },{
         fine = 50,
@@ -206,7 +206,7 @@ Config.SpeedFines = {
     }
 }
 
-Config.MPH = true -- Whether or not to use the imperial system (For Radars) 
+Config.MPH = true -- Whether or not to use the imperial system (For Radars)
 
 Config.Radars = {
     {
