@@ -34,7 +34,6 @@ local function handleSpeedCam(speedCam, radar)
 	speedRange(overlimit)
 end
 
-
 CreateThread(function()
 	for _,value in pairs(Config.Radars) do
 		speedCams[#speedCams+1] = lib.points.new({
