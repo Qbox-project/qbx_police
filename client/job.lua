@@ -235,7 +235,7 @@ local function scanFingerprint()
         lib.notify({ description = Lang:t("error.none_nearby"), type = 'error', })
         return
     end
-    TriggerServerEvent("police:server:showFingerprint", playerId)
+    TriggerServerEvent("police:server:showFingerprint", GetPlayerServerId(playerId))
 end
 
 local function uiPrompt(promptType, id)
