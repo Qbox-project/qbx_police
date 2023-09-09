@@ -32,7 +32,7 @@ local function updateBlips()
                 source = v.PlayerData.source,
                 label = v.PlayerData.metadata.callsign,
                 job = v.PlayerData.job.name,
-                location = vec4(coords.x, coords.y. coords.z, heading)
+                location = vec4(coords.x, coords.y, coords.z, heading)
             }
         end
     end
@@ -564,6 +564,7 @@ end)
 
 -- Threads
 CreateThread(function()
+    Wait(1000)
     for i = 1, #Config.Locations.trash do
         exports.ox_inventory:ClearInventory(('policetrash_%s'):format(i))
     end

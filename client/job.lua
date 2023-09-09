@@ -235,7 +235,7 @@ local function scanFingerprint()
         lib.notify({ description = Lang:t("error.none_nearby"), type = 'error', })
         return
     end
-    TriggerServerEvent("police:server:showFingerprint", playerId)
+    TriggerServerEvent("police:server:showFingerprint", GetPlayerServerId(playerId))
 end
 
 local function uiPrompt(promptType, id)
@@ -389,8 +389,8 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
                 rot = { x = -120.0, y = 0.0, z = 0.0 },
             },
         },
-    }) 
-    then 
+    })
+    then
         local plate = QBCore.Functions.GetPlate(vehicle)
         TriggerServerEvent("police:server:Impound", plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
         QBCore.Functions.DeleteVehicle(vehicle)

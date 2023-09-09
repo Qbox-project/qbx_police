@@ -25,7 +25,7 @@ QBCore.Commands.Add("spikestrip", Lang:t("commands.place_spike"), {}, false, fun
 end)
 
 QBCore.Commands.Add("grantlicense", Lang:t("commands.license_grant"), {{name = "id", help = Lang:t('info.player_id')}, {name = "license", help = Lang:t('info.license_type')}}, true, function(source, args)
-    if not checkLeoAndOnDuty(source, Config.LicenseRank) then 
+    if not checkLeoAndOnDuty(source, Config.LicenseRank) then
         TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.error_rank_license"), type = 'error'})
         return
     end
@@ -236,7 +236,7 @@ QBCore.Commands.Add("takedna", Lang:t("commands.takedna"), {{name = "id", help =
     if not player.Functions.RemoveItem("empty_evidence_bag", 1) then
         return TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.have_evidence_bag"), type = "error"})
     end
-    
+
     local info = {
         label = Lang:t('info.dna_sample'),
         type = "dna",
