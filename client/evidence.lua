@@ -122,14 +122,9 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
             car = false,
             combat = true,
             mouse = false,
-        },
-        anim = {
-            dict = HealAnimDict,
-            clip = HealAnim,
-        },
+        }
     })
     then
-        exports.scully_emotemenu:cancelEmote()
         if bloodDrops and next(bloodDrops) then
             for bloodId in pairs(bloodDrops) do
                 if #(pos - bloodDrops[bloodId].coords) < 10.0 then
@@ -140,7 +135,6 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
             lib.notify({ description = Lang:t('success.blood_clear'), type = 'success' })
         end
     else
-        exports.scully_emotemenu:cancelEmote()
         lib.notify({ description = Lang:t('error.blood_not_cleared'), type = 'error' })
     end
 end)
@@ -173,14 +167,9 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
             car = false,
             combat = true,
             mouse = false,
-        },
-        anim = {
-            dict = HealAnimDict,
-            clip = HealAnim,
-        },
+        }
     })
     then
-        exports.scully_emotemenu:cancelEmote()
         if casings and next(casings) then
             for casingId in pairs(casings) do
                 if #(pos - casings[casingId].coords) < 10.0 then
@@ -191,7 +180,6 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
             lib.notify({ description = Lang:t('success.bullet_casing_removed'), type = 'success' })
         end
     else
-        exports.scully_emotemenu:cancelEmote()
         lib.notify({ description = Lang:t('error.bullet_casing_not_removed'), type = 'error' })
     end
 end)
