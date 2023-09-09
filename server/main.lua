@@ -828,6 +828,7 @@ end)
 
 -- Threads
 CreateThread(function()
+    Wait(1000)
     for i = 1, #Config.Locations.trash do
         exports.ox_inventory:ClearInventory(('policetrash_%s'):format(i))
     end
