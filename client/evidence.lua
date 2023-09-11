@@ -33,24 +33,6 @@ local ignoredWeapons = {
     [`weapon_fireextinguisher`] = true,
 }
 
--- Functions
----@param coords vector3
----@param text string
-local function drawText3D(coords, text)
-    SetTextScale(0.35, 0.35)
-    SetTextFont(4)
-    SetTextProportional(true)
-    SetTextColour(255, 255, 255, 215)
-    SetTextEntry('STRING')
-    SetTextCentre(true)
-    AddTextComponentString(text)
-    SetDrawOrigin(coords.x, coords.y, coords.z, 0)
-    DrawText(0.0, 0.0)
-    local factor = (string.len(text)) / 370
-    DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
-    ClearDrawOrigin()
-end
-
 local function dropBulletCasing(weapon, ped)
     local randX = math.random() + math.random(-1, 1)
     local randY = math.random() + math.random(-1, 1)
@@ -248,53 +230,69 @@ local function getPlayerDistanceFromCoords(coords)
     return #(pos - coords)
 end
 
+---@class DrawEvidenceIfInRangeArgs
+---@field evidenceId integer
+---@field coords vector3
+---@field text string
+---@field metadata table
+---@field serverEventOnPickup string
+
+---@param args DrawEvidenceIfInRangeArgs
+local function drawEvidenceIfInRange(args)
+    if getPlayerDistanceFromCoords(args.coords) >= 1.5 then return end
+    DrawText3D(args.text, args.coords)
+    if IsControlJustReleased(0, 47) then
+        TriggerServerEvent(args.serverEventOnPickup, args.evidenceId, args.metadata)
+    end
+end
+
 --- draw 3D text on the ground to show evidence, if they press pickup button, set metadata and add it to their inventory.
 CreateThread(function()
     while true do
         Wait(0)
         if currentCasing and currentCasing ~= 0 then
-            if getPlayerDistanceFromCoords(casings[currentCasing].coords) < 1.5 then
-                drawText3D(casings[currentCasing].coords, Lang:t('info.bullet_casing', {value = casings[currentCasing].type}))
-                if IsControlJustReleased(0, 47) then
-                    local info = {
-                        type = Lang:t('info.casing'),
-                        street = getStreetLabel(casings[currentCasing].coords),
-                        ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[casings[currentCasing].type].ammotype],
-                        ammotype = casings[currentCasing].type,
-                        serie = casings[currentCasing].serie
-                    }
-                    TriggerServerEvent('evidence:server:AddCasingToInventory', currentCasing, info)
-                end
-            end
+            drawEvidenceIfInRange({
+                evidenceId = currentCasing,
+                coords = casings[currentCasing].coords,
+                text = Lang:t('info.bullet_casing', {value = casings[currentCasing].type}),
+                metadata = {
+                    type = Lang:t('info.casing'),
+                    street = getStreetLabel(casings[currentCasing].coords),
+                    ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[casings[currentCasing].type].ammotype],
+                    ammotype = casings[currentCasing].type,
+                    serie = casings[currentCasing].serie
+                },
+                serverEventOnPickup = 'evidence:server:AddCasingToInventory'
+            })
         end
 
         if currentBloodDrop and currentBloodDrop ~= 0 then
-            if getPlayerDistanceFromCoords(bloodDrops[currentBloodDrop].coords) < 1.5 then
-                drawText3D(bloodDrops[currentBloodDrop].coords, Lang:t('info.blood_text', {value = dnaHash(bloodDrops[currentBloodDrop].citizenid)}))
-                if IsControlJustReleased(0, 47) then
-                    local info = {
-                        type = Lang:t('info.blood'),
-                        street = getStreetLabel(bloodDrops[currentBloodDrop].coords),
-                        dnalabel = dnaHash(bloodDrops[currentBloodDrop].citizenid),
-                        bloodtype = bloodDrops[currentBloodDrop].bloodtype
-                    }
-                    TriggerServerEvent('evidence:server:AddBlooddropToInventory', currentBloodDrop, info)
-                end
-            end
+            drawEvidenceIfInRange({
+                evidenceId = currentBloodDrop,
+                coords = bloodDrops[currentBloodDrop].coords,
+                text = Lang:t('info.blood_text', {value = dnaHash(bloodDrops[currentBloodDrop].citizenid)}),
+                metadata = {
+                    type = Lang:t('info.blood'),
+                    street = getStreetLabel(bloodDrops[currentBloodDrop].coords),
+                    dnalabel = dnaHash(bloodDrops[currentBloodDrop].citizenid),
+                    bloodtype = bloodDrops[currentBloodDrop].bloodtype
+                },
+                serverEventOnPickup = 'evidence:server:AddBlooddropToInventory'
+            })
         end
 
         if currentFingerprint and currentFingerprint ~= 0 then
-            if getPlayerDistanceFromCoords(fingerprints[currentFingerprint].coords) < 1.5 then
-                drawText3D(fingerprints[currentFingerprint].coords, Lang:t('info.fingerprint_text'))
-                if IsControlJustReleased(0, 47) then
-                    local info = {
-                        type = Lang:t('info.fingerprint'),
-                        street = getStreetLabel(fingerprints[currentFingerprint].coords),
-                        fingerprint = fingerprints[currentFingerprint].fingerprint
-                    }
-                    TriggerServerEvent('evidence:server:AddFingerprintToInventory', currentFingerprint, info)
-                end
-            end
+            drawEvidenceIfInRange({
+                evidenceId = currentFingerprint,
+                coords = fingerprints[currentFingerprint].coords,
+                text = Lang:t('info.fingerprint_text'),
+                metadata = {
+                    type = Lang:t('info.fingerprint'),
+                    street = getStreetLabel(fingerprints[currentFingerprint].coords),
+                    fingerprint = fingerprints[currentFingerprint].fingerprint
+                },
+                serverEventOnPickup = 'evidence:server:AddFingerprintToInventory'
+            })
         end
     end
 end)
