@@ -2,7 +2,7 @@ local currentCameraIndex = 0
 local createdCamera = 0
 local currentScaleform = -1
 
-local function GetCurrentTime()
+local function getCurrentTime()
     local hours = GetClockHours()
     local minutes = GetClockMinutes()
     if hours < 10 then
@@ -14,7 +14,7 @@ local function GetCurrentTime()
     return tostring(hours .. ":" .. minutes)
 end
 
-local function CreateInstructionalScaleform(scaleform)
+local function createInstructionalScaleform(scaleform)
     scaleform = RequestScaleformMovie(scaleform)
     while not HasScaleformMovieLoaded(scaleform) do
         Wait(0)
@@ -47,7 +47,7 @@ local function CreateInstructionalScaleform(scaleform)
     return scaleform
 end
 
-local function ChangeSecurityCamera(x, y, z, r)
+local function changeSecurityCamera(x, y, z, r)
     if createdCamera ~= 0 then
         DestroyCam(createdCamera, false)
         createdCamera = 0
@@ -64,10 +64,10 @@ local function ChangeSecurityCamera(x, y, z, r)
     RenderScriptCams(true, false, 0, true, true)
     Wait(250)
     createdCamera = cam
-    currentScaleform = CreateInstructionalScaleform("instructional_buttons")
+    currentScaleform = createInstructionalScaleform("instructional_buttons")
 end
 
-local function CloseSecurityCamera()
+local function closeSecurityCamera()
     DestroyCam(createdCamera, false)
     RenderScriptCams(false, false, 1, true, true)
     createdCamera = 0
@@ -83,6 +83,7 @@ end
 
 -- Events
 RegisterNetEvent('police:client:ActiveCamera', function(cameraId)
+    if GetInvokingResource() then return end
     if Config.SecurityCameras.cameras[cameraId] then
         DoScreenFadeOut(250)
         while not IsScreenFadedOut() do
@@ -93,14 +94,14 @@ RegisterNetEvent('police:client:ActiveCamera', function(cameraId)
             label = Config.SecurityCameras.cameras[cameraId].label,
             id = cameraId,
             connected = Config.SecurityCameras.cameras[cameraId].isOnline,
-            time = GetCurrentTime(),
+            time = getCurrentTime(),
         })
         local firstCamX = Config.SecurityCameras.cameras[cameraId].coords.x
         local firstCamY = Config.SecurityCameras.cameras[cameraId].coords.y
         local firstCamZ = Config.SecurityCameras.cameras[cameraId].coords.z
         local firstCamR = Config.SecurityCameras.cameras[cameraId].r
         SetFocusArea(firstCamX, firstCamY, firstCamZ, firstCamX, firstCamY, firstCamZ)
-        ChangeSecurityCamera(firstCamX, firstCamY, firstCamZ, firstCamR)
+        changeSecurityCamera(firstCamX, firstCamY, firstCamZ, firstCamR)
         currentCameraIndex = cameraId
         DoScreenFadeIn(250)
     elseif cameraId == 0 then
@@ -108,7 +109,7 @@ RegisterNetEvent('police:client:ActiveCamera', function(cameraId)
         while not IsScreenFadedOut() do
             Wait(0)
         end
-        CloseSecurityCamera()
+        closeSecurityCamera()
         SendNUIMessage({
             type = "disablecam",
         })
@@ -119,18 +120,21 @@ RegisterNetEvent('police:client:ActiveCamera', function(cameraId)
 end)
 
 RegisterNetEvent('police:client:DisableAllCameras', function()
+    if GetInvokingResource() then return end
     for k in pairs(Config.SecurityCameras.cameras) do
         Config.SecurityCameras.cameras[k].isOnline = false
     end
 end)
 
 RegisterNetEvent('police:client:EnableAllCameras', function()
+    if GetInvokingResource() then return end
     for k in pairs(Config.SecurityCameras.cameras) do
         Config.SecurityCameras.cameras[k].isOnline = true
     end
 end)
 
 RegisterNetEvent('police:client:SetCamera', function(key, isOnline)
+    if GetInvokingResource() then return end
     if type(key) == 'table' and table.type(key) == 'array' then
         for _, v in pairs(key) do
             Config.SecurityCameras.cameras[v].isOnline = isOnline
@@ -142,64 +146,68 @@ RegisterNetEvent('police:client:SetCamera', function(key, isOnline)
     end
 end)
 
+local function listenForCameraControls()
+    DrawScaleformMovieFullscreen(currentScaleform, 255, 255, 255, 255, 0)
+    SetTimecycleModifier("scanline_cam_cheap")
+    SetTimecycleModifierStrength(1.0)
+
+    if Config.SecurityCameras.hideradar then
+        DisplayRadar(false)
+    end
+
+    -- CLOSE CAMERAS
+    if IsControlJustPressed(1, 177) then
+        DoScreenFadeOut(250)
+        while not IsScreenFadedOut() do
+            Wait(0)
+        end
+        closeSecurityCamera()
+        SendNUIMessage({
+            type = "disablecam",
+        })
+        DoScreenFadeIn(250)
+    end
+
+    ---------------------------------------------------------------------------
+    -- CAMERA ROTATION CONTROLS
+    ---------------------------------------------------------------------------
+    if Config.SecurityCameras.cameras[currentCameraIndex].canRotate then
+        local getCameraRot = GetCamRot(createdCamera, 2)
+
+        -- ROTATE UP
+        if IsControlPressed(0, 32) then
+            if getCameraRot.x <= 0.0 then
+                SetCamRot(createdCamera, getCameraRot.x + 0.7, 0.0, getCameraRot.z, 2)
+            end
+        end
+
+        -- ROTATE DOWN
+        if IsControlPressed(0, 8) then
+            if getCameraRot.x >= -50.0 then
+                SetCamRot(createdCamera, getCameraRot.x - 0.7, 0.0, getCameraRot.z, 2)
+            end
+        end
+
+        -- ROTATE LEFT
+        if IsControlPressed(0, 34) then
+            SetCamRot(createdCamera, getCameraRot.x, 0.0, getCameraRot.z + 0.7, 2)
+        end
+
+        -- ROTATE RIGHT
+        if IsControlPressed(0, 9) then
+            SetCamRot(createdCamera, getCameraRot.x, 0.0, getCameraRot.z - 0.7, 2)
+        end
+    end
+end
+
 -- Threads
 CreateThread(function()
     while true do
-        local sleep = 2000
-        if createdCamera ~= 0 and currentScaleform ~= -1 then
-            sleep = 0
-            DrawScaleformMovieFullscreen(currentScaleform, 255, 255, 255, 255, 0)
-            SetTimecycleModifier("scanline_cam_cheap")
-            SetTimecycleModifierStrength(1.0)
-
-            if Config.SecurityCameras.hideradar then
-                DisplayRadar(false)
-            end
-
-            -- CLOSE CAMERAS
-            if IsControlJustPressed(1, 177) then
-                DoScreenFadeOut(250)
-                while not IsScreenFadedOut() do
-                    Wait(0)
-                end
-                CloseSecurityCamera()
-                SendNUIMessage({
-                    type = "disablecam",
-                })
-                DoScreenFadeIn(250)
-            end
-
-            ---------------------------------------------------------------------------
-            -- CAMERA ROTATION CONTROLS
-            ---------------------------------------------------------------------------
-            if Config.SecurityCameras.cameras[currentCameraIndex].canRotate then
-                local getCameraRot = GetCamRot(createdCamera, 2)
-
-                -- ROTATE UP
-                if IsControlPressed(0, 32) then
-                    if getCameraRot.x <= 0.0 then
-                        SetCamRot(createdCamera, getCameraRot.x + 0.7, 0.0, getCameraRot.z, 2)
-                    end
-                end
-
-                -- ROTATE DOWN
-                if IsControlPressed(0, 8) then
-                    if getCameraRot.x >= -50.0 then
-                        SetCamRot(createdCamera, getCameraRot.x - 0.7, 0.0, getCameraRot.z, 2)
-                    end
-                end
-
-                -- ROTATE LEFT
-                if IsControlPressed(0, 34) then
-                    SetCamRot(createdCamera, getCameraRot.x, 0.0, getCameraRot.z + 0.7, 2)
-                end
-
-                -- ROTATE RIGHT
-                if IsControlPressed(0, 9) then
-                    SetCamRot(createdCamera, getCameraRot.x, 0.0, getCameraRot.z - 0.7, 2)
-                end
-            end
+        if createdCamera == 0 or currentScaleform == -1 then
+            Wait(2000)
+        else
+            listenForCameraControls()
+            Wait(0)
         end
-        Wait(sleep)
     end
 end)
