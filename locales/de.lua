@@ -137,12 +137,12 @@ local Translations = {
         serial_not_visible = 'Seriennummer nicht sichtbar...',
     },
     menu = {
-        garage_title = 'Polizeifahrzeuge'
-        close = '⬅ Menü schließen'
-        impound = 'Abgeschleppte Fahrzeuge'
-        pol_impound = 'Polizei-Abschleppdienst'
-        pol_garage = 'Polizeigarage'
-        pol_armory = 'Polizei-Waffenkammer'
+        garage_title = 'Polizeifahrzeuge',
+        close = '⬅ Menü schließen',
+        impound = 'Abgeschleppte Fahrzeuge',
+        pol_impound = 'Polizei-Abschleppdienst',
+        pol_garage = 'Polizeigarage',
+        pol_armory = 'Polizei-Waffenkammer',
     },
     email = {
         sender = 'Department of Justice',
