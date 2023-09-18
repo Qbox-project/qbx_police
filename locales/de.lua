@@ -19,7 +19,7 @@ local Translations = {
         rank_revoke = 'Du hast nicht die erforderliche Rangstufe, um eine Lizenz zu entziehen',
         on_duty_police_only = 'Nur Polizei im Dienst',
         vehicle_not_flag = 'Fahrzeug nicht markiert',
-        not_towdriver = 'Kein Abschleppwagenfahrer'
+        not_towdriver = 'Kein Abschleppwagenfahrer',
         not_lawyer = 'Person ist kein Anwalt',
         no_anklet = 'Diese Person hat keine Fußfessel',
         have_evidence_bag = 'Du brauchst einen leeren Beweisbeutel',
@@ -116,7 +116,7 @@ local Translations = {
         target_location = 'Der Aufenthaltsort von %{firstname} %{lastname} ist auf der Karte markiert',
         anklet_location = 'Ort der Fußfessel',
         new_call = 'Neuer Anruf',
-        officer_down = 'Polizist %{lastname} | %{callsign} am Boden'
+        officer_down = 'Polizist %{lastname} | %{callsign} am Boden',
         plate_triggered = 'Ein Fahrzeug mit dem Kennzeichen %{plate} wurde auf der Straße %{street} vom Radar #%{radar} erfasst',
         plate_triggered_blip = 'Fahrzeug von Radar #%{radar} erfasst',
     },
