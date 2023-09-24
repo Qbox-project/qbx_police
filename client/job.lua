@@ -84,19 +84,21 @@ local function takeOutImpound(vehicle)
     if not inImpound then return end
     local coords = Config.Locations.impound[currentGarage]
     if not coords then return end
-    QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
-        local veh = NetToVeh(netId)
-        QBCore.Functions.TriggerCallback('qb-garage:server:GetVehicleProperties', function(properties)
-            QBCore.Functions.SetVehicleProperties(veh, properties)
-            SetVehicleNumberPlateText(veh, vehicle.plate)
-            SetVehicleFuelLevel(veh, vehicle.fuel)
-            doCarDamage(veh, vehicle)
-            TriggerServerEvent('police:server:TakeOutImpound', vehicle.plate, currentGarage)
-            TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-            TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-            SetVehicleEngineOn(veh, true, true, false)
-        end, vehicle.plate)
-    end, vehicle.vehicle, coords, true)
+    local netId = lib.callback.await('qbx-policejob:server:spawnVehicle', false, vehicle.vehicle, coords, false)
+    local properties = lib.callback.await('qb-garage:server:GetVehicleProperties', false, vehicle.plate)
+    local timeout = 100
+    while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
+        Wait(10)
+        timeout -= 1
+    end
+    local veh = NetworkGetEntityFromNetworkId(netId)
+    lib.setVehicleProperties(veh, properties)
+    SetVehicleNumberPlateText(veh, vehicle.plate)
+    SetVehicleFuelLevel(veh, vehicle.fuel)
+    doCarDamage(veh, vehicle)
+    TriggerServerEvent('police:server:TakeOutImpound', vehicle.plate, currentGarage)
+    TriggerEvent('vehiclekeys:client:SetOwner', GetPlate(veh))
+    SetVehicleEngineOn(veh, true, true, false)
 end
 
 local function takeOutVehicle(vehicleInfo)
@@ -104,9 +106,14 @@ local function takeOutVehicle(vehicleInfo)
     local coords = Config.Locations.vehicle[currentGarage]
     if not coords then return end
 
-    local netId = lib.callback.await('qbx-policejob:server:spawnVehicle', false, vehicleInfo, coords, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)))
-    local veh = NetToVeh(netId)
-    setCarItemsInfo()
+    local netId = lib.callback.await('qbx-policejob:server:spawnVehicle', false, vehicleInfo, coords, true)
+    local timeout = 100
+    while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
+        Wait(10)
+        timeout -= 1
+    end
+    local veh = NetworkGetEntityFromNetworkId(netId)
+    SetVehicleNumberPlateText(veh, vehicleInfo .. Lang:t('info.police_plate') .. tostring(math.random(1000, 9999)))
     SetEntityHeading(veh, coords.w)
     SetVehicleFuelLevel(veh, 100.0)
     if Config.VehicleSettings[vehicleInfo] then
@@ -117,9 +124,7 @@ local function takeOutVehicle(vehicleInfo)
             SetVehicleLivery(veh, Config.VehicleSettings[vehicleInfo].livery)
         end
     end
-    TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-    TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-    TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
+    TriggerEvent('vehiclekeys:client:SetOwner', GetPlate(veh))
     SetVehicleEngineOn(veh, true, true, false)
 end
 
@@ -214,17 +219,20 @@ local function spawnHelicopter()
     else
         local plyCoords = GetEntityCoords(cache.ped)
         local coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
-        QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
-            local veh = NetToVeh(netId)
-            SetVehicleLivery(veh , 0)
-            SetVehicleMod(veh, 0, 48, false)
-            SetVehicleNumberPlateText(veh, "ZULU"..tostring(math.random(1000, 9999)))
-            SetEntityHeading(veh, coords.w)
-            SetVehicleFuelLevel(veh, 100.0)
-            TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-            TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-            SetVehicleEngineOn(veh, true, true, false)
-        end, Config.PoliceHelicopter, coords, true)
+        local netId = lib.callback.await('qbx-policejob:server:spawnVehicle', false, Config.PoliceHelicopter, coords)
+        local timeout = 100
+        while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
+            Wait(10)
+            timeout -= 1
+        end
+        SetVehicleLivery(veh, 0)
+        SetVehicleMod(veh, 0, 48, false)
+        SetVehicleNumberPlateText(veh, "ZULU" .. tostring(math.random(1000, 9999)))
+        SetEntityHeading(veh, coords.w)
+        SetVehicleFuelLevel(veh, 100.0)
+        TaskWarpPedIntoVehicle(cache.ped, veh, -1)
+        TriggerEvent("vehiclekeys:client:SetOwner", GetPlate(veh))
+        SetVehicleEngineOn(veh, true, true, false)
     end
 end
 
