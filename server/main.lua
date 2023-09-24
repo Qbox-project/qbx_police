@@ -95,14 +95,8 @@ lib.callback.register('police:GetImpoundedVehicles', function()
     return FetchImpoundedVehicles()
 end)
 
-lib.callback.register('qbx-policejob:server:spawnVehicle', function(source, model, coords, plate)
-    local netId = QBCore.Functions.CreateVehicle(source, model, coords, true)
-    if not netId or netId == 0 then return end
-    local veh = NetworkGetEntityFromNetworkId(netId)
-    if not veh or veh == 0 then return end
-
-    SetVehicleNumberPlateText(veh, plate)
-    TriggerClientEvent('vehiclekeys:client:SetOwner', source, plate)
+lib.callback.register('qbx-policejob:server:spawnVehicle', function(source, model, coords, warp)
+    local netId = SpawnVehicle(source, model, coords, warp)
     return netId
 end)
 
