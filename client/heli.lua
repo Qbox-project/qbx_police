@@ -13,11 +13,25 @@ local spotlightState = false
 -- Script starts here
 local helicam = false
 local fov = (fovMax + fovMin) * 0.5
-local visionState = 0 -- 0 is normal, 1 is nightmode, 2 is thermal vision
 
-local isScanning = false
-local isScanned = false
+---@enum
+local VISION_STATE = {
+	normal = 0,
+	nightmode = 1,
+	thermal = 2
+}
+local visionState = VISION_STATE.normal
+
 local scanValue = 0
+
+---@enum
+local VEHICLE_LOCK_STATE = {
+	dormant = 0,
+	scanning = 1,
+	locked = 2,
+}
+
+local vehicleLockState = VEHICLE_LOCK_STATE.dormant
 
 local vehicleDetected = nil
 local lockedOnVehicle = nil
@@ -32,17 +46,18 @@ local function isHeliHighEnough(heli)
 end
 
 local function changeVision()
-	if visionState == 0 then
+	PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
+	if visionState == VISION_STATE.normal then
 		SetNightvision(true)
-		visionState = 1
-	elseif visionState == 1 then
+	elseif visionState == VISION_STATE.nightmode then
 		SetNightvision(false)
 		SetSeethrough(true)
-		visionState = 2
-	else
+	elseif visionState == VISION_STATE.thermal then
 		SetSeethrough(false)
-		visionState = 0
+	else
+		error("Unexpected visionState " .. json.encode(visionState))
 	end
+	visionState = (visionState + 1) % 3
 end
 
 local function hideHudThisFrame()
@@ -131,7 +146,7 @@ local function helicamThread()
 		local sleep
 		while helicam do
 			sleep = 0
-			if isScanning and not isScanned then
+			if vehicleLockState == VEHICLE_LOCK_STATE.scanning then
 				if scanValue < 100 then
 					scanValue += 1
 					SendNUIMessage({
@@ -141,15 +156,13 @@ local function helicamThread()
 					if scanValue == 100 then
 						PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
 						lockedOnVehicle = vehicleDetected
-						isScanning = false
-						isScanned = true
+						vehicleLockState = VEHICLE_LOCK_STATE.locked
 					end
 					sleep = 10
 				end
-			elseif isScanned and not isScanning and lockedOnVehicle then
+			elseif vehicleLockState == VEHICLE_LOCK_STATE.locked then
 				scanValue = 100
 				renderVehicleInfo(lockedOnVehicle)
-				isScanning = false
 				sleep = 100
 			else
 				scanValue = 0
@@ -158,6 +171,39 @@ local function helicamThread()
 			Wait(sleep)
 		end
 	end)
+end
+
+local function unlockCamera(cam)
+	PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
+	lockedOnVehicle = nil
+	local rot = GetCamRot(cam, 2) -- All this because I can't seem to get the camera unlocked from the entity
+	fov = GetCamFov(cam)
+	local oldCam = cam
+	DestroyCam(oldCam, false)
+	local newCam = CreateCam("DEFAULT_SCRIPTED_FLY_CAMERA", true)
+	AttachCamToEntity(newCam, cache.vehicle, 0.0,0.0,-1.5, true)
+	SetCamRot(newCam, rot.x, rot.y, rot.z, 2)
+	SetCamFov(newCam, fov)
+	RenderScriptCams(true, false, 0, true, false)
+	vehicleLockState = VEHICLE_LOCK_STATE.dormant
+	scanValue = 0
+	SendNUIMessage({
+		type = "disablescan",
+	})
+	return newCam
+end
+
+local function turnOffCamera()
+	PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
+	helicam = false
+	vehicleLockState = VEHICLE_LOCK_STATE.dormant
+	scanValue = 0
+	SendNUIMessage({
+		type = "disablescan",
+	})
+	SendNUIMessage({
+		type = "heliclose",
+	})
 end
 
 local function handleInVehicle()
@@ -203,45 +249,21 @@ local function handleInVehicle()
 		lockedOnVehicle = nil
 		while helicam and not IsEntityDead(cache.ped) and cache.vehicle and isHeliHighEnough(cache.vehicle) do
 			if IsControlJustPressed(0, toggleHelicam) then -- Toggle Helicam
-				PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
-				helicam = false
-				isScanned = false
-				scanValue = 0
-				SendNUIMessage({
-					type = "disablescan",
-				})
-				SendNUIMessage({
-					type = "heliclose",
-				})
+				turnOffCamera()
 			end
 			if IsControlJustPressed(0, toggleVision) then
-				PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
 				changeVision()
 			end
 			local zoomvalue = 0
 			if lockedOnVehicle then
 				if DoesEntityExist(lockedOnVehicle) then
+
 					PointCamAtEntity(cam, lockedOnVehicle, 0.0, 0.0, 0.0, true)
 					if IsControlJustPressed(0, toggleLockOn) then
-						PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
-						lockedOnVehicle = nil
-						local rot = GetCamRot(cam, 2) -- All this because I can't seem to get the camera unlocked from the entity
-						fov = GetCamFov(cam)
-						local old_cam = cam
-						DestroyCam(old_cam, false)
-						cam = CreateCam("DEFAULT_SCRIPTED_FLY_CAMERA", true)
-						AttachCamToEntity(cam, cache.vehicle, 0.0,0.0,-1.5, true)
-						SetCamRot(cam, rot.x, rot.y, rot.z, 2)
-						SetCamFov(cam, fov)
-						RenderScriptCams(true, false, 0, true, false)
-						isScanned = false
-						scanValue = 0
-						SendNUIMessage({
-							type = "disablescan",
-						})
+						cam = unlockCamera(cam)
 					end
 				else
-					isScanned = false
+					vehicleLockState = VEHICLE_LOCK_STATE.dormant
 					SendNUIMessage({
 						type = "disablescan",
 					})
@@ -250,11 +272,7 @@ local function handleInVehicle()
 			else
 				zoomvalue = (1.0 / (fovMax - fovMin)) * (fov - fovMin)
 				checkInputRotation(cam, zoomvalue)
-				if DoesEntityExist(getVehicleInView(cam)) then
-					isScanning = true
-				else
-					isScanning = false
-				end
+				vehicleLockState = DoesEntityExist(getVehicleInView(cam)) and VEHICLE_LOCK_STATE.scanning or VEHICLE_LOCK_STATE.dormant
 			end
 			handleZoom(cam)
 			hideHudThisFrame()
