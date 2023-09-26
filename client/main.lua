@@ -38,7 +38,7 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
 end
 
 -- Events
-AddEventHandler('QBX:Client:OnPlayerLoaded', function()
+AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     PlayerData = QBX.Functions.GetPlayerData()
 
     TriggerServerEvent("police:server:SetHandcuffStatus", false)
@@ -76,7 +76,7 @@ AddEventHandler('QBX:Client:OnPlayerLoaded', function()
     IsLoggedIn = true
 end)
 
-RegisterNetEvent('QBX:Client:OnPlayerUnload', function()
+RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     TriggerServerEvent("police:server:SetHandcuffStatus", false)
     TriggerServerEvent("police:server:UpdateCurrentCops")
     isEscorted = false
@@ -91,7 +91,7 @@ RegisterNetEvent('QBX:Client:OnPlayerUnload', function()
     IsLoggedIn = false
 end)
 
-RegisterNetEvent('QBX:Client:OnJobUpdate', function(JobInfo)
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     if JobInfo.type == "leo" and PlayerData.job.type ~= "leo" then
         if JobInfo.onduty then
             TriggerEvent('qb-policejob:ToggleDuty')
@@ -109,7 +109,7 @@ RegisterNetEvent('QBX:Client:OnJobUpdate', function(JobInfo)
     PlayerData.job = JobInfo
 end)
 
-RegisterNetEvent('QBX:Player:SetPlayerData', function(val)
+RegisterNetEvent('QBCore:Player:SetPlayerData', function(val)
     -- Make sure it can only be triggered from the server
     if GetInvokingResource() then return end
     PlayerData = val
