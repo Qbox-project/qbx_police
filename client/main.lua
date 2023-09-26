@@ -1,5 +1,4 @@
 -- Variables
-QBX = exports['qbx-core']:GetCoreObject()
 cuffType = 1
 isEscorted = false
 PlayerData = QBX.Functions.GetPlayerData() or {}
