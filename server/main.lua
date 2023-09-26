@@ -1,4 +1,3 @@
-QBCore = exports['qbx-core']:GetCoreObject()
 Plates = {}
 local playerStatus = {}
 local casings = {}
@@ -23,7 +22,7 @@ end
 -- Functions
 local function updateBlips()
     local dutyPlayers = {}
-    local players = QBCore.Functions.GetQBPlayers()
+    local players = QBX.Functions.GetQBPlayers()
     for _, v in pairs(players) do
         if v and (v.PlayerData.job.type == "leo" or v.PlayerData.job.name == "ambulance") and v.PlayerData.job.onduty then
             local coords = GetEntityCoords(GetPlayerPed(v.PlayerData.source))
@@ -49,7 +48,7 @@ local function generateId(table)
 end
 
 RegisterNetEvent('police:server:SendTrackerLocation', function(coords, requestId)
-    local Target = QBCore.Functions.GetPlayer(source)
+    local Target = QBX.Functions.GetPlayer(source)
     local msg = Lang:t('info.target_location', {firstname = Target.PlayerData.charinfo.firstname, lastname = Target.PlayerData.charinfo.lastname})
     local alertData = {
         title = Lang:t('info.anklet_location'),
@@ -61,26 +60,26 @@ RegisterNetEvent('police:server:SendTrackerLocation', function(coords, requestId
 end)
 
 -- Items
-QBCore.Functions.CreateUseableItem("handcuffs", function(source)
-    local player = QBCore.Functions.GetPlayer(source)
+QBX.Functions.CreateUseableItem("handcuffs", function(source)
+    local player = QBX.Functions.GetPlayer(source)
     if not player.Functions.GetItemByName("handcuffs") then return end
     TriggerClientEvent("police:client:CuffPlayerSoft", source)
 end)
 
-QBCore.Functions.CreateUseableItem("moneybag", function(source, item)
-    local player = QBCore.Functions.GetPlayer(source)
+QBX.Functions.CreateUseableItem("moneybag", function(source, item)
+    local player = QBX.Functions.GetPlayer(source)
     if not player or not player.Functions.GetItemByName("moneybag") or not item.info or item.info == "" or player.PlayerData.job.type == "leo" or not player.Functions.RemoveItem("moneybag", 1, item.slot) then return end
     player.Functions.AddMoney("cash", tonumber(item.info.cash), "used-moneybag")
 end)
 
 -- Callbacks
 lib.callback.register('police:server:isPlayerDead', function(_, playerId)
-    local player = QBCore.Functions.GetPlayer(playerId)
+    local player = QBX.Functions.GetPlayer(playerId)
     return player.PlayerData.metadata.idead
 end)
 
 lib.callback.register('police:GetPlayerStatus', function(_, playerId)
-    local player = QBCore.Functions.GetPlayer(playerId)
+    local player = QBX.Functions.GetPlayer(playerId)
     if not player or not playerStatus[player.PlayerData.source] or not next(playerStatus[player.PlayerData.source]) then
         return {}
     end
@@ -96,7 +95,7 @@ lib.callback.register('police:GetImpoundedVehicles', function()
 end)
 
 lib.callback.register('qbx-policejob:server:spawnVehicle', function(source, model, coords, plate)
-    local netId = QBCore.Functions.CreateVehicle(source, model, coords, true)
+    local netId = QBX.Functions.CreateVehicle(source, model, coords, true)
     if not netId or netId == 0 then return end
     local veh = NetworkGetEntityFromNetworkId(netId)
     if not veh or veh == 0 then return end
@@ -111,7 +110,7 @@ local function isPlateFlagged(plate)
 end
 
 ---@deprecated use qbx-police:server:isPlateFlagged
-QBCore.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
+QBX.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
     print(string.format("%s invoked deprecated callback police:IsPlateFlagged. Use police:server:IsPoliceForcePresent instead.", GetInvokingResource()))
     cb(isPlateFlagged(plate))
 end)
@@ -121,7 +120,7 @@ lib.callback.register('qbx-police:server:isPlateFlagged', function(_, plate)
 end)
 
 local function isPoliceForcePresent()
-    local players = QBCore.Functions.GetQBPlayers()
+    local players = QBX.Functions.GetQBPlayers()
     for _, v in pairs(players) do
         if v and v.PlayerData.job.type == "leo" and v.PlayerData.job.grade.level >= 2 then
             return true
@@ -131,7 +130,7 @@ local function isPoliceForcePresent()
 end
 
 ---@deprecated
-QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
+QBX.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
     print(string.format("%s invoked deprecated callback police:server:IsPoliceForcePresent. Use police:server:isPoliceForcePresent instead.", GetInvokingResource()))
     cb(isPoliceForcePresent())
 end)
@@ -144,16 +143,16 @@ end)
 RegisterNetEvent('police:server:Radar', function(fine)
     local source = source
     local price  = Config.SpeedFines[fine].fine
-    local player = QBCore.Functions.GetPlayer(source)
+    local player = QBX.Functions.GetPlayer(source)
     if not player.Functions.RemoveMoney("bank", math.floor(price), "Radar Fine") then return end
     exports['qbx-management']:AddMoney('police', price)
-    TriggerClientEvent('QBCore:Notify', source, Lang:t("info.fine_received", {fine = price}))
+    TriggerClientEvent('QBX:Notify', source, Lang:t("info.fine_received", {fine = price}))
 end)
 
 RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource)
     local ped = GetPlayerPed(playerSource)
     local coords = GetEntityCoords(ped)
-    local players = QBCore.Functions.GetQBPlayers()
+    local players = QBX.Functions.GetQBPlayers()
     for k, v in pairs(players) do
         if IsLeoAndOnDuty(v) then
             if camId then
@@ -196,8 +195,8 @@ RegisterNetEvent('police:server:CuffPlayer', function(playerId, isSoftcuff)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
 
-    local player = QBCore.Functions.GetPlayer(src)
-    local cuffedPlayer = QBCore.Functions.GetPlayer(playerId)
+    local player = QBX.Functions.GetPlayer(src)
+    local cuffedPlayer = QBX.Functions.GetPlayer(playerId)
     if not player or not cuffedPlayer or (not player.Functions.GetItemByName("handcuffs") and player.PlayerData.job.type ~= "leo") then return end
 
     TriggerClientEvent("police:client:GetCuffed", cuffedPlayer.PlayerData.source, player.PlayerData.source, isSoftcuff)
@@ -207,8 +206,8 @@ RegisterNetEvent('police:server:EscortPlayer', function(playerId)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
 
-    local player = QBCore.Functions.GetPlayer(source)
-    local escortPlayer = QBCore.Functions.GetPlayer(playerId)
+    local player = QBX.Functions.GetPlayer(source)
+    local escortPlayer = QBX.Functions.GetPlayer(playerId)
     if not player or not escortPlayer then return end
 
     if (player.PlayerData.job.type == "leo" or player.PlayerData.job.name == "ambulance") or (escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand) then
@@ -221,8 +220,8 @@ end)
 RegisterNetEvent('police:server:KidnapPlayer', function(playerId)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
-    local Player = QBCore.Functions.GetPlayer(source)
-    local escortPlayer = QBCore.Functions.GetPlayer(playerId)
+    local Player = QBX.Functions.GetPlayer(source)
+    local escortPlayer = QBX.Functions.GetPlayer(playerId)
     if not Player or not escortPlayer then return end
 
     if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand then
@@ -237,8 +236,8 @@ RegisterNetEvent('police:server:SetPlayerOutVehicle', function(playerId)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
 
-    local escortPlayer = QBCore.Functions.GetPlayer(playerId)
-    if not QBCore.Functions.GetPlayer(src) or not escortPlayer then return end
+    local escortPlayer = QBX.Functions.GetPlayer(playerId)
+    if not QBX.Functions.GetPlayer(src) or not escortPlayer then return end
 
     if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead then
         TriggerClientEvent("police:client:SetOutVehicle", escortPlayer.PlayerData.source)
@@ -251,8 +250,8 @@ RegisterNetEvent('police:server:PutPlayerInVehicle', function(playerId)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
 
-    local escortPlayer = QBCore.Functions.GetPlayer(playerId)
-    if not QBCore.Functions.GetPlayer(src) or not escortPlayer then return end
+    local escortPlayer = QBX.Functions.GetPlayer(playerId)
+    if not QBX.Functions.GetPlayer(src) or not escortPlayer then return end
 
     if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead then
         TriggerClientEvent("police:client:PutInVehicle", escortPlayer.PlayerData.source)
@@ -265,8 +264,8 @@ RegisterNetEvent('police:server:BillPlayer', function(playerId, price)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
 
-    local player = QBCore.Functions.GetPlayer(src)
-    local otherPlayer = QBCore.Functions.GetPlayer(playerId)
+    local player = QBX.Functions.GetPlayer(src)
+    local otherPlayer = QBX.Functions.GetPlayer(playerId)
     if not player or not otherPlayer or player.PlayerData.job.type ~= "leo" then return end
 
     otherPlayer.Functions.RemoveMoney("bank", price, "paid-bills")
@@ -278,8 +277,8 @@ RegisterNetEvent('police:server:JailPlayer', function(playerId, time)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
 
-    local player = QBCore.Functions.GetPlayer(src)
-    local otherPlayer = QBCore.Functions.GetPlayer(playerId)
+    local player = QBX.Functions.GetPlayer(src)
+    local otherPlayer = QBX.Functions.GetPlayer(playerId)
     if not player or not otherPlayer or player.PlayerData.job.type ~= "leo" then return end
 
     local currentDate = os.date("*t")
@@ -297,7 +296,7 @@ RegisterNetEvent('police:server:JailPlayer', function(playerId, time)
 end)
 
 RegisterNetEvent('police:server:SetHandcuffStatus', function(isHandcuffed)
-    local player = QBCore.Functions.GetPlayer(source)
+    local player = QBX.Functions.GetPlayer(source)
     if not player then return end
     player.Functions.SetMetaData("ishandcuffed", isHandcuffed)
 end)
@@ -310,7 +309,7 @@ RegisterNetEvent('police:server:FlaggedPlateTriggered', function(radar, plate, s
     local src = source
     local ped = GetPlayerPed(src)
     local coords = GetEntityCoords(ped)
-    local players = QBCore.Functions.GetQBPlayers()
+    local players = QBX.Functions.GetQBPlayers()
     for k, v in pairs(players) do
         if v and IsLeoAndOnDuty(v) then
             local alertData = {title = Lang:t('info.new_call'), coords = coords, description = Lang:t('info.plate_triggered', {plate = plate, street = street, radar = radar})}
@@ -324,8 +323,8 @@ RegisterNetEvent('police:server:SearchPlayer', function(playerId)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
 
-    local searchedPlayer = QBCore.Functions.GetPlayer(playerId)
-    if not QBCore.Functions.GetPlayer(src) or not searchedPlayer then return end
+    local searchedPlayer = QBX.Functions.GetPlayer(playerId)
+    if not QBX.Functions.GetPlayer(src) or not searchedPlayer then return end
 
     TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.searched_success")})
     TriggerClientEvent('ox_lib:notify', searchedPlayer.PlayerData.source, {description = Lang:t("info.being_searched")})
@@ -335,8 +334,8 @@ RegisterNetEvent('police:server:SeizeCash', function(playerId)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
 
-    local player = QBCore.Functions.GetPlayer(src)
-    local searchedPlayer = QBCore.Functions.GetPlayer(playerId)
+    local player = QBX.Functions.GetPlayer(src)
+    local searchedPlayer = QBX.Functions.GetPlayer(playerId)
     if not player or not searchedPlayer then return end
 
     local moneyAmount = searchedPlayer.PlayerData.money.cash
@@ -350,8 +349,8 @@ RegisterNetEvent('police:server:RobPlayer', function(playerId)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
 
-    local player = QBCore.Functions.GetPlayer(src)
-    local searchedPlayer = QBCore.Functions.GetPlayer(playerId)
+    local player = QBX.Functions.GetPlayer(src)
+    local searchedPlayer = QBX.Functions.GetPlayer(playerId)
     if not player or not searchedPlayer then return end
 
     local money = searchedPlayer.PlayerData.money.cash
@@ -399,7 +398,7 @@ RegisterNetEvent('evidence:server:CreateBloodDrop', function(citizenid, bloodtyp
 end)
 
 RegisterNetEvent('evidence:server:CreateFingerDrop', function(coords)
-    local player = QBCore.Functions.GetPlayer(source)
+    local player = QBX.Functions.GetPlayer(source)
     local fingerId = generateId(fingerDrops)
     fingerDrops[fingerId] = player.PlayerData.metadata.fingerprint
     TriggerClientEvent("evidence:client:AddFingerPrint", -1, fingerId, player.PlayerData.metadata.fingerprint, coords)
@@ -415,7 +414,7 @@ end)
 
 RegisterNetEvent('evidence:server:AddBlooddropToInventory', function(bloodId, bloodInfo)
     local src = source
-    local player = QBCore.Functions.GetPlayer(src)
+    local player = QBX.Functions.GetPlayer(src)
     local playerName = player.PlayerData.charinfo.firstname.." "..player.PlayerData.charinfo.lastname
     local streetName = bloodInfo.street
     local bloodType = bloodInfo.bloodtype
@@ -437,7 +436,7 @@ end)
 
 RegisterNetEvent('evidence:server:AddFingerprintToInventory', function(fingerId, fingerInfo)
     local src = source
-    local player = QBCore.Functions.GetPlayer(src)
+    local player = QBX.Functions.GetPlayer(src)
     local playerName = player.PlayerData.charinfo.firstname.." "..player.PlayerData.charinfo.lastname
     local streetName = fingerInfo.street
     local fingerPrint = fingerInfo.fingerprint
@@ -466,7 +465,7 @@ end)
 
 RegisterNetEvent('police:server:UpdateCurrentCops', function()
     local amount = 0
-    local players = QBCore.Functions.GetQBPlayers()
+    local players = QBX.Functions.GetQBPlayers()
     if updatingCops then return end
     updatingCops = true
     for _, v in pairs(players) do
@@ -489,7 +488,7 @@ end)
 
 RegisterNetEvent('evidence:server:AddCasingToInventory', function(casingId, casingInfo)
     local src = source
-    local player = QBCore.Functions.GetPlayer(src)
+    local player = QBX.Functions.GetPlayer(src)
     local playerName = player.PlayerData.charinfo.firstname.." "..player.PlayerData.charinfo.lastname
     local streetName = casingInfo.street
     local ammoType = casingInfo.ammolabel
@@ -515,7 +514,7 @@ RegisterNetEvent('police:server:showFingerprint', function(playerId)
 end)
 
 RegisterNetEvent('police:server:showFingerprintId', function(sessionId)
-    local player = QBCore.Functions.GetPlayer(source)
+    local player = QBX.Functions.GetPlayer(source)
     local fid = player.PlayerData.metadata.fingerprint
     TriggerClientEvent('police:client:showFingerprintId', sessionId, fid)
     TriggerClientEvent('police:client:showFingerprintId', source, fid)
@@ -525,8 +524,8 @@ RegisterNetEvent('police:server:SetTracker', function(targetId)
     local src = source
     if isTargetTooFar(src, targetId, 2.5) then return end
 
-    local target = QBCore.Functions.GetPlayer(targetId)
-    if not QBCore.Functions.GetPlayer(src) or not target then return end
+    local target = QBX.Functions.GetPlayer(targetId)
+    if not QBX.Functions.GetPlayer(src) or not target then return end
 
     local trackerMeta = target.PlayerData.metadata.tracker
     if trackerMeta then
@@ -550,7 +549,7 @@ AddEventHandler('onServerResourceStart', function(resource)
     if resource ~= 'ox_inventory' then return end
 
     local jobs = {}
-    for k, v in pairs(QBCore.Shared.Jobs) do
+    for k, v in pairs(QBX.Shared.Jobs) do
         if v.type == 'leo' then
             jobs[k] = 0
         end
@@ -570,7 +569,7 @@ CreateThread(function()
     end
     while true do
         Wait(1000 * 60 * 10)
-        local curCops = QBCore.Functions.GetDutyCountType('leo')
+        local curCops = QBX.Functions.GetDutyCountType('leo')
         TriggerClientEvent("police:SetCopCount", -1, curCops)
     end
 end)

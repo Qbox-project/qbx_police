@@ -1,8 +1,8 @@
 -- Variables
-QBCore = exports['qbx-core']:GetCoreObject()
+QBX = exports['qbx-core']:GetCoreObject()
 cuffType = 1
 isEscorted = false
-PlayerData = QBCore.Functions.GetPlayerData() or {}
+PlayerData = QBX.Functions.GetPlayerData() or {}
 IsLoggedIn = LocalPlayer.state.isLoggedIn
 local DutyBlips = {}
 
@@ -39,8 +39,8 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
 end
 
 -- Events
-AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-    PlayerData = QBCore.Functions.GetPlayerData()
+AddEventHandler('QBX:Client:OnPlayerLoaded', function()
+    PlayerData = QBX.Functions.GetPlayerData()
 
     TriggerServerEvent("police:server:SetHandcuffStatus", false)
     TriggerServerEvent("police:server:UpdateCurrentCops")
@@ -77,7 +77,7 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     IsLoggedIn = true
 end)
 
-RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+RegisterNetEvent('QBX:Client:OnPlayerUnload', function()
     TriggerServerEvent("police:server:SetHandcuffStatus", false)
     TriggerServerEvent("police:server:UpdateCurrentCops")
     isEscorted = false
@@ -92,7 +92,7 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     IsLoggedIn = false
 end)
 
-RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
+RegisterNetEvent('QBX:Client:OnJobUpdate', function(JobInfo)
     if JobInfo.type == "leo" and PlayerData.job.type ~= "leo" then
         if JobInfo.onduty then
             TriggerEvent('qb-policejob:ToggleDuty')
@@ -110,7 +110,7 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     PlayerData.job = JobInfo
 end)
 
-RegisterNetEvent('QBCore:Player:SetPlayerData', function(val)
+RegisterNetEvent('QBX:Player:SetPlayerData', function(val)
     -- Make sure it can only be triggered from the server
     if GetInvokingResource() then return end
     PlayerData = val

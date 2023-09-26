@@ -19,7 +19,7 @@ end
 local function setCarItemsInfo()
 	local items = {}
 	for _, item in pairs(Config.CarItems) do
-		local itemInfo = QBCore.Shared.Items[item.name:lower()]
+		local itemInfo = QBX.Shared.Items[item.name:lower()]
 		items[item.slot] = {
 			name = itemInfo.name,
 			amount = tonumber(item.amount),
@@ -84,16 +84,16 @@ local function takeOutImpound(vehicle)
     if not inImpound then return end
     local coords = Config.Locations.impound[currentGarage]
     if not coords then return end
-    QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
+    QBX.Functions.TriggerCallback('QBX:Server:SpawnVehicle', function(netId)
         local veh = NetToVeh(netId)
-        QBCore.Functions.TriggerCallback('qb-garage:server:GetVehicleProperties', function(properties)
-            QBCore.Functions.SetVehicleProperties(veh, properties)
+        QBX.Functions.TriggerCallback('qb-garage:server:GetVehicleProperties', function(properties)
+            QBX.Functions.SetVehicleProperties(veh, properties)
             SetVehicleNumberPlateText(veh, vehicle.plate)
             SetVehicleFuelLevel(veh, vehicle.fuel)
             doCarDamage(veh, vehicle)
             TriggerServerEvent('police:server:TakeOutImpound', vehicle.plate, currentGarage)
             TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-            TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
+            TriggerEvent("vehiclekeys:client:SetOwner", QBX.Functions.GetPlate(veh))
             SetVehicleEngineOn(veh, true, true, false)
         end, vehicle.plate)
     end, vehicle.vehicle, coords, true)
@@ -118,8 +118,8 @@ local function takeOutVehicle(vehicleInfo)
         end
     end
     TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-    TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
-    TriggerServerEvent("inventory:server:addTrunkItems", QBCore.Functions.GetPlate(veh), Config.CarItems)
+    TriggerEvent("vehiclekeys:client:SetOwner", QBX.Functions.GetPlate(veh))
+    TriggerServerEvent("inventory:server:addTrunkItems", QBX.Functions.GetPlate(veh), Config.CarItems)
     SetVehicleEngineOn(veh, true, true, false)
 end
 
@@ -160,9 +160,9 @@ local function openImpoundMenu()
         lib.notify({ description = Lang:t("error.no_impound"), type = 'error', })
     else
         for _, v in pairs(result) do
-            local enginePercent = QBCore.Shared.Round(v.engine / 10, 0)
+            local enginePercent = QBX.Shared.Round(v.engine / 10, 0)
             local currentFuel = v.fuel
-            local vName = QBCore.Shared.Vehicles[v.vehicle].name
+            local vName = QBX.Shared.Vehicles[v.vehicle].name
 
             options[#options+1] = {
                 title = vName.." ["..v.plate.."]",
@@ -210,11 +210,11 @@ end
 local function spawnHelicopter()
     if not inHelicopter then return end
     if cache.vehicle then
-        QBCore.Functions.DeleteVehicle(cache.vehicle)
+        QBX.Functions.DeleteVehicle(cache.vehicle)
     else
         local plyCoords = GetEntityCoords(cache.ped)
         local coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
-        QBCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
+        QBX.Functions.TriggerCallback('QBX:Server:SpawnVehicle', function(netId)
             local veh = NetToVeh(netId)
             SetVehicleLivery(veh , 0)
             SetVehicleMod(veh, 0, 48, false)
@@ -222,7 +222,7 @@ local function spawnHelicopter()
             SetEntityHeading(veh, coords.w)
             SetVehicleFuelLevel(veh, 100.0)
             TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-            TriggerEvent("vehiclekeys:client:SetOwner", QBCore.Functions.GetPlate(veh))
+            TriggerEvent("vehiclekeys:client:SetOwner", QBX.Functions.GetPlate(veh))
             SetVehicleEngineOn(veh, true, true, false)
         end, Config.PoliceHelicopter, coords, true)
     end
@@ -251,7 +251,7 @@ local function uiPrompt(promptType, id)
                 elseif promptType == 'garage' then
                     if not inGarage then return end
                     if cache.vehicle then
-                        QBCore.Functions.DeleteVehicle(cache.vehicle)
+                        QBX.Functions.DeleteVehicle(cache.vehicle)
                         lib.hideTextUI()
                         break
                     else
@@ -266,7 +266,7 @@ local function uiPrompt(promptType, id)
                 elseif promptType == 'impound' then
                     if not inImpound then return end
                     if cache.vehicle then
-                        QBCore.Functions.DeleteVehicle(cache.vehicle)
+                        QBX.Functions.DeleteVehicle(cache.vehicle)
                         lib.hideTextUI()
                         break
                     else
@@ -349,7 +349,7 @@ RegisterNetEvent('police:client:CallAnim', function()
 end)
 
 RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
-    local vehicle = QBCore.Functions.GetClosestVehicle()
+    local vehicle = QBX.Functions.GetClosestVehicle()
     if not DoesEntityExist(vehicle) then return end
 
     local bodyDamage = math.ceil(GetVehicleBodyHealth(vehicle))
@@ -391,9 +391,9 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
         },
     })
     then
-        local plate = QBCore.Functions.GetPlate(vehicle)
+        local plate = QBX.Functions.GetPlate(vehicle)
         TriggerServerEvent("police:server:Impound", plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
-        QBCore.Functions.DeleteVehicle(vehicle)
+        QBX.Functions.DeleteVehicle(vehicle)
         lib.notify({ description = Lang:t('success.impounded'), type = 'success' })
         ClearPedTasks(cache.ped)
     else
@@ -418,7 +418,7 @@ RegisterNetEvent('police:client:CheckStatus', function()
 end)
 
 function ToggleDuty()
-    TriggerServerEvent("QBCore:ToggleDuty")
+    TriggerServerEvent("QBX:ToggleDuty")
     TriggerServerEvent("police:server:UpdateCurrentCops")
 end
 
