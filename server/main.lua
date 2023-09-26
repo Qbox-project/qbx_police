@@ -146,7 +146,7 @@ RegisterNetEvent('police:server:Radar', function(fine)
     local player = QBX.Functions.GetPlayer(source)
     if not player.Functions.RemoveMoney("bank", math.floor(price), "Radar Fine") then return end
     exports['qbx-management']:AddMoney('police', price)
-    TriggerClientEvent('QBX:Notify', source, Lang:t("info.fine_received", {fine = price}))
+    TriggerClientEvent('QBCore:Notify', source, Lang:t("info.fine_received", {fine = price}))
 end)
 
 RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource)
