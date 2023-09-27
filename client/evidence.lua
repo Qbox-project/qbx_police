@@ -57,7 +57,7 @@ RegisterNetEvent('evidence:client:SetStatus', function(statusId, time)
                 text = statusList[statusId],
                 time = time
             }
-            QBCore.Functions.Notify(currentStatusList[statusId].text, 'error')
+            QBX.Functions.Notify(currentStatusList[statusId].text, 'error')
         end
     elseif statusList[statusId] then
         currentStatusList[statusId] = nil
@@ -258,7 +258,7 @@ CreateThread(function()
                 metadata = {
                     type = Lang:t('info.casing'),
                     street = getStreetLabel(casings[currentCasing].coords),
-                    ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[casings[currentCasing].type].ammotype],
+                    ammolabel = Config.AmmoLabels[QBX.Shared.Weapons[casings[currentCasing].type].ammotype],
                     ammotype = casings[currentCasing].type,
                     serie = casings[currentCasing].serie
                 },

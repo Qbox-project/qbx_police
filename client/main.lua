@@ -1,8 +1,7 @@
 -- Variables
-QBCore = exports['qbx-core']:GetCoreObject()
 cuffType = 1
 isEscorted = false
-PlayerData = QBCore.Functions.GetPlayerData() or {}
+PlayerData = QBX.Functions.GetPlayerData() or {}
 IsLoggedIn = LocalPlayer.state.isLoggedIn
 local DutyBlips = {}
 
@@ -40,7 +39,7 @@ end
 
 -- Events
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-    PlayerData = QBCore.Functions.GetPlayerData()
+    PlayerData = QBX.Functions.GetPlayerData()
 
     TriggerServerEvent("police:server:SetHandcuffStatus", false)
     TriggerServerEvent("police:server:UpdateCurrentCops")

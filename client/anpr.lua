@@ -15,7 +15,7 @@ end
 
 local function handleSpeedCam(speedCam, radar)
 	if not cache.vehicle or cache.seat ~= -1 or GetVehicleClass(cache.vehicle) == 18 then return end
-	local plate = QBCore.Functions.GetPlate(cache.vehicle)
+	local plate = QBX.Functions.GetPlate(cache.vehicle)
 	local speed = GetEntitySpeed(cache.vehicle) * (Config.MPH and 2.236936 or 3.6)
 	local overlimit = speed - speedCam.speed
 
