@@ -1,13 +1,13 @@
-# qb-policejob
-Police Job for QB-Core Framework :police_officer:
+# qbx_policejob
+Police Job for QBOX :police_officer:
 
 ## Dependencies
-- [qb-core](https://github.com/Qbox-project/qb-core)
-- [qb-management](https://github.com/Qbox-project/qb-management) - For the boss menu
-- [qb-garages](https://github.com/Qbox-project/qb-garages) - For the vehicle spawner
-- [qb-clothing](https://github.com/Qbox-project/qb-clothing) - For the locker room
-- [qb-phone](https://github.com/Qbox-project/qb-phone) - For the MEOS app and notifications etc.
-- [qb-smallresources](https://github.com/Qbox-project/qb-smallresources) - For logging certain events
+- [qbx_core](https://github.com/Qbox-project/qbx_core)
+- [qbx_management](https://github.com/Qbox-project/qbx_management) - For the boss menu
+- [qbx_garages](https://github.com/Qbox-project/qbx_garages) - For the vehicle spawner
+- [qbx_clothing](https://github.com/Qbox-project/qbx_clothing) - For the locker room
+- [qbx_phone](https://github.com/Qbox-project/qbx_phone) - For the MEOS app and notifications etc.
+- [qbx_smallresources](https://github.com/Qbox-project/qbx_smallresources) - For logging certain events
 - [ox_lib](https://github.com/overextended/ox_lib) - For UI elements and cached data
 
 ## Screenshots
@@ -60,10 +60,10 @@ Police Job for QB-Core Framework :police_officer:
 
 ## Installation
 ### Manual
-- Download the script and put it in the `[qb]` directory.
+- Download the script and put it in the `[qbx]` directory.
 - Add the following code to your server.cfg/resouces.cfg
 
 ```
-ensure qb-core
-ensure qb-policejob
+ensure qbx_core
+ensure qbx_policejob
 ```
