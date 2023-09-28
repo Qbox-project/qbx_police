@@ -4,7 +4,7 @@
 ---@return boolean
 local function checkLeoAndOnDuty(player, minGrade)
     if type(player) == "number" then
-        player = exports.qbx_core:.GetPlayer(player)
+        player = exports.qbx_core:GetPlayer(player)
     end
     if not IsLeoAndOnDuty(player, minGrade) then
         TriggerClientEvent('ox_lib:notify', player.PlayerData.source, {description = Lang:t("error.on_duty_police_only"), type = 'error'})
@@ -49,7 +49,7 @@ lib.addCommand("grantlicense", {
         TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.license_type"), type = 'error'})
         return
     end
-    local searchedPlayer = exports.qbx_core:.GetPlayer(tonumber(args[1]))
+    local searchedPlayer = exports.qbx_core:GetPlayer(tonumber(args[1]))
     if not searchedPlayer then return end
     local licenseTable = searchedPlayer.PlayerData.metadata.licences
     if licenseTable[args[2]] then
@@ -85,7 +85,7 @@ lib.addCommand("revokelicense",{
         TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.error_license"), type = "error"})
         return
     end
-    local searchedPlayer = exports.qbx_core:.GetPlayer(tonumber(args[1]))
+    local searchedPlayer = exports.qbx_core:GetPlayer(tonumber(args[1]))
     if not searchedPlayer then return end
     local licenseTable = searchedPlayer.PlayerData.metadata.licences
     if not licenseTable[args[2]] then
@@ -144,7 +144,7 @@ lib.addCommand("callsign", {
         }
     },
  }, function(source, args)
-    local player = exports.qbx_core:.GetPlayer(source)
+    local player = exports.qbx_core:GetPlayer(source)
     player.Functions.SetMetaData("callsign", table.concat(args, " "))
 end)
 
@@ -316,7 +316,7 @@ lib.addCommand("paytow", {
 }, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
     local playerId = tonumber(args[1])
-    local OtherPlayer = exports.qbx_core:.GetPlayer(playerId)
+    local OtherPlayer = exports.qbx_core:GetPlayer(playerId)
     if not OtherPlayer then return end
     if OtherPlayer.PlayerData.job.name ~= "tow" then
         return TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.not_towdriver"), type = 'error'})
@@ -337,13 +337,13 @@ lib.addCommand("paylawyer", {
         }
     },
  }, function(source, args)
-    local Player = exports.qbx_core:.GetPlayer(source)
+    local Player = exports.qbx_core:GetPlayer(source)
     if Player.PlayerData.job.type ~= "leo" and Player.PlayerData.job.name ~= "judge" then
         return TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.on_duty_police_only"), type = 'error'})
     end
 
     local playerId = tonumber(args[1])
-    local OtherPlayer = exports.qbx_core:.GetPlayer(playerId)
+    local OtherPlayer = exports.qbx_core:GetPlayer(playerId)
     if not OtherPlayer then return end
     if OtherPlayer.PlayerData.job.name ~= "lawyer" then
         return TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.not_lawyer"), type = "error"})
@@ -373,7 +373,7 @@ lib.addCommand("ankletlocation", {
 }, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
     local citizenid = args[1]
-    local Target = exports.qbx_core:.GetPlayerByCitizenId(citizenid)
+    local Target = exports.qbx_core:GetPlayerByCitizenId(citizenid)
     if not Target then return end
     if not Target.PlayerData.metadata.tracker then
         return TriggerClientEvent('ox_lib:notify', source, {description = Lang:t("error.no_anklet"), type = 'error'})
@@ -391,8 +391,8 @@ lib.addCommand("takedna", {
         }
     },
 }, function(source, args)
-    local player = exports.qbx_core:.GetPlayer(source)
-    local OtherPlayer = exports.qbx_core:.GetPlayer(tonumber(args[1]))
+    local player = exports.qbx_core:GetPlayer(source)
+    local OtherPlayer = exports.qbx_core:GetPlayer(tonumber(args[1]))
 
     if not checkLeoAndOnDuty(player) then return end
     if not player.Functions.RemoveItem("empty_evidence_bag", 1) then
@@ -422,7 +422,7 @@ lib.addCommand("911p", {
 	if args[1] then message = table.concat(args, " ") else message = Lang:t("commands.civilian_call") end
     local ped = GetPlayerPed(source)
     local coords = GetEntityCoords(ped)
-    local players = exports.qbx_core:.GetQBPlayers()
+    local players = exports.qbx_core:GetQBPlayers()
     for _, v in pairs(players) do
         if IsLeoAndOnDuty(v) then
             local alertData = {title = Lang:t("commands.emergency_call"), coords = {x = coords.x, y = coords.y, z = coords.z}, description = message}

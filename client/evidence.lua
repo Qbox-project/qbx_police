@@ -57,7 +57,7 @@ RegisterNetEvent('evidence:client:SetStatus', function(statusId, time)
                 text = statusList[statusId],
                 time = time
             }
-            exports.qbx_core:.Notify(currentStatusList[statusId].text, 'error')
+            exports.qbx_core:Notify(currentStatusList[statusId].text, 'error')
         end
     elseif statusList[statusId] then
         currentStatusList[statusId] = nil

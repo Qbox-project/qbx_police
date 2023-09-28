@@ -87,7 +87,7 @@ local function takeOutImpound(vehicle)
    lib.callback('QBX:Server:SpawnVehicle', false, function(netId)
         local veh = NetToVeh(netId)
         lib.callback('qb-garage:server:GetVehicleProperties', false, function(properties)
-            exports.qbx_core:.SetVehicleProperties(veh, properties)
+            exports.qbx_core:SetVehicleProperties(veh, properties)
             SetVehicleNumberPlateText(veh, vehicle.plate)
             SetVehicleFuelLevel(veh, vehicle.fuel)
             doCarDamage(veh, vehicle)
@@ -211,11 +211,11 @@ end
 local function spawnHelicopter()
     if not inHelicopter then return end
     if cache.vehicle then
-        exports.qbx_core:.DeleteVehicle(cache.vehicle)
+        exports.qbx_core:DeleteVehicle(cache.vehicle)
     else
         local plyCoords = GetEntityCoords(cache.ped)
         local coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
-        exports.qbx_core:.TriggerCallback('QBX:Server:SpawnVehicle', function(netId)
+        exports.qbx_core:TriggerCallback('QBX:Server:SpawnVehicle', function(netId)
             local veh = NetToVeh(netId)
             SetVehicleLivery(veh , 0)
             SetVehicleMod(veh, 0, 48, false)
@@ -252,7 +252,7 @@ local function uiPrompt(promptType, id)
                 elseif promptType == 'garage' then
                     if not inGarage then return end
                     if cache.vehicle then
-                        exports.qbx_core:.DeleteVehicle(cache.vehicle)
+                        exports.qbx_core:DeleteVehicle(cache.vehicle)
                         lib.hideTextUI()
                         break
                     else
@@ -267,7 +267,7 @@ local function uiPrompt(promptType, id)
                 elseif promptType == 'impound' then
                     if not inImpound then return end
                     if cache.vehicle then
-                        exports.qbx_core:.DeleteVehicle(cache.vehicle)
+                        exports.qbx_core:DeleteVehicle(cache.vehicle)
                         lib.hideTextUI()
                         break
                     else
@@ -350,7 +350,7 @@ RegisterNetEvent('police:client:CallAnim', function()
 end)
 
 RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
-    local vehicle = exports.qbx_core:.GetClosestVehicle()
+    local vehicle = exports.qbx_core:GetClosestVehicle()
     if not DoesEntityExist(vehicle) then return end
 
     local bodyDamage = math.ceil(GetVehicleBodyHealth(vehicle))
@@ -394,7 +394,7 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
     then
         local plate = GetPlate(vehicle)
         TriggerServerEvent("police:server:Impound", plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
-        exports.qbx_core:.DeleteVehicle(vehicle)
+        exports.qbx_core:DeleteVehicle(vehicle)
         lib.notify({ description = Lang:t('success.impounded'), type = 'success' })
         ClearPedTasks(cache.ped)
     else
