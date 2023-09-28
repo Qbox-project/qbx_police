@@ -110,10 +110,10 @@ local function isPlateFlagged(plate)
 end
 
 ---@deprecated use qbx_police:server:isPlateFlagged
-exports.qbx_core:CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
-    print(string.format("%s invoked deprecated callback police:IsPlateFlagged. Use police:server:IsPoliceForcePresent instead.", GetInvokingResource()))
-    cb(isPlateFlagged(plate))
-end)
+--exports.qbx_core:CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
+--    print(string.format("%s invoked deprecated callback police:IsPlateFlagged. Use police:server:IsPoliceForcePresent instead.", GetInvokingResource()))
+--   cb(isPlateFlagged(plate))
+--end)
 
 lib.callback.register('qbx_police:server:isPlateFlagged', function(_, plate)
     return isPlateFlagged(plate)
@@ -130,10 +130,10 @@ local function isPoliceForcePresent()
 end
 
 ---@deprecated
-exports.qbx_core:CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
-    print(string.format("%s invoked deprecated callback police:server:IsPoliceForcePresent. Use police:server:isPoliceForcePresent instead.", GetInvokingResource()))
-    cb(isPoliceForcePresent())
-end)
+--exports.qbx_core:CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
+--    print(string.format("%s invoked deprecated callback police:server:IsPoliceForcePresent. Use police:server:isPoliceForcePresent instead.", GetInvokingResource()))
+--    cb(isPoliceForcePresent())
+--end)
 
 lib.callback.register('police:server:isPoliceForcePresent', function()
     return isPoliceForcePresent()
