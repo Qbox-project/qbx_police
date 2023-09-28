@@ -1,5 +1,5 @@
 RegisterNetEvent('police:client:CheckDistance', function()
-    local player, distance = QBX.Functions.GetClosestPlayer()
+    local player, distance = exports.qbx_core:.GetClosestPlayer()
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
         TriggerServerEvent("police:server:SetTracker", playerId)

@@ -120,7 +120,7 @@ local function renderVehicleInfo(vehicle)
 	local pos = GetEntityCoords(vehicle)
 	local model = GetEntityModel(vehicle)
 	local vehName = GetLabelText(GetDisplayNameFromVehicleModel(model))
-	local licensePlate = QBX.Functions.GetPlate(vehicle)
+	local licensePlate = GetPlate(vehicle)
 	local speed = math.ceil(GetEntitySpeed(vehicle) * 3.6)
 	local street1, street2 = GetStreetNameAtCoord(pos.x, pos.y, pos.z)
 	local streetLabel = GetStreetNameFromHashKey(street1)
@@ -208,7 +208,7 @@ end
 
 local function handleInVehicle()
 	if not IsLoggedIn then return end
-	if PlayerData.job.type ~= 'leo' or not PlayerData.job.onduty then return end
+	if QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then return end
 	if isHeliHighEnough(cache.vehicle) then
 		if IsControlJustPressed(0, toggleHelicam) then -- Toggle Helicam
 			PlaySoundFrontend(-1, "SELECT", "HUD_FRONTEND_DEFAULT_SOUNDSET", false)
