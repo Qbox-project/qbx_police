@@ -239,7 +239,8 @@ RegisterNetEvent('police:server:SetPlayerOutVehicle', function(playerId)
     local escortPlayer = exports.qbx_core:GetPlayer(playerId)
     if not exports.qbx_core:GetPlayer(src) or not escortPlayer then return end
 
-    if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead then
+    if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand then
+        
         TriggerClientEvent("police:client:SetOutVehicle", escortPlayer.PlayerData.source)
     else
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.not_cuffed_dead"), type = 'error'})
@@ -253,7 +254,7 @@ RegisterNetEvent('police:server:PutPlayerInVehicle', function(playerId)
     local escortPlayer = exports.qbx_core:GetPlayer(playerId)
     if not exports.qbx_core:GetPlayer(src) or not escortPlayer then return end
 
-    if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead then
+    if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand then
         TriggerClientEvent("police:client:PutInVehicle", escortPlayer.PlayerData.source)
     else
         TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.not_cuffed_dead"), type = 'error'})
