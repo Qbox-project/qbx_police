@@ -3,7 +3,7 @@ local isEscorting = false
 
 -- Functions
 exports('IsHandcuffed', function()
-    return PlayerData.metadata.ishandcuffed
+    return QBX.PlayerData.metadata.ishandcuffed
 end)
 
 local function isTargetDead(playerId)
@@ -11,7 +11,7 @@ local function isTargetDead(playerId)
 end
 
 local function handCuffAnimation()
-    if PlayerData.metadata.ishandcuffed then
+    if QBX.PlayerData.metadata.ishandcuffed then
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "Cuff", 0.2)
     else
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "Uncuff", 0.2)
@@ -97,10 +97,10 @@ local function handcuffedEscorted()
         sleep = 0
         escortActions()
     end
-    if not PlayerData.metadata.ishandcuffed then return sleep end
+    if not QBX.PlayerData.metadata.ishandcuffed then return sleep end
     sleep = 0
     handcuffActions()
-    if PlayerData.metadata.isdead then return sleep end
+    if QBX.PlayerData.metadata.isdead then return sleep end
     for i = 1, #anim do
         if IsEntityPlayingAnim(cache.ped, anim[i].dict, anim[i].anim, 3) then return sleep end
     end
@@ -118,9 +118,9 @@ RegisterNetEvent('police:client:SetOutVehicle', function()
 end)
 
 RegisterNetEvent('police:client:PutInVehicle', function()
-    if not PlayerData.metadata.ishandcuffed and not isEscorted then return end
+    if not QBX.PlayerData.metadata.ishandcuffed and not isEscorted then return end
 
-    local vehicle = QBX.Functions.GetClosestVehicle()
+    local vehicle = exports.qbx_core:GetClosestVehicle()
     if not DoesEntityExist(vehicle) then return end
 
     for i = GetVehicleMaxNumberOfPassengers(vehicle), 0, -1 do
@@ -152,7 +152,7 @@ local function isTooFar(player, distance, maxDistance)
 end
 
 RegisterNetEvent('police:client:SearchPlayer', function()
-    local player, distance = QBX.Functions.GetClosestPlayer()
+    local player, distance = exports.qbx_core:GetClosestPlayer()
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     exports.ox_inventory:openNearbyInventory()
@@ -160,14 +160,14 @@ RegisterNetEvent('police:client:SearchPlayer', function()
 end)
 
 RegisterNetEvent('police:client:SeizeCash', function()
-    local player, distance = QBX.Functions.GetClosestPlayer()
+    local player, distance = exports.qbx_core:GetClosestPlayer()
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     TriggerServerEvent("police:server:SeizeCash", playerId)
 end)
 
 RegisterNetEvent('police:client:RobPlayer', function()
-    local player, distance = QBX.Functions.GetClosestPlayer()
+    local player, distance = exports.qbx_core:GetClosestPlayer()
     if isTooFar(player, distance) then return end
     local playerPed = GetPlayerPed(player)
     local playerId = GetPlayerServerId(player)
@@ -210,7 +210,7 @@ RegisterNetEvent('police:client:RobPlayer', function()
 end)
 
 RegisterNetEvent('police:client:JailPlayer', function()
-    local player, distance = QBX.Functions.GetClosestPlayer()
+    local player, distance = exports.qbx_core:GetClosestPlayer()
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     local dialog = lib.inputDialog(Lang:t('info.jail_time_input'), {
@@ -224,7 +224,7 @@ RegisterNetEvent('police:client:JailPlayer', function()
 end)
 
 RegisterNetEvent('police:client:BillPlayer', function()
-    local player, distance = QBX.Functions.GetClosestPlayer()
+    local player, distance = exports.qbx_core:GetClosestPlayer()
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     local dialog = lib.inputDialog(Lang:t('info.bill'), {
@@ -240,10 +240,10 @@ RegisterNetEvent('police:client:BillPlayer', function()
 end)
 
 local function triggerIfHandsFree(eventName)
-    local player, distance = QBX.Functions.GetClosestPlayer()
+    local player, distance = exports.qbx_core:GetClosestPlayer()
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
-    if PlayerData.metadata.ishandcuffed or isEscorted then return end
+    if QBX.PlayerData.metadata.ishandcuffed or isEscorted then return end
     TriggerServerEvent(eventName, playerId)
 end
 
@@ -260,16 +260,16 @@ RegisterNetEvent('police:client:EscortPlayer', function()
 end)
 
 RegisterNetEvent('police:client:KidnapPlayer', function()
-    local player, distance = QBX.Functions.GetClosestPlayer()
+    local player, distance = exports.qbx_core:GetClosestPlayer()
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
-    if IsPedInAnyVehicle(GetPlayerPed(player), false) or PlayerData.metadata.ishandcuffed or isEscorted then return end
+    if IsPedInAnyVehicle(GetPlayerPed(player), false) or QBX.PlayerData.metadata.ishandcuffed or isEscorted then return end
     TriggerServerEvent("police:server:KidnapPlayer", playerId)
 end)
 
 RegisterNetEvent('police:client:CuffPlayerSoft', function()
     if IsPedRagdoll(cache.ped) then return end
-    local player, distance = QBX.Functions.GetClosestPlayer()
+    local player, distance = exports.qbx_core:GetClosestPlayer()
     if isTooFar(player, distance, 1.5) then return end
     local playerId = GetPlayerServerId(player)
     if IsPedInAnyVehicle(GetPlayerPed(player), false) or cache.vehicle then
@@ -283,7 +283,7 @@ end)
 RegisterNetEvent('police:client:CuffPlayer', function()
     if IsPedRagdoll(cache.ped) then return end
 
-    local player, distance = QBX.Functions.GetClosestPlayer()
+    local player, distance = exports.qbx_core:GetClosestPlayer()
     if isTooFar(player, distance) then return end
     if exports.ox_inventory:Search('count', Config.HandCuffItem) == 0 then
         lib.notify({ description = Lang:t("error.no_cuff"), type = 'error' })
@@ -299,7 +299,7 @@ RegisterNetEvent('police:client:CuffPlayer', function()
 end)
 
 RegisterNetEvent('police:client:GetEscorted', function(playerId)
-    if not PlayerData.metadata.isdead and not PlayerData.metadata.ishandcuffed and not PlayerData.metadata.inlaststand then return end
+    if not QBX.PlayerData.metadata.isdead and not QBX.PlayerData.metadata.ishandcuffed and not QBX.PlayerData.metadata.inlaststand then return end
 
     if not isEscorted then
         isEscorted = true
@@ -321,7 +321,7 @@ RegisterNetEvent('police:client:DeEscort', function()
 end)
 
 RegisterNetEvent('police:client:GetKidnappedTarget', function(playerId)
-    if PlayerData.metadata.idead or PlayerData.metadata.inlaststand or PlayerData.metadata.ishandcuffed then
+    if QBX.PlayerData.metadata.idead or QBX.PlayerData.metadata.inlaststand or QBX.PlayerData.metadata.ishandcuffed then
         if not isEscorted then
             isEscorted = true
             local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
@@ -352,7 +352,7 @@ RegisterNetEvent('police:client:GetKidnappedDragger', function()
 end)
 
 RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
-    if not PlayerData.metadata.ishandcuffed then
+    if not QBX.PlayerData.metadata.ishandcuffed then
         TriggerServerEvent("police:server:SetHandcuffStatus", true)
         ClearPedTasksImmediately(cache.ped)
         if cache.weapon ~= `WEAPON_UNARMED` then

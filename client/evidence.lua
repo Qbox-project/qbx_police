@@ -57,7 +57,7 @@ RegisterNetEvent('evidence:client:SetStatus', function(statusId, time)
                 text = statusList[statusId],
                 time = time
             }
-            QBX.Functions.Notify(currentStatusList[statusId].text, 'error')
+            exports.qbx_core:Notify(currentStatusList[statusId].text, 'error')
         end
     elseif statusList[statusId] then
         currentStatusList[statusId] = nil
@@ -258,7 +258,7 @@ CreateThread(function()
                 metadata = {
                     type = Lang:t('info.casing'),
                     street = getStreetLabel(casings[currentCasing].coords),
-                    ammolabel = Config.AmmoLabels[QBX.Shared.Weapons[casings[currentCasing].type].ammotype],
+                    ammolabel = Config.AmmoLabels[exports.qbx_core:GetWeapons()[casings[currentCasing].type].ammotype],
                     ammotype = casings[currentCasing].type,
                     serie = casings[currentCasing].serie
                 },
@@ -299,8 +299,8 @@ end)
 
 local function canDiscoverEvidence()
     return IsLoggedIn
-        and PlayerData.job.type == 'leo'
-        and PlayerData.job.onduty
+        and QBX.PlayerData.job.type == 'leo'
+        and QBX.PlayerData.job.onduty
         and IsPlayerFreeAiming(cache.playerId)
         and cache.weapon == `WEAPON_FLASHLIGHT`
 end

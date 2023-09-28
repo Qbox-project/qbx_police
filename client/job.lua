@@ -19,7 +19,7 @@ end
 local function setCarItemsInfo()
 	local items = {}
 	for _, item in pairs(Config.CarItems) do
-		local itemInfo = QBX.Shared.Items[item.name:lower()]
+		local itemInfo = exports.qbx_core:GetItems()[item.name:lower()]
 		items[item.slot] = {
 			name = itemInfo.name,
 			amount = tonumber(item.amount),
@@ -84,16 +84,16 @@ local function takeOutImpound(vehicle)
     if not inImpound then return end
     local coords = Config.Locations.impound[currentGarage]
     if not coords then return end
-    QBX.Functions.TriggerCallback('QBX:Server:SpawnVehicle', function(netId)
+   lib.callback('QBX:Server:SpawnVehicle', false, function(netId)
         local veh = NetToVeh(netId)
-        QBX.Functions.TriggerCallback('qb-garage:server:GetVehicleProperties', function(properties)
-            QBX.Functions.SetVehicleProperties(veh, properties)
+        lib.callback('qb-garage:server:GetVehicleProperties', false, function(properties)
+            exports.qbx_core:SetVehicleProperties(veh, properties)
             SetVehicleNumberPlateText(veh, vehicle.plate)
             SetVehicleFuelLevel(veh, vehicle.fuel)
             doCarDamage(veh, vehicle)
             TriggerServerEvent('police:server:TakeOutImpound', vehicle.plate, currentGarage)
             TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-            TriggerEvent("vehiclekeys:client:SetOwner", QBX.Functions.GetPlate(veh))
+            TriggerEvent("vehiclekeys:client:SetOwner", GetPlate(veh))
             SetVehicleEngineOn(veh, true, true, false)
         end, vehicle.plate)
     end, vehicle.vehicle, coords, true)
@@ -104,7 +104,7 @@ local function takeOutVehicle(vehicleInfo)
     local coords = Config.Locations.vehicle[currentGarage]
     if not coords then return end
 
-    local netId = lib.callback.await('qbx-policejob:server:spawnVehicle', false, vehicleInfo, coords, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)))
+    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicleInfo, coords, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)))
     local veh = NetToVeh(netId)
     setCarItemsInfo()
     SetEntityHeading(veh, coords.w)
@@ -118,13 +118,13 @@ local function takeOutVehicle(vehicleInfo)
         end
     end
     TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-    TriggerEvent("vehiclekeys:client:SetOwner", QBX.Functions.GetPlate(veh))
-    TriggerServerEvent("inventory:server:addTrunkItems", QBX.Functions.GetPlate(veh), Config.CarItems)
+    TriggerEvent("vehiclekeys:client:SetOwner", GetPlate(veh))
+    TriggerServerEvent("inventory:server:addTrunkItems", GetPlate(veh), Config.CarItems)
     SetVehicleEngineOn(veh, true, true, false)
 end
 
 local function openGarageMenu()
-    local authorizedVehicles = Config.AuthorizedVehicles[PlayerData.job.grade.level]
+    local authorizedVehicles = Config.AuthorizedVehicles[QBX.PlayerData.job.grade.level]
     local options = {}
 
     for veh, label in pairs(authorizedVehicles) do
@@ -159,10 +159,11 @@ local function openImpoundMenu()
     if not result then
         lib.notify({ description = Lang:t("error.no_impound"), type = 'error', })
     else
+        local vehicles = exports.qbx_core:GetVechiclesByName()
         for _, v in pairs(result) do
-            local enginePercent = QBX.Shared.Round(v.engine / 10, 0)
+            local enginePercent = math.round(v.engine / 10, 0)
             local currentFuel = v.fuel
-            local vName = QBX.Shared.Vehicles[v.vehicle].name
+            local vName = vehicles[v.vehicle].name
 
             options[#options+1] = {
                 title = vName.." ["..v.plate.."]",
@@ -210,11 +211,11 @@ end
 local function spawnHelicopter()
     if not inHelicopter then return end
     if cache.vehicle then
-        QBX.Functions.DeleteVehicle(cache.vehicle)
+        exports.qbx_core:DeleteVehicle(cache.vehicle)
     else
         local plyCoords = GetEntityCoords(cache.ped)
         local coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
-        QBX.Functions.TriggerCallback('QBX:Server:SpawnVehicle', function(netId)
+        exports.qbx_core:TriggerCallback('QBX:Server:SpawnVehicle', function(netId)
             local veh = NetToVeh(netId)
             SetVehicleLivery(veh , 0)
             SetVehicleMod(veh, 0, 48, false)
@@ -222,7 +223,7 @@ local function spawnHelicopter()
             SetEntityHeading(veh, coords.w)
             SetVehicleFuelLevel(veh, 100.0)
             TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-            TriggerEvent("vehiclekeys:client:SetOwner", QBX.Functions.GetPlate(veh))
+            TriggerEvent("vehiclekeys:client:SetOwner", GetPlate(veh))
             SetVehicleEngineOn(veh, true, true, false)
         end, Config.PoliceHelicopter, coords, true)
     end
@@ -239,7 +240,7 @@ local function scanFingerprint()
 end
 
 local function uiPrompt(promptType, id)
-    if PlayerData.job.type ~= "leo" then return end
+    if QBX.PlayerData.job.type ~= "leo" then return end
     CreateThread(function()
         while inPrompt do
             Wait(0)
@@ -251,7 +252,7 @@ local function uiPrompt(promptType, id)
                 elseif promptType == 'garage' then
                     if not inGarage then return end
                     if cache.vehicle then
-                        QBX.Functions.DeleteVehicle(cache.vehicle)
+                        exports.qbx_core:DeleteVehicle(cache.vehicle)
                         lib.hideTextUI()
                         break
                     else
@@ -266,7 +267,7 @@ local function uiPrompt(promptType, id)
                 elseif promptType == 'impound' then
                     if not inImpound then return end
                     if cache.vehicle then
-                        QBX.Functions.DeleteVehicle(cache.vehicle)
+                        exports.qbx_core:DeleteVehicle(cache.vehicle)
                         lib.hideTextUI()
                         break
                     else
@@ -349,7 +350,7 @@ RegisterNetEvent('police:client:CallAnim', function()
 end)
 
 RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
-    local vehicle = QBX.Functions.GetClosestVehicle()
+    local vehicle = exports.qbx_core:GetClosestVehicle()
     if not DoesEntityExist(vehicle) then return end
 
     local bodyDamage = math.ceil(GetVehicleBodyHealth(vehicle))
@@ -391,9 +392,9 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
         },
     })
     then
-        local plate = QBX.Functions.GetPlate(vehicle)
+        local plate = GetPlate(vehicle)
         TriggerServerEvent("police:server:Impound", plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
-        QBX.Functions.DeleteVehicle(vehicle)
+        exports.qbx_core:DeleteVehicle(vehicle)
         lib.notify({ description = Lang:t('success.impounded'), type = 'success' })
         ClearPedTasks(cache.ped)
     else
@@ -403,7 +404,7 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
 end)
 
 RegisterNetEvent('police:client:CheckStatus', function()
-    if PlayerData.job.type ~= "leo" then return end
+    if QBX.PlayerData.job.type ~= "leo" then return end
 
     local playerId = lib.getClosestPlayer(GetEntityCoords(cache.ped), 5.0, false)
     if not playerId then
@@ -451,7 +452,7 @@ else
             rotation = 0.0,
             onEnter = function()
                 inPrompt = true
-                if not PlayerData.job.onduty then
+                if not QBX.PlayerData.job.onduty then
                     lib.showTextUI(Lang:t('info.on_duty'))
                 else
                     lib.showTextUI(Lang:t('info.off_duty'))
@@ -474,7 +475,7 @@ CreateThread(function()
             size = vec3(2, 2, 2),
             rotation = 0.0,
             onEnter = function()
-                if PlayerData.job.type == 'leo' and PlayerData.job.onduty then
+                if QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty then
                     inPrompt = true
                     lib.showTextUI(Lang:t("info.evidence"))
                     uiPrompt('evidence')
@@ -517,7 +518,7 @@ CreateThread(function()
             onEnter = function()
                 inTrash = true
                 inPrompt = true
-                if PlayerData.job.onduty then
+                if QBX.PlayerData.job.onduty then
                     lib.showTextUI(Lang:t('info.trash_enter'))
                     uiPrompt('trash', i)
                 end
@@ -539,7 +540,7 @@ CreateThread(function()
             onEnter = function()
                 inFingerprint = true
                 inPrompt = true
-                if PlayerData.job.onduty then
+                if QBX.PlayerData.job.onduty then
                     lib.showTextUI(Lang:t('info.scan_fingerprint'))
                     uiPrompt('fingerprint')
                 end
@@ -561,7 +562,7 @@ CreateThread(function()
             onEnter = function()
                 inHelicopter = true
                 inPrompt = true
-                if PlayerData.job.onduty then
+                if QBX.PlayerData.job.onduty then
                     uiPrompt('heli')
                     if cache.vehicle then
                         lib.showTextUI(Lang:t('info.store_heli'))
@@ -588,7 +589,7 @@ CreateThread(function()
                 inImpound = true
                 inPrompt = true
                 currentGarage = k
-                if PlayerData.job.onduty then
+                if QBX.PlayerData.job.onduty then
                     if cache.vehicle then
                         lib.showTextUI(Lang:t('info.impound_veh'))
                         uiPrompt('impound')
@@ -614,7 +615,7 @@ CreateThread(function()
             size = vec3(2, 2, 2),
             rotation = 0.0,
             onEnter = function()
-                if PlayerData.job.onduty and PlayerData.job.type == 'leo' then
+                if QBX.PlayerData.job.onduty and QBX.PlayerData.job.type == 'leo' then
                     inGarage = true
                     inPrompt = true
                     currentGarage = k

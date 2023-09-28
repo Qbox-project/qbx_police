@@ -1,7 +1,6 @@
 -- Variables
 cuffType = 1
 isEscorted = false
-PlayerData = QBX.Functions.GetPlayerData() or {}
 IsLoggedIn = LocalPlayer.state.isLoggedIn
 local DutyBlips = {}
 
@@ -39,14 +38,12 @@ end
 
 -- Events
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-    PlayerData = QBX.Functions.GetPlayerData()
-
     TriggerServerEvent("police:server:SetHandcuffStatus", false)
     TriggerServerEvent("police:server:UpdateCurrentCops")
 
     local trackerClothingData = {}
 
-    if PlayerData.metadata.tracker then
+    if QBX.PlayerData.metadata.tracker then
         trackerClothingData.outfitData = {
             accessory = {
                 item = 13,
@@ -64,7 +61,7 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 
     TriggerEvent('qb-clothing:client:loadOutfit', trackerClothingData)
 
-    if PlayerData.job and PlayerData.job.type ~= "leo" then
+    if QBX.PlayerData.job and QBX.PlayerData.job.type ~= "leo" then
         if DutyBlips then
             for _, v in pairs(DutyBlips) do
                 RemoveBlip(v)
@@ -92,7 +89,7 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
-    if JobInfo.type == "leo" and PlayerData.job.type ~= "leo" then
+    if JobInfo.type == "leo" and QBX.PlayerData.job.type ~= "leo" then
         if JobInfo.onduty then
             TriggerEvent('qb-policejob:ToggleDuty')
         end
@@ -106,22 +103,16 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
         end
         DutyBlips = {}
     end
-    PlayerData.job = JobInfo
-end)
-
-RegisterNetEvent('QBCore:Player:SetPlayerData', function(val)
-    -- Make sure it can only be triggered from the server
-    if GetInvokingResource() then return end
-    PlayerData = val
+    QBX.PlayerData.job = JobInfo
 end)
 
 RegisterNetEvent('police:client:sendBillingMail', function(amount)
     SetTimeout(math.random(2500, 4000), function()
         local gender = Lang:t('info.mr')
-        if PlayerData.charinfo.gender == 1 then
+        if QBX.PlayerData.charinfo.gender == 1 then
             gender = Lang:t('info.mrs')
         end
-        local charinfo = PlayerData.charinfo
+        local charinfo = QBX.PlayerData.charinfo
         TriggerServerEvent('qb-phone:server:sendNewMail', {
             sender = Lang:t('email.sender'),
             subject = Lang:t('email.subject'),
@@ -132,7 +123,7 @@ RegisterNetEvent('police:client:sendBillingMail', function(amount)
 end)
 
 RegisterNetEvent('police:client:UpdateBlips', function(players)
-    if PlayerData.job and (PlayerData.job.type == 'leo' or PlayerData.job.name == 'ambulance') and PlayerData.job.onduty then
+    if QBX.PlayerData.job and (QBX.PlayerData.job.type == 'leo' or QBX.PlayerData.job.name == 'ambulance') and QBX.PlayerData.job.onduty then
         if DutyBlips then
             for _, v in pairs(DutyBlips) do
                 RemoveBlip(v)
@@ -199,8 +190,8 @@ RegisterNetEvent('police:client:SendToJail', function(time)
 end)
 
 RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
-    TriggerServerEvent('police:server:policeAlert', Lang:t('info.officer_down', {lastname = PlayerData.charinfo.lastname, callsign = PlayerData.metadata.callsign}))
-    TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {lastname = PlayerData.charinfo.lastname, callsign = PlayerData.metadata.callsign}))
+    TriggerServerEvent('police:server:policeAlert', Lang:t('info.officer_down', {lastname = QBX.PlayerData.charinfo.lastname, callsign = QBX.PlayerData.metadata.callsign}))
+    TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {lastname = QBX.PlayerData.charinfo.lastname, callsign = QBX.PlayerData.metadata.callsign}))
 end)
 
 -- Threads
