@@ -1,4 +1,5 @@
 Plates = {}
+local qbCore = exports['qb-core']:GetCoreObject()
 local playerStatus = {}
 local casings = {}
 local bloodDrops = {}
@@ -110,8 +111,8 @@ local function isPlateFlagged(plate)
 end
 
 ---@deprecated use qbx_police:server:isPlateFlagged
-exports.qbx_core:CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
-    print(string.format("%s invoked deprecated callback police:IsPlateFlagged. Use police:server:IsPoliceForcePresent instead.", GetInvokingResource()))
+qbCore.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
+    lib.print.warn(GetInvokingResource(), "invoked deprecated callback police:IsPlateFlagged. Use qbx_police:server:isPlateFlagged instead.")
     cb(isPlateFlagged(plate))
 end)
 
@@ -130,14 +131,12 @@ local function isPoliceForcePresent()
 end
 
 ---@deprecated
-exports.qbx_core:CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
-    print(string.format("%s invoked deprecated callback police:server:IsPoliceForcePresent. Use police:server:isPoliceForcePresent instead.", GetInvokingResource()))
+qbCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
+    lib.print.warn(GetInvokingResource(), "invoked deprecated callback police:server:IsPoliceForcePresent. Use lib callback qbx_police:server:isPoliceForcePresent instead")
     cb(isPoliceForcePresent())
 end)
 
-lib.callback.register('police:server:isPoliceForcePresent', function()
-    return isPoliceForcePresent()
-end)
+lib.callback.register('qbx_police:server:isPoliceForcePresent', isPoliceForcePresent)
 
 -- Events
 RegisterNetEvent('police:server:Radar', function(fine)
