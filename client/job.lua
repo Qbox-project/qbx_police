@@ -1,4 +1,5 @@
 -- Variables
+local qbCore = exports['qb-core']:GetCoreObject()
 local currentGarage = 0
 local inFingerprint = false
 local fingerPrintSessionId = nil
@@ -215,7 +216,7 @@ local function spawnHelicopter()
     else
         local plyCoords = GetEntityCoords(cache.ped)
         local coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
-        exports.qbx_core:TriggerCallback('QBX:Server:SpawnVehicle', function(netId)
+        qbCore.Functions.TriggerCallback('QBCore:Server:SpawnVehicle', function(netId)
             local veh = NetToVeh(netId)
             SetVehicleLivery(veh , 0)
             SetVehicleMod(veh, 0, 48, false)

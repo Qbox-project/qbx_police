@@ -89,12 +89,6 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
-    if JobInfo.type == "leo" and QBX.PlayerData.job.type ~= "leo" then
-        if JobInfo.onduty then
-            TriggerEvent('qb-policejob:ToggleDuty')
-        end
-    end
-
     if JobInfo.type ~= "leo" then
         if DutyBlips then
             for _, v in pairs(DutyBlips) do
@@ -103,7 +97,6 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
         end
         DutyBlips = {}
     end
-    QBX.PlayerData.job = JobInfo
 end)
 
 RegisterNetEvent('police:client:sendBillingMail', function(amount)
