@@ -114,10 +114,10 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
                 end
             end
             TriggerServerEvent('evidence:server:ClearBlooddrops', blooddropList)
-            exports.qbx_core:Notify(Lang:t('success.blood_clear'), 'success' )
+            exports.qbx_core:Notify(Lang:t('success.blood_clear'), 'success')
         end
     else
-        exports.qbx_core:Notify(Lang:t('error.blood_not_cleared'), 'error' )
+        exports.qbx_core:Notify(Lang:t('error.blood_not_cleared'), 'error')
     end
 end)
 

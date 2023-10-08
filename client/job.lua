@@ -68,11 +68,11 @@ local function doCarDamage(currentVehicle, veh)
 		SetVehicleDoorBroken(currentVehicle, 4, true)
 	end
 
-		SetVehicleTyreBurst(currentVehicle, 1, false, 990.0)
-		SetVehicleTyreBurst(currentVehicle, 2, false, 990.0)
-		SetVehicleTyreBurst(currentVehicle, 3, false, 990.0)
-		SetVehicleTyreBurst(currentVehicle, 4, false, 990.0)
 	if popTires then
+        SetVehicleTyreBurst(currentVehicle, 1, false, 990.0)
+        SetVehicleTyreBurst(currentVehicle, 2, false, 990.0)
+        SetVehicleTyreBurst(currentVehicle, 3, false, 990.0)
+        SetVehicleTyreBurst(currentVehicle, 4, false, 990.0)
 	end
 
 	if body < 1000 then
