@@ -234,10 +234,7 @@ local function handleInVehicle()
 	if helicam then
 		SetTimecycleModifier("heliGunCam")
 		SetTimecycleModifierStrength(0.3)
-		local scaleform = RequestScaleformMovie("HELI_CAM")
-		while not HasScaleformMovieLoaded(scaleform) do
-			Wait(0)
-		end
+		local scaleform = lib.requestScaleformMovie("HELI_CAM")
 		local cam = CreateCam("DEFAULT_SCRIPTED_FLY_CAMERA", true)
 		AttachCamToEntity(cam, cache.vehicle, 0.0,0.0,-1.5, true)
 		SetCamRot(cam, 0.0, 0.0, GetEntityHeading(cache.vehicle), 2)

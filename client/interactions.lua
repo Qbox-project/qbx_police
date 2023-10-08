@@ -113,7 +113,6 @@ end
 -- Events
 RegisterNetEvent('police:client:SetOutVehicle', function()
     if not cache.vehicle then return end
-
     TaskLeaveVehicle(cache.ped, cache.vehicle, 16)
 end)
 
@@ -142,10 +141,7 @@ end)
 ---@return boolean
 local function isTooFar(player, distance, maxDistance)
     if not player or distance >= (maxDistance or 2.5) then
-        lib.notify({
-            description = Lang:t("error.none_nearby"),
-            type = 'error'
-        })
+        exports.qbx_core:Notify(Lang:t("error.none_nearby"), 'error')
         return true
     end
     return false
@@ -172,7 +168,7 @@ RegisterNetEvent('police:client:RobPlayer', function()
     local playerPed = GetPlayerPed(player)
     local playerId = GetPlayerServerId(player)
     if not (IsEntityPlayingAnim(playerPed, "missminuteman_1ig_2", "handsup_base", 3) or IsEntityPlayingAnim(playerPed, "mp_arresting", "idle", 3) or isTargetDead(playerId)) then
-        lib.notify({ description = Lang:t("error.no_rob"), type = 'error' })
+        exports.qbx_core:Notify(Lang:t("error.no_rob"), 'error')
         return
     end
     if lib.progressCircle({
@@ -201,11 +197,11 @@ RegisterNetEvent('police:client:RobPlayer', function()
             exports.ox_inventory:openNearbyInventory()
             TriggerServerEvent("inventory:server:RobPlayer", playerId)
         else
-            lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
+            exports.qbx_core:Notify(Lang:t("error.none_nearby"), 'error')
         end
     else
         StopAnimTask(cache.ped, "random@shop_robbery", "robbery_action_b", 1.0)
-        lib.notify({ description = Lang:t('error.canceled'), type = 'error' })
+        exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
     end
 end)
 
@@ -214,12 +210,12 @@ RegisterNetEvent('police:client:JailPlayer', function()
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     local dialog = lib.inputDialog(Lang:t('info.jail_time_input'), {
-        { type = "number", label = Lang:t('info.time_months'), default = 1 }
+        {type = "number", label = Lang:t('info.time_months'), min = 0}
     })
     if dialog and dialog[1] > 0 then
         TriggerServerEvent("police:server:JailPlayer", playerId, dialog[1])
     else
-        lib.notify({ description = Lang:t("error.time_higher"), type = 'error' })
+        exports.qbx_core:Notify(Lang:t("error.time_higher"), 'error')
     end
 end)
 
@@ -228,14 +224,12 @@ RegisterNetEvent('police:client:BillPlayer', function()
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     local dialog = lib.inputDialog(Lang:t('info.bill'), {
-        type = "number",
-        label = Lang:t('info.amount'),
-        default = 1
+        {type = "number", label = Lang:t('info.amount'), min = 0}
     })
     if dialog and dialog[1] > 0 then
         TriggerServerEvent("police:server:BillPlayer", playerId, dialog[1])
     else
-        lib.notify({ description = Lang:t("error.time_higher"), type = 'error' })
+        exports.qbx_core:Notify(Lang:t("error.time_higher"), 'error')
     end
 end)
 
@@ -273,7 +267,7 @@ RegisterNetEvent('police:client:CuffPlayerSoft', function()
     if isTooFar(player, distance, 1.5) then return end
     local playerId = GetPlayerServerId(player)
     if IsPedInAnyVehicle(GetPlayerPed(player), false) or cache.vehicle then
-        lib.notify({ description = Lang:t("error.vehicle_cuff"), type = 'error' })
+        exports.qbx_core:Notify(Lang:t("error.vehicle_cuff"), 'error')
         return
     end
     TriggerServerEvent("police:server:CuffPlayer", playerId, true)
@@ -286,12 +280,12 @@ RegisterNetEvent('police:client:CuffPlayer', function()
     local player, distance = exports.qbx_core:GetClosestPlayer()
     if isTooFar(player, distance) then return end
     if exports.ox_inventory:Search('count', Config.HandCuffItem) == 0 then
-        lib.notify({ description = Lang:t("error.no_cuff"), type = 'error' })
+        exports.qbx_core:Notify(Lang:t("error.no_cuff"), 'error')
         return
     end
     local playerId = GetPlayerServerId(player)
     if IsPedInAnyVehicle(GetPlayerPed(player), false) or cache.vehicle then
-        lib.notify({ description = Lang:t("error.vehicle_cuff"), type = 'error' })
+        exports.qbx_core:Notify(Lang:t("error.vehicle_cuff"), 'error')
         return
     end
     TriggerServerEvent("police:server:CuffPlayer", playerId, false)
@@ -360,10 +354,10 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
         end
         if not isSoftcuff then
             cuffType = 16
-            lib.notify({ description = Lang:t("info.cuff"), type = 'success' })
+            exports.qbx_core:Notify(Lang:t("info.cuff"), 'success')
         else
             cuffType = 49
-            lib.notify({ description = Lang:t("info.cuffed_walk"), type = 'success' })
+            exports.qbx_core:Notify(Lang:t("info.cuffed_walk"), 'success')
         end
         getCuffedAnimation(playerId)
     else
@@ -373,7 +367,7 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
         TriggerServerEvent("police:server:SetHandcuffStatus", false)
         ClearPedTasksImmediately(cache.ped)
         TriggerServerEvent("InteractSound_SV:PlayOnSource", "Uncuff", 0.2)
-        lib.notify({ description = Lang:t("success.uncuffed"), type = 'success' })
+        exports.qbx_core:Notify(Lang:t("success.uncuffed"), 'success')
     end
 end)
 
