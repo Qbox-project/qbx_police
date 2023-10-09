@@ -20,7 +20,7 @@ end
 local function setCarItemsInfo()
 	local items = {}
 	for _, item in pairs(Config.CarItems) do
-		local itemInfo = exports.qbx_core:GetItems()[item.name:lower()]
+		local itemInfo = exports.ox_inventory:Items()[item.name:lower()]
 		items[item.slot] = {
 			name = itemInfo.name,
 			amount = tonumber(item.amount),
@@ -419,7 +419,7 @@ RegisterNetEvent('police:client:CheckStatus', function()
 end)
 
 function ToggleDuty()
-    TriggerServerEvent("QBX:ToggleDuty")
+    TriggerServerEvent("QBCore:ToggleDuty")
     TriggerServerEvent("police:server:UpdateCurrentCops")
 end
 
@@ -432,7 +432,7 @@ if Config.UseTarget then
                 coords = Config.Locations.duty[i],
                 size = vec3(1,1,3),
                 distance = 1.5,
-                debug = Config.debug,
+                debug = Config.PolyDebug,
                 options = {
                     {
                         label = Lang:t("info.onoff_duty"),
@@ -450,6 +450,7 @@ else
             coords = Config.Locations.duty[i],
             size = vec3(2, 2, 2),
             rotation = 0.0,
+            debug = Config.PolyDebug,
             onEnter = function()
                 inPrompt = true
                 if not QBX.PlayerData.job.onduty then
@@ -474,6 +475,7 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
+            debug = Config.PolyDebug,
             onEnter = function()
                 if QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty then
                     inPrompt = true
@@ -494,6 +496,7 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
+            debug = Config.PolyDebug,
             onEnter = function()
                 inStash = true
                 inPrompt = true
@@ -515,6 +518,7 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
+            debug = Config.PolyDebug,
             onEnter = function()
                 inTrash = true
                 inPrompt = true
@@ -537,6 +541,7 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
+            debug = Config.PolyDebug,
             onEnter = function()
                 inFingerprint = true
                 inPrompt = true
@@ -559,6 +564,7 @@ CreateThread(function()
             coords = v,
             size = vec3(4, 4, 4),
             rotation = 0.0,
+            debug = Config.PolyDebug,
             onEnter = function()
                 inHelicopter = true
                 inPrompt = true
@@ -585,6 +591,7 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
+            debug = Config.PolyDebug,
             onEnter = function()
                 inImpound = true
                 inPrompt = true
@@ -614,6 +621,7 @@ CreateThread(function()
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
+            debug = Config.PolyDebug,
             onEnter = function()
                 if QBX.PlayerData.job.onduty and QBX.PlayerData.job.type == 'leo' then
                     inGarage = true
