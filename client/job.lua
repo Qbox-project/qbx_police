@@ -1,4 +1,5 @@
 -- Variables
+local qbCore = exports['qb-core']:GetCoreObject()
 local currentGarage = 0
 local inFingerprint = false
 local fingerPrintSessionId = nil
