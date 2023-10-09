@@ -2,7 +2,7 @@
 cuffType = 1
 isEscorted = false
 IsLoggedIn = LocalPlayer.state.isLoggedIn
-local DutyBlips = {}
+local dutyBlips = {}
 
 -- Functions
 local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
@@ -27,7 +27,7 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentString(playerLabel)
         EndTextCommandSetBlipName(blip)
-        DutyBlips[#DutyBlips+1] = blip
+        dutyBlips[#dutyBlips + 1] = blip
     end
 
     if GetBlipFromEntity(cache.ped) == blip then
@@ -62,12 +62,12 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     TriggerEvent('qb-clothing:client:loadOutfit', trackerClothingData)
 
     if QBX.PlayerData.job and QBX.PlayerData.job.type ~= "leo" then
-        if DutyBlips then
-            for _, v in pairs(DutyBlips) do
+        if dutyBlips then
+            for _, v in pairs(dutyBlips) do
                 RemoveBlip(v)
             end
         end
-        DutyBlips = {}
+        dutyBlips = {}
     end
 
     IsLoggedIn = true
@@ -79,23 +79,23 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     isEscorted = false
     ClearPedTasks(cache.ped)
     DetachEntity(cache.ped, true, false)
-    if DutyBlips then
-        for _, v in pairs(DutyBlips) do
+    if dutyBlips then
+        for _, v in pairs(dutyBlips) do
             RemoveBlip(v)
         end
-        DutyBlips = {}
+        dutyBlips = {}
     end
     IsLoggedIn = false
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     if JobInfo.type ~= "leo" then
-        if DutyBlips then
-            for _, v in pairs(DutyBlips) do
+        if dutyBlips then
+            for _, v in pairs(dutyBlips) do
                 RemoveBlip(v)
             end
         end
-        DutyBlips = {}
+        dutyBlips = {}
     end
 end)
 
@@ -117,12 +117,12 @@ end)
 
 RegisterNetEvent('police:client:UpdateBlips', function(players)
     if QBX.PlayerData.job and (QBX.PlayerData.job.type == 'leo' or QBX.PlayerData.job.name == 'ambulance') and QBX.PlayerData.job.onduty then
-        if DutyBlips then
-            for _, v in pairs(DutyBlips) do
+        if dutyBlips then
+            for _, v in pairs(dutyBlips) do
                 RemoveBlip(v)
             end
         end
-        DutyBlips = {}
+        dutyBlips = {}
         if players then
             for _, data in pairs(players) do
                 local id = GetPlayerFromServerId(data.source)
@@ -137,9 +137,9 @@ RegisterNetEvent('police:client:policeAlert', function(coords, text, camId)
     local street1name = GetStreetNameFromHashKey(street1)
     local street2name = GetStreetNameFromHashKey(street2)
     if camId then
-        lib.notify({ title = text, description = street1name.. ' ' ..street2name.. '- Camera ID: ' .. camId, type = 'inform' })
+        exports.qbx_core:Notify(text, 'inform', 5000, street1name.. ' ' ..street2name.. '- Camera ID: ' .. camId)
     else
-        lib.notify({ title = text, description = street1name.. ' ' ..street2name, type = 'inform' })
+        exports.qbx_core:Notify(text,'inform', 5000, street1name.. ' ' ..street2name)
     end
     PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", false, 0, true)
     local transG = 250

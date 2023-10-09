@@ -1,5 +1,5 @@
+local QBCore = exports['qb-core']:GetCoreObject()
 Plates = {}
-local qbCore = exports['qb-core']:GetCoreObject()
 local playerStatus = {}
 local casings = {}
 local bloodDrops = {}
@@ -49,8 +49,8 @@ local function generateId(table)
 end
 
 RegisterNetEvent('police:server:SendTrackerLocation', function(coords, requestId)
-    local Target = exports.qbx_core:GetPlayer(source)
-    local msg = Lang:t('info.target_location', {firstname = Target.PlayerData.charinfo.firstname, lastname = Target.PlayerData.charinfo.lastname})
+    local target = exports.qbx_core:GetPlayer(source)
+    local msg = Lang:t('info.target_location', {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname})
     local alertData = {
         title = Lang:t('info.anklet_location'),
         coords = coords,
@@ -96,7 +96,7 @@ lib.callback.register('police:GetImpoundedVehicles', function()
 end)
 
 lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate)
-    local netId = exports.qbx_core:CreateVehicle(source, model, coords, true)
+    local netId = SpawnVehicle(source, model, coords, true)
     if not netId or netId == 0 then return end
     local veh = NetworkGetEntityFromNetworkId(netId)
     if not veh or veh == 0 then return end
@@ -111,7 +111,7 @@ local function isPlateFlagged(plate)
 end
 
 ---@deprecated use qbx_police:server:isPlateFlagged
-qbCore.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
+QBCore.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
     lib.print.warn(GetInvokingResource(), "invoked deprecated callback police:IsPlateFlagged. Use qbx_police:server:isPlateFlagged instead.")
     cb(isPlateFlagged(plate))
 end)
@@ -131,7 +131,7 @@ local function isPoliceForcePresent()
 end
 
 ---@deprecated
-qbCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
+QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
     lib.print.warn(GetInvokingResource(), "invoked deprecated callback police:server:IsPoliceForcePresent. Use lib callback qbx_police:server:isPoliceForcePresent instead")
     cb(isPoliceForcePresent())
 end)
@@ -145,7 +145,7 @@ RegisterNetEvent('police:server:Radar', function(fine)
     local player = exports.qbx_core:GetPlayer(source)
     if not player.Functions.RemoveMoney("bank", math.floor(price), "Radar Fine") then return end
     exports.qbx_management:AddMoney('police', price)
-    TriggerClientEvent('QBCore:Notify', source, Lang:t("info.fine_received", {fine = price}))
+    exports.qbx_core:Notify(source, Lang:t("info.fine_received", {fine = price}), 'inform')
 end)
 
 RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource)
@@ -175,7 +175,7 @@ RegisterNetEvent('police:server:TakeOutImpound', function(plate, garage)
     if #(playerCoords - targetCoords) > 10.0 then return DropPlayer(src, "Attempted exploit abuse") end
 
     Unimpound(plate)
-    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.impound_vehicle_removed"), type = 'success'})
+    exports.qbx_core:Notify(src, Lang:t("success.impound_vehicle_removed"), 'success')
 end)
 
 local function isTargetTooFar(src, targetId, maxDistance)
@@ -212,22 +212,22 @@ RegisterNetEvent('police:server:EscortPlayer', function(playerId)
     if (player.PlayerData.job.type == "leo" or player.PlayerData.job.name == "ambulance") or (escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand) then
         TriggerClientEvent("police:client:GetEscorted", escortPlayer.PlayerData.source, player.PlayerData.source)
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.not_cuffed_dead"), type = 'error'})
+        exports.qbx_core:Notify(src, Lang:t("error.not_cuffed_dead"), 'error')
     end
 end)
 
 RegisterNetEvent('police:server:KidnapPlayer', function(playerId)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
-    local Player = exports.qbx_core:GetPlayer(source)
+    local player = exports.qbx_core:GetPlayer(source)
     local escortPlayer = exports.qbx_core:GetPlayer(playerId)
-    if not Player or not escortPlayer then return end
+    if not player or not escortPlayer then return end
 
     if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand then
-        TriggerClientEvent("police:client:GetKidnappedTarget", escortPlayer.PlayerData.source, Player.PlayerData.source)
-        TriggerClientEvent("police:client:GetKidnappedDragger", Player.PlayerData.source, escortPlayer.PlayerData.source)
+        TriggerClientEvent("police:client:GetKidnappedTarget", escortPlayer.PlayerData.source, player.PlayerData.source)
+        TriggerClientEvent("police:client:GetKidnappedDragger", player.PlayerData.source, escortPlayer.PlayerData.source)
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.not_cuffed_dead"), type = 'error'})
+        exports.qbx_core:Notify(src, Lang:t("error.not_cuffed_dead"), 'error')
     end
 end)
 
@@ -242,7 +242,7 @@ RegisterNetEvent('police:server:SetPlayerOutVehicle', function(playerId)
         
         TriggerClientEvent("police:client:SetOutVehicle", escortPlayer.PlayerData.source)
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.not_cuffed_dead"), type = 'error'})
+        exports.qbx_core:Notify(src, Lang:t("error.not_cuffed_dead"), 'error')
     end
 end)
 
@@ -256,7 +256,7 @@ RegisterNetEvent('police:server:PutPlayerInVehicle', function(playerId)
     if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand then
         TriggerClientEvent("police:client:PutInVehicle", escortPlayer.PlayerData.source)
     else
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.not_cuffed_dead"), type = 'error'})
+        exports.qbx_core:Notify(src, Lang:t("error.not_cuffed_dead"), 'error')
     end
 end)
 
@@ -270,7 +270,7 @@ RegisterNetEvent('police:server:BillPlayer', function(playerId, price)
 
     otherPlayer.Functions.RemoveMoney("bank", price, "paid-bills")
     exports.qbx_management:AddMoney("police", price)
-    TriggerClientEvent('ox_lib:notify', otherPlayer.PlayerData.source, {description = Lang:t("info.fine_received", {fine = price})})
+    exports.qbx_core:Notify(otherPlayer.PlayerData.source, Lang:t("info.fine_received", {fine = price}), 'inform')
 end)
 
 RegisterNetEvent('police:server:JailPlayer', function(playerId, time)
@@ -292,7 +292,7 @@ RegisterNetEvent('police:server:JailPlayer', function(playerId, time)
         date = currentDate
     })
     TriggerClientEvent("police:client:SendToJail", otherPlayer.PlayerData.source, time)
-    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.sent_jail_for", {time = time})})
+    exports.qbx_core:Notify(src, Lang:t("info.sent_jail_for", {time = time}), 'inform')
 end)
 
 RegisterNetEvent('police:server:SetHandcuffStatus', function(isHandcuffed)
@@ -326,8 +326,8 @@ RegisterNetEvent('police:server:SearchPlayer', function(playerId)
     local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
     if not exports.qbx_core:GetPlayer(src) or not searchedPlayer then return end
 
-    TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.searched_success")})
-    TriggerClientEvent('ox_lib:notify', searchedPlayer.PlayerData.source, {description = Lang:t("info.being_searched")})
+    exports.qbx_core:Notify(src, Lang:t("info.searched_success"), 'inform')
+    exports.qbx_core:Notify(searchedPlayer.PlayerData.source, Lang:t("info.being_searched"), 'inform')
 end)
 
 RegisterNetEvent('police:server:SeizeCash', function(playerId)
@@ -342,7 +342,7 @@ RegisterNetEvent('police:server:SeizeCash', function(playerId)
     local info = { cash = moneyAmount }
     searchedPlayer.Functions.RemoveMoney("cash", moneyAmount, "police-cash-seized")
     player.Functions.AddItem("moneybag", 1, false, info)
-    TriggerClientEvent('ox_lib:notify', searchedPlayer.PlayerData.source, {description = Lang:t("info.cash_confiscated")})
+    exports.qbx_core:Notify(searchedPlayer.PlayerData.source, Lang:t("info.cash_confiscated"), 'inform')
 end)
 
 RegisterNetEvent('police:server:RobPlayer', function(playerId)
@@ -356,8 +356,8 @@ RegisterNetEvent('police:server:RobPlayer', function(playerId)
     local money = searchedPlayer.PlayerData.money.cash
     player.Functions.AddMoney("cash", money, "police-player-robbed")
     searchedPlayer.Functions.RemoveMoney("cash", money, "police-player-robbed")
-    TriggerClientEvent('ox_lib:notify', searchedPlayer.PlayerData.source, {description = Lang:t("info.cash_robbed", {money = money})})
-    TriggerClientEvent('ox_lib:notify', player.PlayerData.source, {description = Lang:t("info.stolen_money", {stolen = money})})
+    exports.qbx_core:Notify(searchedPlayer.PlayerData.source, Lang:t("info.cash_robbed", {money = money}), 'inform')
+    exports.qbx_core:Notify(player.PlayerData.source, Lang:t("info.stolen_money", {stolen = money}), 'inform')
 end)
 
 RegisterNetEvent('police:server:spawnObject', function(type)
@@ -377,10 +377,10 @@ RegisterNetEvent('police:server:Impound', function(plate, fullImpound, price, bo
     if not IsVehicleOwned(plate) then return end
     if not fullImpound then
         ImpoundWithPrice(price, body, engine, fuel, plate)
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.vehicle_taken_depot", {price = price})})
+        exports.qbx_core:Notify(src, Lang:t("info.vehicle_taken_depot", {price = price}), 'inform')
     else
         ImpoundForever(body, engine, fuel, plate)
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("info.vehicle_seized")})
+        exports.qbx_core:Notify(src, Lang:t("info.vehicle_seized"), 'inform')
     end
 end)
 
@@ -426,7 +426,7 @@ RegisterNetEvent('evidence:server:AddBlooddropToInventory', function(bloodId, bl
     metadata.description = metadata.description.."\n\nCollected By: "..playerName
     metadata.description = metadata.description.."\n\nCollected At: "..streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
-        return TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.have_evidence_bag"), type = "error"})
+        return exports.qbx_core:Notify(src, Lang:t("error.have_evidence_bag"), 'error')
     end
     if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
         TriggerClientEvent("evidence:client:RemoveBlooddrop", -1, bloodId)
@@ -446,7 +446,7 @@ RegisterNetEvent('evidence:server:AddFingerprintToInventory', function(fingerId,
     metadata.description = metadata.description.."\n\nCollected By: "..playerName
     metadata.description = metadata.description.."\n\nCollected At: "..streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
-        return TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.have_evidence_bag"), type = "error"})
+        return exports.qbx_core:Notify(src, Lang:t("error.have_evidence_bag"), 'error')
     end
     if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
         TriggerClientEvent("evidence:client:RemoveFingerprint", -1, fingerId)
@@ -500,7 +500,7 @@ RegisterNetEvent('evidence:server:AddCasingToInventory', function(casingId, casi
     metadata.description = metadata.description.."\n\nCollected By: "..playerName
     metadata.description = metadata.description.."\n\nCollected At: "..streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
-        return TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("error.have_evidence_bag"), type = "error"})
+        return exports.qbx_core:Notify(src, Lang:t("error.have_evidence_bag"), 'error')
     end
     if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
         TriggerClientEvent("evidence:client:RemoveCasing", -1, casingId)
@@ -530,13 +530,13 @@ RegisterNetEvent('police:server:SetTracker', function(targetId)
     local trackerMeta = target.PlayerData.metadata.tracker
     if trackerMeta then
         target.Functions.SetMetaData("tracker", false)
-        TriggerClientEvent('ox_lib:notify', targetId, {description = Lang:t("success.anklet_taken_off"), type = 'success'})
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.took_anklet_from", {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname}), type = 'success'})
+        exports.qbx_core:Notify(targetId, Lang:t("success.anklet_taken_off"), 'success')
+        exports.qbx_core:Notify(src, Lang:t("success.took_anklet_from", {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname}), 'success')
         TriggerClientEvent('police:client:SetTracker', targetId, false)
     else
         target.Functions.SetMetaData("tracker", true)
-        TriggerClientEvent('ox_lib:notify', targetId, {description = Lang:t("success.put_anklet"), type = 'success'})
-        TriggerClientEvent('ox_lib:notify', src, {description = Lang:t("success.put_anklet_on", {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname}), type = 'success'})
+        exports.qbx_core:Notify(targetId, Lang:t("success.put_anklet"), 'success')
+        exports.qbx_core:Notify(src, Lang:t("success.put_anklet_on", {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname}), 'success')
         TriggerClientEvent('police:client:SetTracker', targetId, true)
     end
 end)

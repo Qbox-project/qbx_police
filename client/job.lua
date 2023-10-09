@@ -41,16 +41,16 @@ end
 local function doCarDamage(currentVehicle, veh)
 	local smash = false
 	local damageOutside = false
-	local damageOutside2 = false
+	local popTires = false
 	local engine = veh.engine + 0.0
 	local body = veh.body + 0.0
 
 	if engine < 200.0 then engine = 200.0 end
-    if engine  > 1000.0 then engine = 950.0 end
+    if engine > 1000.0 then engine = 950.0 end
 	if body < 150.0 then body = 150.0 end
 	if body < 950.0 then smash = true end
 	if body < 920.0 then damageOutside = true end
-	if body < 920.0 then damageOutside2 = true end
+	if body < 920.0 then popTires = true end
 
     Wait(100)
     SetVehicleEngineHealth(currentVehicle, engine)
@@ -69,11 +69,11 @@ local function doCarDamage(currentVehicle, veh)
 		SetVehicleDoorBroken(currentVehicle, 4, true)
 	end
 
-	if damageOutside2 then
-		SetVehicleTyreBurst(currentVehicle, 1, false, 990.0)
-		SetVehicleTyreBurst(currentVehicle, 2, false, 990.0)
-		SetVehicleTyreBurst(currentVehicle, 3, false, 990.0)
-		SetVehicleTyreBurst(currentVehicle, 4, false, 990.0)
+	if popTires then
+        SetVehicleTyreBurst(currentVehicle, 1, false, 990.0)
+        SetVehicleTyreBurst(currentVehicle, 2, false, 990.0)
+        SetVehicleTyreBurst(currentVehicle, 3, false, 990.0)
+        SetVehicleTyreBurst(currentVehicle, 4, false, 990.0)
 	end
 
 	if body < 1000 then
@@ -119,7 +119,6 @@ local function takeOutVehicle(vehicleInfo)
         end
     end
     TaskWarpPedIntoVehicle(cache.ped, veh, -1)
-    TriggerEvent("vehiclekeys:client:SetOwner", GetPlate(veh))
     TriggerServerEvent("inventory:server:addTrunkItems", GetPlate(veh), Config.CarItems)
     SetVehicleEngineOn(veh, true, true, false)
 end
@@ -129,7 +128,7 @@ local function openGarageMenu()
     local options = {}
 
     for veh, label in pairs(authorizedVehicles) do
-        options[#options+1] = {
+        options[#options + 1] = {
             title = label,
             onSelect = function()
                 takeOutVehicle(veh)
@@ -138,7 +137,7 @@ local function openGarageMenu()
     end
 
     for veh, label in pairs(Config.WhitelistedVehicles) do
-        options[#options+1] = {
+        options[#options + 1] = {
             title = label,
             onSelect = function()
                 takeOutVehicle(veh)
@@ -147,26 +146,26 @@ local function openGarageMenu()
     end
 
     lib.registerContext({
-        id = 'qb_policejob_vehicles_menu',
+        id = 'vehicleMenu',
         title = Lang:t('menu.garage_title'),
         options = options,
     })
-    lib.showContext('qb_policejob_vehicles_menu')
+    lib.showContext('vehicleMenu')
 end
 
 local function openImpoundMenu()
     local options = {}
     local result = lib.callback.await("police:GetImpoundedVehicles", false)
     if not result then
-        lib.notify({ description = Lang:t("error.no_impound"), type = 'error', })
+        exports.qbx_core:Notify(Lang:t("error.no_impound"), 'error')
     else
-        local vehicles = exports.qbx_core:GetVechiclesByName()
+        local vehicles = exports.qbx_core:GetVehiclesByName()
         for _, v in pairs(result) do
             local enginePercent = math.round(v.engine / 10, 0)
             local currentFuel = v.fuel
             local vName = vehicles[v.vehicle].name
 
-            options[#options+1] = {
+            options[#options + 1] = {
                 title = vName.." ["..v.plate.."]",
                 onSelect = function()
                     takeOutImpound(v)
@@ -180,11 +179,11 @@ local function openImpoundMenu()
     end
 
     lib.registerContext({
-        id = 'qb_policejob_impound_menu',
+        id = 'impoundMenu',
         title = Lang:t('menu.impound'),
         options = options,
     })
-    lib.showContext('qb_policejob_impound_menu')
+    lib.showContext('impoundMenu')
 end
 
 ---TODO: global evidence lockers instead of location specific
@@ -234,7 +233,7 @@ local function scanFingerprint()
     if not inFingerprint then return end
     local playerId = lib.getClosestPlayer(GetEntityCoords(cache.ped), 2.5, false)
     if not playerId then
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error', })
+        exports.qbx_core:Notify(Lang:t("error.none_nearby"), 'error')
         return
     end
     TriggerServerEvent("police:server:showFingerprint", GetPlayerServerId(playerId))
@@ -253,7 +252,7 @@ local function uiPrompt(promptType, id)
                 elseif promptType == 'garage' then
                     if not inGarage then return end
                     if cache.vehicle then
-                        exports.qbx_core:DeleteVehicle(cache.vehicle)
+                        DeleteVehicle(cache.vehicle)
                         lib.hideTextUI()
                         break
                     else
@@ -268,7 +267,7 @@ local function uiPrompt(promptType, id)
                 elseif promptType == 'impound' then
                     if not inImpound then return end
                     if cache.vehicle then
-                        exports.qbx_core:DeleteVehicle(cache.vehicle)
+                        DeleteVehicle(cache.vehicle)
                         lib.hideTextUI()
                         break
                     else
@@ -290,7 +289,7 @@ local function uiPrompt(promptType, id)
                     break
                 elseif promptType == 'stash' then
                     if not inStash then return end
-                    exports.ox_inventory:openInventory('stash', { id = 'policelocker'})
+                    exports.ox_inventory:openInventory('stash', {id = 'policelocker'})
                     break
                 end
             end
@@ -351,7 +350,7 @@ RegisterNetEvent('police:client:CallAnim', function()
 end)
 
 RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
-    local vehicle = exports.qbx_core:GetClosestVehicle()
+    local vehicle = GetClosestVehicle()
     if not DoesEntityExist(vehicle) then return end
 
     local bodyDamage = math.ceil(GetVehicleBodyHealth(vehicle))
@@ -379,28 +378,28 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
         },
         prop = {
             {
-            model = `prop_notepad_01`,
-            bone = 18905,
-            pos = { x = 0.1, y = 0.02, z = 0.05 },
-            rot = { x = 10.0, y = 0.0, z = 0.0 },
+                model = `prop_notepad_01`,
+                bone = 18905,
+                pos = {x = 0.1, y = 0.02, z = 0.05},
+                rot = {x = 10.0, y = 0.0, z = 0.0}
             },
             {
                 model = 'prop_pencil_01',
                 bone = 58866,
-                pos = { x = 0.11, y = -0.02, z = 0.001 },
-                rot = { x = -120.0, y = 0.0, z = 0.0 },
-            },
+                pos = {x = 0.11, y = -0.02, z = 0.001},
+                rot = {x = -120.0, y = 0.0, z = 0.0}
+            }
         },
     })
     then
         local plate = GetPlate(vehicle)
         TriggerServerEvent("police:server:Impound", plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
-        exports.qbx_core:DeleteVehicle(vehicle)
-        lib.notify({ description = Lang:t('success.impounded'), type = 'success' })
+        DeleteVehicle(vehicle)
+        exports.qbx_core:Notify(Lang:t('success.impounded'), 'success')
         ClearPedTasks(cache.ped)
     else
         ClearPedTasks(cache.ped)
-        lib.notify({ description = Lang:t('error.canceled'), type = 'error' })
+        exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
     end
 end)
 
@@ -409,13 +408,13 @@ RegisterNetEvent('police:client:CheckStatus', function()
 
     local playerId = lib.getClosestPlayer(GetEntityCoords(cache.ped), 5.0, false)
     if not playerId then
-        lib.notify({ description = Lang:t("error.none_nearby"), type = 'error' })
+        exports.qbx_core:Notify(Lang:t("error.none_nearby"), 'error')
         return
     end
     local result = lib.callback.await('police:GetPlayerStatus', false, playerId)
     if not result then return end
     for _, v in pairs(result) do
-        lib.notify({ description = v, type = 'success' })
+        exports.qbx_core:Notify(v, 'success')
     end
 end)
 
@@ -595,7 +594,7 @@ CreateThread(function()
                         lib.showTextUI(Lang:t('info.impound_veh'))
                         uiPrompt('impound')
                     else
-                        lib.showTextUI('menu.pol_impound')
+                        lib.showTextUI(Lang:t('menu.pol_impound'))
                         uiPrompt('impound')
                     end
                 end

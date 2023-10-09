@@ -19,6 +19,7 @@ local Translations = {
         rank_revoke = 'You are not a high enough rank to revoke a license',
         on_duty_police_only = 'For on-duty police only',
         vehicle_not_flag = 'Vehicle not flagged',
+        vehicle_flag = 'Vehicle already flagged',
         not_towdriver = 'Not a tow truck driver',
         not_lawyer = 'Person is not a lawyer',
         no_anklet = 'This person doesn\'t have an anklet on.',

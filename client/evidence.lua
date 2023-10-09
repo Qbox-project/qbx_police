@@ -114,10 +114,10 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
                 end
             end
             TriggerServerEvent('evidence:server:ClearBlooddrops', blooddropList)
-            lib.notify({ description = Lang:t('success.blood_clear'), type = 'success' })
+            exports.qbx_core:Notify(Lang:t('success.blood_clear'), 'success')
         end
     else
-        lib.notify({ description = Lang:t('error.blood_not_cleared'), type = 'error' })
+        exports.qbx_core:Notify(Lang:t('error.blood_not_cleared'), 'error')
     end
 end)
 
@@ -159,10 +159,10 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
                 end
             end
             TriggerServerEvent('evidence:server:ClearCasings', casingList)
-            lib.notify({ description = Lang:t('success.bullet_casing_removed'), type = 'success' })
+            exports.qbx_core:Notify(Lang:t('success.bullet_casing_removed'), 'success')
         end
     else
-        lib.notify({ description = Lang:t('error.bullet_casing_not_removed'), type = 'error' })
+        exports.qbx_core:Notify(Lang:t('error.bullet_casing_not_removed'), 'error')
     end
 end)
 

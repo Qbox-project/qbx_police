@@ -1,23 +1,23 @@
 RegisterNetEvent('police:client:CheckDistance', function()
-    local player, distance = exports.qbx_core:GetClosestPlayer()
+    local player, distance = GetClosestPlayer()
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
         TriggerServerEvent("police:server:SetTracker", playerId)
     else
-        lib.notify({description = Lang:t("error.none_nearby"), type = "error"})
+        exports.qbx_core:Notify(Lang:t("error.none_nearby"), 'error')
     end
 end)
 
 RegisterNetEvent('police:client:SetTracker', function(bool)
     local trackerClothingData = {
         outfitData = {
-            accessory = { item = -1, texture = 0 },  -- Neck / Tie
+            accessory = {item = -1, texture = 0}  -- Neck / Tie
         }
     }
 
     if bool then
         trackerClothingData.outfitData = {
-            accessory = { item = 13, texture = 0 }
+            accessory = {item = 13, texture = 0}
         }
 
         TriggerEvent('qb-clothing:client:loadOutfit', trackerClothingData)
@@ -32,7 +32,7 @@ end)
 
 RegisterNetEvent('police:client:TrackerMessage', function(msg, coords)
     PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", false, 0, true)
-    lib.notify({ description = msg, type = 'inform' })
+    exports.qbx_core:Notify(msg, 'inform')
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
     SetBlipSprite(blip, 458)

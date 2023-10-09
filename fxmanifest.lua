@@ -1,7 +1,8 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'QB-PoliceJob'
+description 'QBX-PoliceJob'
+repository 'https://github.com/Qbox-project/qbx_policejob'
 version '1.0.0'
 
 shared_scripts {
@@ -19,20 +20,12 @@ modules {
 }
 
 client_scripts {
-    'client/main.lua',
-    'client/camera.lua',
-    'client/interactions.lua',
-    'client/job.lua',
-    'client/heli.lua',
-    'client/anpr.lua',
-    'client/evidence.lua',
-    'client/objects.lua',
-    'client/tracker.lua'
+    'client/*.lua'
 }
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
-    'server/main.lua'
+    'server/*.lua'
 }
 
 ui_page 'html/index.html'
@@ -46,3 +39,4 @@ files {
 }
 
 lua54 'yes'
+use_experimental_fxv2_oal 'yes'

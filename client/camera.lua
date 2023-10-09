@@ -15,10 +15,7 @@ local function getCurrentTime()
 end
 
 local function createInstructionalScaleform(scaleform)
-    scaleform = RequestScaleformMovie(scaleform)
-    while not HasScaleformMovieLoaded(scaleform) do
-        Wait(0)
-    end
+    scaleform = lib.requestScaleformMovie(scaleform)
     PushScaleformMovieFunction(scaleform, "CLEAR_ALL")
     PopScaleformMovieFunctionVoid()
 
