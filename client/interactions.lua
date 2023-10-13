@@ -263,7 +263,7 @@ end)
 
 RegisterNetEvent('police:client:CuffPlayerSoft', function()
     if IsPedRagdoll(cache.ped) then return end
-    local player, distance = exports.qbx_core:GetClosestPlayer()
+    local player, distance = GetClosestPlayer()
     if isTooFar(player, distance, 1.5) then return end
     local playerId = GetPlayerServerId(player)
     if IsPedInAnyVehicle(GetPlayerPed(player), false) or cache.vehicle then
