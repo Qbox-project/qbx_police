@@ -95,8 +95,8 @@ lib.callback.register('police:GetImpoundedVehicles', function()
     return FetchImpoundedVehicles()
 end)
 
-lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate)
-    local netId = SpawnVehicle(source, model, coords, true)
+lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate, warp)
+    local netId = SpawnVehicle(source, model, coords, warp)
     if not netId or netId == 0 then return end
     local veh = NetworkGetEntityFromNetworkId(netId)
     if not veh or veh == 0 then return end
@@ -149,6 +149,7 @@ RegisterNetEvent('police:server:Radar', function(fine)
 end)
 
 RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource)
+    if not playerSource then playerSource = source end
     local ped = GetPlayerPed(playerSource)
     local coords = GetEntityCoords(ped)
     local players = exports.qbx_core:GetQBPlayers()
