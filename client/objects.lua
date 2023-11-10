@@ -50,18 +50,23 @@ end
 RegisterNetEvent('police:client:spawnPObj', function(item)
     if lib.progressBar({
         duration = 2500,
-        label = Lang:t("progressbar.place_object"),
+        label = Lang:t('progressbar.place_object'),
         useWhileDead = false,
         canCancel = true,
-        disable = {car = true, move = true, combat = true},
+        disable = {
+            car = true,
+            move = true,
+            combat = true,
+            mouse = false
+        },
         anim = {
-            dict = "anim@narcotics@trash",
-            clip = "drop_front"
+            dict = 'anim@narcotics@trash',
+            clip = 'drop_front'
         }
     }) then
-        TriggerServerEvent("police:server:spawnObject", item)
+        TriggerServerEvent('police:server:spawnObject', item)
     else
-        exports.qbx_core:Notify(Lang:t("error.canceled"), 'error')
+        exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
     end
 end)
 
@@ -70,18 +75,23 @@ RegisterNetEvent('police:client:deleteObject', function()
     if dist < 5.0 then
         if lib.progressBar({
             duration = 2500,
-            label = Lang:t("progressbar.remove_object"),
+            label = Lang:t('progressbar.remove_object'),
             useWhileDead = false,
             canCancel = true,
-            disable = {car = true, move = true, combat = true},
+            disable = {
+                car = true,
+                move = true,
+                combat = true,
+                mouse = false
+            },
             anim = {
-                dict = "weapons@first_person@aim_rng@generic@projectile@thermal_charge@",
-                clip = "plant_floor",
+                dict = 'weapons@first_person@aim_rng@generic@projectile@thermal_charge@',
+                clip = 'plant_floor'
             }
         }) then
-            TriggerServerEvent("police:server:deleteObject", objectId)
+            TriggerServerEvent('police:server:deleteObject', objectId)
         else
-            exports.qbx_core:Notify(Lang:t("error.canceled"), 'error')
+            exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
         end
     end
 end)
@@ -110,8 +120,8 @@ end)
 
 ---Spawn a spike strip.
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
-    if #spawnedSpikes >= Config.MaxSpikes or QBX.PlayerData.job.type ~= "leo" or not QBX.PlayerData.job.onduty then
-        exports.qbx_core:Notify(Lang:t("error.no_spikestripe"), 'error')
+    if #spawnedSpikes >= Config.MaxSpikes or QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then
+        exports.qbx_core:Notify(Lang:t('error.no_spikestripe'), 'error')
         return
     end
 
@@ -149,12 +159,12 @@ AddEventHandler('ox_lib:cache:vehicle', function()
 		while cache.vehicle do
             if closestSpike then
                 local tires = {
-                    {bone = "wheel_lf", index = 0},
-                    {bone = "wheel_rf", index = 1},
-                    {bone = "wheel_lm", index = 2},
-                    {bone = "wheel_rm", index = 3},
-                    {bone = "wheel_lr", index = 4},
-                    {bone = "wheel_rr", index = 5}
+                    {bone = 'wheel_lf', index = 0},
+                    {bone = 'wheel_rf', index = 1},
+                    {bone = 'wheel_lm', index = 2},
+                    {bone = 'wheel_rm', index = 3},
+                    {bone = 'wheel_lr', index = 4},
+                    {bone = 'wheel_rr', index = 5}
                 }
 
                 for a = 1, #tires do
@@ -184,7 +194,7 @@ CreateThread(function()
                 local dist = #(pos - spawnedSpikes[closestSpike].coords)
                 if dist < 4 then
                     if not cache.vehicle then
-                        if QBX.PlayerData.job.type == "leo" and QBX.PlayerData.job.onduty then
+                        if QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty then
                             sleep = 0
                             lib.showTextUI(Lang:t('info.delete_spike'))
                             if IsControlJustPressed(0, 38) then

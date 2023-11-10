@@ -1,7 +1,7 @@
 -- Variables
 local currentGarage = 0
 local inFingerprint = false
-local fingerPrintSessionId = nil
+local fingerprintSessionId = nil
 local inStash = false
 local inTrash = false
 local inHelicopter = false
@@ -11,7 +11,7 @@ local inPrompt = false
 
 local function openFingerprintUi()
     SendNUIMessage({
-        type = "fingerprintOpen"
+        type = 'fingerprintOpen'
     })
     SetNuiFocus(true, true)
 end
@@ -25,7 +25,7 @@ local function setCarItemsInfo()
 			amount = tonumber(item.amount),
 			info = item.info,
 			label = itemInfo.label,
-			description = itemInfo.description or "",
+			description = itemInfo.description or '',
 			weight = itemInfo.weight,
 			type = itemInfo.type,
 			unique = itemInfo.unique,
@@ -126,7 +126,7 @@ local function takeOutVehicle(vehicleInfo)
             SetVehicleLivery(veh, Config.VehicleSettings[vehicleInfo].livery)
         end
     end
-    TriggerServerEvent("inventory:server:addTrunkItems", GetPlate(veh), Config.CarItems)
+    TriggerServerEvent('inventory:server:addTrunkItems', GetPlate(veh), Config.CarItems)
     SetVehicleEngineOn(veh, true, true, false)
 end
 
@@ -162,9 +162,9 @@ end
 
 local function openImpoundMenu()
     local options = {}
-    local result = lib.callback.await("police:GetImpoundedVehicles", false)
+    local result = lib.callback.await('police:GetImpoundedVehicles', false)
     if not result then
-        exports.qbx_core:Notify(Lang:t("error.no_impound"), 'error')
+        exports.qbx_core:Notify(Lang:t('error.no_impound'), 'error')
     else
         local vehicles = exports.qbx_core:GetVehiclesByName()
         for _, v in pairs(result) do
@@ -173,7 +173,7 @@ local function openImpoundMenu()
             local vName = vehicles[v.vehicle].name
 
             options[#options + 1] = {
-                title = vName.." ["..v.plate.."]",
+                title = vName..' ['..v.plate..']',
                 onSelect = function()
                     takeOutImpound(v)
                 end,
@@ -198,11 +198,11 @@ local function openEvidenceLockerSelectInput(currentEvidence)
     local input = lib.inputDialog(Lang:t('info.evidence_stash', {value = currentEvidence}), {Lang:t('info.slot')})
     if not input then return end
     local slotNumber = tonumber(input[1])
-    TriggerServerEvent("inventory:server:OpenInventory", "stash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = slotNumber}), {
+    TriggerServerEvent('inventory:server:OpenInventory', 'stash', Lang:t('info.current_evidence', {value = currentEvidence, value2 = slotNumber}), {
         maxweight = 4000000,
         slots = 500,
     })
-    TriggerEvent("inventory:client:SetCurrentStash", Lang:t('info.current_evidence', {value = currentEvidence, value2 = slotNumber}))
+    TriggerEvent('inventory:client:SetCurrentStash', Lang:t('info.current_evidence', {value = currentEvidence, value2 = slotNumber}))
 end
 
 local function openEvidenceMenu()
@@ -237,14 +237,14 @@ local function scanFingerprint()
     if not inFingerprint then return end
     local playerId = lib.getClosestPlayer(GetEntityCoords(cache.ped), 2.5, false)
     if not playerId then
-        exports.qbx_core:Notify(Lang:t("error.none_nearby"), 'error')
+        exports.qbx_core:Notify(Lang:t('error.none_nearby'), 'error')
         return
     end
-    TriggerServerEvent("police:server:showFingerprint", GetPlayerServerId(playerId))
+    TriggerServerEvent('police:server:showFingerprint', GetPlayerServerId(playerId))
 end
 
 local function uiPrompt(promptType, id)
-    if QBX.PlayerData.job.type ~= "leo" then return end
+    if QBX.PlayerData.job.type ~= 'leo' then return end
     CreateThread(function()
         while inPrompt do
             Wait(0)
@@ -317,35 +317,35 @@ end)
 --Events
 RegisterNetEvent('police:client:showFingerprint', function(playerId)
     openFingerprintUi()
-    fingerPrintSessionId = playerId
+    fingerprintSessionId = playerId
 end)
 
 RegisterNetEvent('police:client:showFingerprintId', function(fid)
     SendNUIMessage({
-        type = "updateFingerprintId",
+        type = 'updateFingerprintId',
         fingerprintId = fid
     })
-    PlaySound(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", false, 0, true)
+    PlaySound(-1, 'Event_Start_Text', 'GTAO_FM_Events_Soundset', false, 0, true)
 end)
 
 RegisterNUICallback('doFingerScan', function(_, cb)
-    TriggerServerEvent('police:server:showFingerprintId', fingerPrintSessionId)
-    cb("ok")
+    TriggerServerEvent('police:server:showFingerprintId', fingerprintSessionId)
+    cb('ok')
 end)
 
 RegisterNetEvent('police:client:SendEmergencyMessage', function(coords, message)
-    TriggerServerEvent("police:server:SendEmergencyMessage", coords, message)
-    TriggerEvent("police:client:CallAnim")
+    TriggerServerEvent('police:server:SendEmergencyMessage', coords, message)
+    TriggerEvent('police:client:CallAnim')
 end)
 
 RegisterNetEvent('police:client:EmergencySound', function()
-    PlaySound(-1, "Event_Start_Text", "GTAO_FM_Events_Soundset", false, 0, true)
+    PlaySound(-1, 'Event_Start_Text', 'GTAO_FM_Events_Soundset', false, 0, true)
 end)
 
 RegisterNetEvent('police:client:CallAnim', function()
     local isCalling = true
     local callCount = 5
-    lib.requestAnimDict("cellphone@")
+    lib.requestAnimDict('cellphone@')
     TaskPlayAnim(cache.ped, 'cellphone@', 'cellphone_call_listen_base', 3.0, -1, -1, 49, 0, false, false, false)
     Wait(1000)
     CreateThread(function()
@@ -373,14 +373,14 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
     if lib.progressCircle({
         duration = 5000,
         position = 'bottom',
-        label = Lang:t("progressbar.impound"),
+        label = Lang:t('progressbar.impound'),
         useWhileDead = false,
         canCancel = true,
         disable = {
             move = true,
             car = true,
             combat = true,
-            mouse = false,
+            mouse = false
         },
         anim = {
             dict = 'missheistdockssetup1clipboard@base',
@@ -404,7 +404,7 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
     })
     then
         local plate = GetPlate(vehicle)
-        TriggerServerEvent("police:server:Impound", plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
+        TriggerServerEvent('police:server:Impound', plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
         DeleteVehicle(vehicle)
         exports.qbx_core:Notify(Lang:t('success.impounded'), 'success')
         ClearPedTasks(cache.ped)
@@ -415,11 +415,11 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
 end)
 
 RegisterNetEvent('police:client:CheckStatus', function()
-    if QBX.PlayerData.job.type ~= "leo" then return end
+    if QBX.PlayerData.job.type ~= 'leo' then return end
 
     local playerId = lib.getClosestPlayer(GetEntityCoords(cache.ped), 5.0, false)
     if not playerId then
-        exports.qbx_core:Notify(Lang:t("error.none_nearby"), 'error')
+        exports.qbx_core:Notify(Lang:t('error.none_nearby'), 'error')
         return
     end
     local result = lib.callback.await('police:GetPlayerStatus', false, playerId)
@@ -430,8 +430,8 @@ RegisterNetEvent('police:client:CheckStatus', function()
 end)
 
 function ToggleDuty()
-    TriggerServerEvent("QBCore:ToggleDuty")
-    TriggerServerEvent("police:server:UpdateCurrentCops")
+    TriggerServerEvent('QBCore:ToggleDuty')
+    TriggerServerEvent('police:server:UpdateCurrentCops')
 end
 
 -- Threads
@@ -446,10 +446,10 @@ if Config.UseTarget then
                 debug = Config.PolyDebug,
                 options = {
                     {
-                        label = Lang:t("info.onoff_duty"),
+                        label = Lang:t('info.onoff_duty'),
                         icon = 'fa-solid fa-sign-in-alt',
                         onSelect = ToggleDuty,
-                        groups = 'police',
+                        groups = 'police'
                     }
                 }
             })
@@ -490,7 +490,7 @@ CreateThread(function()
             onEnter = function()
                 if QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty then
                     inPrompt = true
-                    lib.showTextUI(Lang:t("info.evidence"))
+                    lib.showTextUI(Lang:t('info.evidence'))
                     uiPrompt('evidence')
                 end
             end,

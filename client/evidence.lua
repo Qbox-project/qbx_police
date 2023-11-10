@@ -30,7 +30,7 @@ local ignoredWeapons = {
     [`weapon_stungun`] = true,
     [`weapon_petrolcan`] = true,
     [`weapon_hazardcan`] = true,
-    [`weapon_fireextinguisher`] = true,
+    [`weapon_fireextinguisher`] = true
 }
 
 local function dropBulletCasing(weapon, ped)
@@ -92,7 +92,7 @@ end)
 
 RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
     local pos = GetEntityCoords(cache.ped)
-    local blooddropList = {}
+    local bloodDropList = {}
     if lib.progressCircle({
         duration = 5000,
         position = 'bottom',
@@ -103,17 +103,17 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
             move = false,
             car = false,
             combat = true,
-            mouse = false,
+            mouse = false
         }
     })
     then
         if bloodDrops and next(bloodDrops) then
             for bloodId in pairs(bloodDrops) do
                 if #(pos - bloodDrops[bloodId].coords) < 10.0 then
-                    blooddropList[#blooddropList + 1] = bloodId
+                    bloodDropList[#bloodDropList + 1] = bloodId
                 end
             end
-            TriggerServerEvent('evidence:server:ClearBlooddrops', blooddropList)
+            TriggerServerEvent('evidence:server:ClearBlooddrops', bloodDropList)
             exports.qbx_core:Notify(Lang:t('success.blood_clear'), 'success')
         end
     else
@@ -298,11 +298,7 @@ CreateThread(function()
 end)
 
 local function canDiscoverEvidence()
-    return IsLoggedIn
-        and QBX.PlayerData.job.type == 'leo'
-        and QBX.PlayerData.job.onduty
-        and IsPlayerFreeAiming(cache.playerId)
-        and cache.weapon == `WEAPON_FLASHLIGHT`
+    return IsLoggedIn and QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty and IsPlayerFreeAiming(cache.playerId) and cache.weapon == `WEAPON_FLASHLIGHT`
 end
 
 ---@param evidence table<number, {coords: vector3}>

@@ -2,9 +2,9 @@ RegisterNetEvent('police:client:CheckDistance', function()
     local player, distance = GetClosestPlayer()
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
-        TriggerServerEvent("police:server:SetTracker", playerId)
+        TriggerServerEvent('police:server:SetTracker', playerId)
     else
-        exports.qbx_core:Notify(Lang:t("error.none_nearby"), 'error')
+        exports.qbx_core:Notify(Lang:t('error.none_nearby'), 'error')
     end
 end)
 
@@ -31,7 +31,7 @@ RegisterNetEvent('police:client:SendTrackerLocation', function(requestId)
 end)
 
 RegisterNetEvent('police:client:TrackerMessage', function(msg, coords)
-    PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", false, 0, true)
+    PlaySound(-1, 'Lose_1st', 'GTAO_FM_Events_Soundset', false, 0, true)
     exports.qbx_core:Notify(msg, 'inform')
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)

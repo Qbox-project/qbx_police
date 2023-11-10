@@ -1,7 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'QBX-PoliceJob'
+description 'QBX_PoliceJob'
 repository 'https://github.com/Qbox-project/qbx_policejob'
 version '1.0.0'
 
