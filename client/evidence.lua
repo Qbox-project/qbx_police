@@ -21,7 +21,7 @@ local statusList = {
     confused = Lang:t('evidence.confused'),
     alcohol = Lang:t('evidence.alcohol'),
     heavyalcohol = Lang:t('evidence.heavy_alcohol'),
-    agitated = Lang:t('evidence.agitated')
+    agitated = Lang:t('evidence.agitated'),
 }
 
 local ignoredWeapons = {
@@ -30,7 +30,7 @@ local ignoredWeapons = {
     [`weapon_stungun`] = true,
     [`weapon_petrolcan`] = true,
     [`weapon_hazardcan`] = true,
-    [`weapon_fireextinguisher`] = true
+    [`weapon_fireextinguisher`] = true,
 }
 
 local function dropBulletCasing(weapon, ped)
@@ -298,7 +298,11 @@ CreateThread(function()
 end)
 
 local function canDiscoverEvidence()
-    return IsLoggedIn and QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty and IsPlayerFreeAiming(cache.playerId) and cache.weapon == `WEAPON_FLASHLIGHT`
+    return IsLoggedIn
+    and QBX.PlayerData.job.type == 'leo'
+    and QBX.PlayerData.job.onduty
+    and IsPlayerFreeAiming(cache.playerId)
+    and cache.weapon == `WEAPON_FLASHLIGHT`
 end
 
 ---@param evidence table<number, {coords: vector3}>

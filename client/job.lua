@@ -179,7 +179,7 @@ local function openImpoundMenu()
                 end,
                 metadata = {
                     {label = 'Engine', value = enginePercent .. ' %'},
-                    {label = 'Fuel', value = currentFuel .. ' %'},
+                    {label = 'Fuel', value = currentFuel .. ' %'}
                 },
             }
         end
@@ -188,7 +188,7 @@ local function openImpoundMenu()
     lib.registerContext({
         id = 'impoundMenu',
         title = Lang:t('menu.impound'),
-        options = options,
+        options = options
     })
     lib.showContext('impoundMenu')
 end

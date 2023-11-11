@@ -164,7 +164,7 @@ AddEventHandler('ox_lib:cache:vehicle', function()
                     {bone = 'wheel_lm', index = 2},
                     {bone = 'wheel_rm', index = 3},
                     {bone = 'wheel_lr', index = 4},
-                    {bone = 'wheel_rr', index = 5}
+                    {bone = 'wheel_rr', index = 5},
                 }
 
                 for a = 1, #tires do

@@ -181,13 +181,13 @@ RegisterNetEvent('police:client:RobPlayer', function()
             move = true,
             car = true,
             combat = true,
-            mouse = false,
+            mouse = false
         },
         anim = {
             dict = 'random@shop_robbery',
             clip = 'robbery_action_b',
-            flags = 16,
-        },
+            flags = 16
+        }
     })
     then
         local plyCoords = GetEntityCoords(playerPed)

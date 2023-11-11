@@ -18,7 +18,7 @@ local fov = (fovMax + fovMin) * 0.5
 local VISION_STATE = {
 	normal = 0,
 	nightmode = 1,
-	thermal = 2
+	thermal = 2,
 }
 
 local visionState = VISION_STATE.normal
@@ -28,7 +28,7 @@ local scanValue = 0
 local VEHICLE_LOCK_STATE = {
 	dormant = 0,
 	scanning = 1,
-	locked = 2
+	locked = 2,
 }
 
 local vehicleLockState = VEHICLE_LOCK_STATE.dormant
