@@ -76,7 +76,7 @@ end)
 -- Callbacks
 lib.callback.register('police:server:isPlayerDead', function(_, playerId)
     local player = exports.qbx_core:GetPlayer(playerId)
-    return player.PlayerData.metadata.idead
+    return player.PlayerData.metadata.isdead
 end)
 
 lib.callback.register('police:GetPlayerStatus', function(_, playerId)
