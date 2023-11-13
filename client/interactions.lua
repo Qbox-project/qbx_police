@@ -315,7 +315,7 @@ RegisterNetEvent('police:client:DeEscort', function()
 end)
 
 RegisterNetEvent('police:client:GetKidnappedTarget', function(playerId)
-    if QBX.PlayerData.metadata.idead or QBX.PlayerData.metadata.inlaststand or QBX.PlayerData.metadata.ishandcuffed then
+    if QBX.PlayerData.metadata.isdead or QBX.PlayerData.metadata.inlaststand or QBX.PlayerData.metadata.ishandcuffed then
         if not isEscorted then
             isEscorted = true
             local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
