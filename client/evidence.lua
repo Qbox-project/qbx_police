@@ -21,7 +21,7 @@ local statusList = {
     confused = Lang:t('evidence.confused'),
     alcohol = Lang:t('evidence.alcohol'),
     heavyalcohol = Lang:t('evidence.heavy_alcohol'),
-    agitated = Lang:t('evidence.agitated')
+    agitated = Lang:t('evidence.agitated'),
 }
 
 local ignoredWeapons = {
@@ -92,7 +92,7 @@ end)
 
 RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
     local pos = GetEntityCoords(cache.ped)
-    local blooddropList = {}
+    local bloodDropList = {}
     if lib.progressCircle({
         duration = 5000,
         position = 'bottom',
@@ -103,17 +103,17 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
             move = false,
             car = false,
             combat = true,
-            mouse = false,
+            mouse = false
         }
     })
     then
         if bloodDrops and next(bloodDrops) then
             for bloodId in pairs(bloodDrops) do
                 if #(pos - bloodDrops[bloodId].coords) < 10.0 then
-                    blooddropList[#blooddropList + 1] = bloodId
+                    bloodDropList[#bloodDropList + 1] = bloodId
                 end
             end
-            TriggerServerEvent('evidence:server:ClearBlooddrops', blooddropList)
+            TriggerServerEvent('evidence:server:ClearBlooddrops', bloodDropList)
             exports.qbx_core:Notify(Lang:t('success.blood_clear'), 'success')
         end
     else
@@ -299,10 +299,10 @@ end)
 
 local function canDiscoverEvidence()
     return IsLoggedIn
-        and QBX.PlayerData.job.type == 'leo'
-        and QBX.PlayerData.job.onduty
-        and IsPlayerFreeAiming(cache.playerId)
-        and cache.weapon == `WEAPON_FLASHLIGHT`
+    and QBX.PlayerData.job.type == 'leo'
+    and QBX.PlayerData.job.onduty
+    and IsPlayerFreeAiming(cache.playerId)
+    and cache.weapon == `WEAPON_FLASHLIGHT`
 end
 
 ---@param evidence table<number, {coords: vector3}>

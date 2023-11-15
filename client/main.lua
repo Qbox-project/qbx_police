@@ -18,7 +18,7 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
         ShowHeadingIndicatorOnBlip(blip, true)
         SetBlipRotation(blip, math.ceil(playerLocation.w))
         SetBlipScale(blip, 1.0)
-        if playerJob == "police" then
+        if playerJob == 'police' then
             SetBlipColour(blip, 38)
         else
             SetBlipColour(blip, 5)
@@ -38,8 +38,8 @@ end
 
 -- Events
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-    TriggerServerEvent("police:server:SetHandcuffStatus", false)
-    TriggerServerEvent("police:server:UpdateCurrentCops")
+    TriggerServerEvent('police:server:SetHandcuffStatus', false)
+    TriggerServerEvent('police:server:UpdateCurrentCops')
 
     local trackerClothingData = {}
 
@@ -61,7 +61,7 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 
     TriggerEvent('qb-clothing:client:loadOutfit', trackerClothingData)
 
-    if QBX.PlayerData.job and QBX.PlayerData.job.type ~= "leo" then
+    if QBX.PlayerData.job and QBX.PlayerData.job.type ~= 'leo' then
         if dutyBlips then
             for _, v in pairs(dutyBlips) do
                 RemoveBlip(v)
@@ -74,8 +74,8 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
-    TriggerServerEvent("police:server:SetHandcuffStatus", false)
-    TriggerServerEvent("police:server:UpdateCurrentCops")
+    TriggerServerEvent('police:server:SetHandcuffStatus', false)
+    TriggerServerEvent('police:server:UpdateCurrentCops')
     isEscorted = false
     ClearPedTasks(cache.ped)
     DetachEntity(cache.ped, true, false)
@@ -89,7 +89,7 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
-    if JobInfo.type ~= "leo" then
+    if JobInfo.type ~= 'leo' then
         if dutyBlips then
             for _, v in pairs(dutyBlips) do
                 RemoveBlip(v)
@@ -141,7 +141,7 @@ RegisterNetEvent('police:client:policeAlert', function(coords, text, camId)
     else
         exports.qbx_core:Notify(text,'inform', 5000, street1name.. ' ' ..street2name)
     end
-    PlaySound(-1, "Lose_1st", "GTAO_FM_Events_Soundset", false, 0, true)
+    PlaySound(-1, 'Lose_1st', 'GTAO_FM_Events_Soundset', false, 0, true)
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
     local blip2 = AddBlipForCoord(coords.x, coords.y, coords.z)
@@ -175,11 +175,11 @@ RegisterNetEvent('police:client:policeAlert', function(coords, text, camId)
 end)
 
 RegisterNetEvent('police:client:SendToJail', function(time)
-    TriggerServerEvent("police:server:SetHandcuffStatus", false)
+    TriggerServerEvent('police:server:SetHandcuffStatus', false)
     isEscorted = false
     ClearPedTasks(cache.ped)
     DetachEntity(cache.ped, true, false)
-    TriggerEvent("prison:client:Enter", time)
+    TriggerEvent('prison:client:Enter', time)
 end)
 
 RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
@@ -195,7 +195,7 @@ CreateThread(function()
         SetBlipAsShortRange(blip, true)
         SetBlipScale(blip, 0.8)
         SetBlipColour(blip, 29)
-        BeginTextCommandSetBlipName("STRING")
+        BeginTextCommandSetBlipName('STRING')
         AddTextComponentString(station.label)
         EndTextCommandSetBlipName(blip)
     end
