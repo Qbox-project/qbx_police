@@ -6,20 +6,16 @@ repository 'https://github.com/Qbox-project/qbx_policejob'
 version '1.0.0'
 
 shared_scripts {
-    'config.lua',
+    '@ox_lib/init.lua',
+    '@qbx_core/modules/utils.lua',
     '@qbx_core/shared/locale.lua',
     'locales/en.lua',
     'locales/*.lua',
-    '@ox_lib/init.lua',
-    '@qbx_core/import.lua'
-}
-
-modules {
-    'qbx_core:playerdata',
-    'qbx_core:utils'
+    'config.lua',
 }
 
 client_scripts {
+    '@qbx_core/modules/playerdata.lua',
     'client/*.lua'
 }
 
