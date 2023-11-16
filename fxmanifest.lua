@@ -11,15 +11,11 @@ shared_scripts {
     'locales/en.lua',
     'locales/*.lua',
     '@ox_lib/init.lua',
-    '@qbx_core/import.lua'
-}
-
-modules {
-    'qbx_core:playerdata',
-    'qbx_core:utils'
+    '@qbx_core/modules/utils.lua'
 }
 
 client_scripts {
+    '@qbx_core/modules/playerdata.lua',
     'client/*.lua'
 }
 
