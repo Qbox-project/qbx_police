@@ -195,7 +195,7 @@ RegisterNetEvent('police:client:RobPlayer', function()
         if #(pos - plyCoords) < 2.5 then
             StopAnimTask(cache.ped, 'random@shop_robbery', 'robbery_action_b', 1.0)
             exports.ox_inventory:openNearbyInventory()
-            TriggerServerEvent('inventory:server:RobPlayer', playerId)
+            TriggerServerEvent('police:server:RobPlayer', playerId)
         else
             exports.qbx_core:Notify(Lang:t('error.none_nearby'), 'error')
         end
