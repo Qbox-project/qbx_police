@@ -1,9 +1,9 @@
--- Variables
+local config = require 'config.client'
+local sharedConfig = require 'config.shared'
 local objectList = {}
 local spawnedSpikes = {}
 local closestSpike = nil
 
--- Functions
 local function GetClosestPoliceObject()
     local pos = GetEntityCoords(cache.ped, true)
     local current = nil
@@ -43,10 +43,8 @@ local function GetClosestSpike()
     closestSpike = current
 end
 
--- Events
-
 ---Spawn police object.
----@param item string name from `Config.Objects`
+---@param item string name from `config/shared.lua`
 RegisterNetEvent('police:client:spawnPObj', function(item)
     if lib.progressBar({
         duration = 2500,
@@ -107,10 +105,10 @@ RegisterNetEvent('police:client:spawnObject', function(objectId, objectType)
     local heading = GetEntityHeading(cache.ped)
     local forward = GetEntityForwardVector(cache.ped)
     local x, y, z = table.unpack(coords + forward * 0.5)
-    local spawnedObj = CreateObject(Config.Objects[objectType].model, x, y, z, true, false, false)
+    local spawnedObj = CreateObject(sharedConfig.objects[objectType].model, x, y, z, true, false, false)
     PlaceObjectOnGroundProperly(spawnedObj)
     SetEntityHeading(spawnedObj, heading)
-    FreezeEntityPosition(spawnedObj, Config.Objects[objectType].freeze)
+    FreezeEntityPosition(spawnedObj, sharedConfig.objects[objectType].freeze)
     objectList[objectId] = {
         id = objectId,
         object = spawnedObj,
@@ -120,7 +118,7 @@ end)
 
 ---Spawn a spike strip.
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
-    if #spawnedSpikes >= Config.MaxSpikes or QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then
+    if #spawnedSpikes >= config.maxSpikes or QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then
         exports.qbx_core:Notify(Lang:t('error.no_spikestripe'), 'error')
         return
     end

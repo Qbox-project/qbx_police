@@ -1,3 +1,4 @@
+local config = require 'config.client'.securityCameras
 local currentCamIndex = 0
 local createdCam = 0
 local currentScaleform = -1
@@ -72,7 +73,7 @@ local function closeSecurityCamera()
     currentScaleform = -1
     ClearTimecycleModifier()
     SetFocusEntity(cache.ped)
-    if Config.SecurityCameras.hideradar then
+    if config.hideRadar then
         DisplayRadar(true)
     end
     FreezeEntityPosition(cache.ped, false)
@@ -81,22 +82,22 @@ end
 -- Events
 RegisterNetEvent('police:client:ActiveCamera', function(camId)
     if GetInvokingResource() then return end
-    if Config.SecurityCameras.cameras[camId] then
+    if config.cameras[camId] then
         DoScreenFadeOut(250)
         while not IsScreenFadedOut() do
             Wait(0)
         end
         SendNUIMessage({
             type = 'enablecam',
-            label = Config.SecurityCameras.cameras[camId].label,
+            label = config.cameras[camId].label,
             id = camId,
-            connected = Config.SecurityCameras.cameras[camId].isOnline,
+            connected = config.cameras[camId].isOnline,
             time = getCurrentTime(),
         })
-        local firstCamX = Config.SecurityCameras.cameras[camId].coords.x
-        local firstCamY = Config.SecurityCameras.cameras[camId].coords.y
-        local firstCamZ = Config.SecurityCameras.cameras[camId].coords.z
-        local firstCamR = Config.SecurityCameras.cameras[camId].r
+        local firstCamX = config.cameras[camId].coords.x
+        local firstCamY = config.cameras[camId].coords.y
+        local firstCamZ = config.cameras[camId].coords.z
+        local firstCamR = config.cameras[camId].r
         SetFocusArea(firstCamX, firstCamY, firstCamZ, firstCamX, firstCamY, firstCamZ)
         changeSecurityCamera(firstCamX, firstCamY, firstCamZ, firstCamR)
         currentCamIndex = camId
@@ -118,15 +119,15 @@ end)
 
 RegisterNetEvent('police:client:DisableAllCameras', function()
     if GetInvokingResource() then return end
-    for k in pairs(Config.SecurityCameras.cameras) do
-        Config.SecurityCameras.cameras[k].isOnline = false
+    for k in pairs(config.cameras) do
+        config.cameras[k].isOnline = false
     end
 end)
 
 RegisterNetEvent('police:client:EnableAllCameras', function()
     if GetInvokingResource() then return end
-    for k in pairs(Config.SecurityCameras.cameras) do
-        Config.SecurityCameras.cameras[k].isOnline = true
+    for k in pairs(config.cameras) do
+        config.cameras[k].isOnline = true
     end
 end)
 
@@ -134,10 +135,10 @@ RegisterNetEvent('police:client:SetCamera', function(key, isOnline)
     if GetInvokingResource() then return end
     if type(key) == 'table' and table.type(key) == 'array' then
         for _, v in pairs(key) do
-            Config.SecurityCameras.cameras[v].isOnline = isOnline
+            config.cameras[v].isOnline = isOnline
         end
     elseif type(key) == 'number' then
-        Config.SecurityCameras.cameras[key].isOnline = isOnline
+        config.cameras[key].isOnline = isOnline
     else
         error('police:client:SetCamera did not receive the right type of key\nreceived type: ' .. type(key) .. '\nreceived value: ' .. key)
     end
@@ -148,7 +149,7 @@ local function listenForCamControls()
     SetTimecycleModifier('scanline_cam_cheap')
     SetTimecycleModifierStrength(1.0)
 
-    if Config.SecurityCameras.hideradar then
+    if config.hideRadar then
         DisplayRadar(false)
     end
 
@@ -168,7 +169,7 @@ local function listenForCamControls()
     ---------------------------------------------------------------------------
     -- CAMERA ROTATION CONTROLS
     ---------------------------------------------------------------------------
-    if Config.SecurityCameras.cameras[currentCamIndex].canRotate then
+    if config.cameras[currentCamIndex].canRotate then
         local getCamRot = GetCamRot(createdCam, 2)
 
         -- ROTATE UP

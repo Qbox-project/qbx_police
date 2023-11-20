@@ -1,3 +1,5 @@
+local config = require 'config.shared'
+
 -- Variables
 cuffType = 1
 isEscorted = false
@@ -189,7 +191,7 @@ end)
 
 -- Threads
 CreateThread(function()
-    for _, station in pairs(Config.Locations.stations) do
+    for _, station in pairs(config.locations.stations) do
         local blip = AddBlipForCoord(station.coords.x, station.coords.y, station.coords.z)
         SetBlipSprite(blip, 60)
         SetBlipAsShortRange(blip, true)

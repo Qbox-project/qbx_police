@@ -1,3 +1,4 @@
+local config = require 'config.client'
 local fovMax = 80.0
 local fovMin = 10.0 -- max zoom level (smaller fov is more zoom)
 local zoomSpeed = 2.0 -- camera zoom speed
@@ -37,7 +38,7 @@ local lockedOnVehicle = nil
 
 -- Functions
 local function isPlayerInPolmav()
-	return GetEntityModel(cache.vehicle) == joaat(Config.PoliceHelicopter)
+	return GetEntityModel(cache.vehicle) == joaat(config.policeHelicopter)
 end
 
 local function isHeliHighEnough(heli)

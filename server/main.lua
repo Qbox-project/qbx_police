@@ -1,3 +1,4 @@
+local sharedConfig = require 'config.shared'
 local QBCore = exports['qb-core']:GetCoreObject()
 Plates = {}
 local playerStatus = {}
@@ -141,7 +142,7 @@ lib.callback.register('qbx_police:server:isPoliceForcePresent', isPoliceForcePre
 -- Events
 RegisterNetEvent('police:server:Radar', function(fine)
     local source = source
-    local price  = Config.SpeedFines[fine].fine
+    local price  = sharedConfig.radars.speedFines[fine].fine
     local player = exports.qbx_core:GetPlayer(source)
     if not player.Functions.RemoveMoney('bank', math.floor(price), 'Radar Fine') then return end
     exports.qbx_management:AddMoney('police', price)
@@ -172,7 +173,7 @@ RegisterNetEvent('police:server:TakeOutImpound', function(plate, garage)
     local src = source
     local playerPed = GetPlayerPed(src)
     local playerCoords = GetEntityCoords(playerPed)
-    local targetCoords = Config.Locations.impound[garage]
+    local targetCoords = sharedConfig.locations.impound[garage]
     if #(playerCoords - targetCoords) > 10.0 then return DropPlayer(src, 'Attempted exploit abuse') end
 
     Unimpound(plate)
@@ -556,8 +557,8 @@ AddEventHandler('onServerResourceStart', function(resource)
         end
     end
 
-    for i = 1, #Config.Locations.trash do
-        exports.ox_inventory:RegisterStash(('policetrash_%s'):format(i), 'Police Trash', 300, 4000000, nil, jobs, Config.Locations.trash[i])
+    for i = 1, #sharedConfig.locations.trash do
+        exports.ox_inventory:RegisterStash(('policetrash_%s'):format(i), 'Police Trash', 300, 4000000, nil, jobs, sharedConfig.locations.trash[i])
     end
     exports.ox_inventory:RegisterStash('policelocker', 'Police Locker', 30, 100000, true)
 end)
@@ -565,7 +566,7 @@ end)
 -- Threads
 CreateThread(function()
     Wait(1000)
-    for i = 1, #Config.Locations.trash do
+    for i = 1, #sharedConfig.locations.trash do
         exports.ox_inventory:ClearInventory(('policetrash_%s'):format(i))
     end
     while true do

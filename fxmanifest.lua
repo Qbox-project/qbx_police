@@ -1,7 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'QBX_PoliceJob'
+description 'qbx_policejob'
 repository 'https://github.com/Qbox-project/qbx_policejob'
 version '1.0.0'
 
@@ -11,7 +11,6 @@ shared_scripts {
     '@qbx_core/shared/locale.lua',
     'locales/en.lua',
     'locales/*.lua',
-    'config.lua',
 }
 
 client_scripts {
@@ -31,7 +30,9 @@ files {
     'html/vue.min.js',
     'html/script.js',
     'html/fingerprint.png',
-    'html/main.css'
+    'html/main.css',
+    'config/client.lua',
+    'config/shared.lua',
 }
 
 lua54 'yes'
