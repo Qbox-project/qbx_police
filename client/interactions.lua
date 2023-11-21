@@ -1,4 +1,5 @@
 -- Variables
+local config = require 'config.client'
 local isEscorting = false
 
 -- Functions
@@ -279,7 +280,7 @@ RegisterNetEvent('police:client:CuffPlayer', function()
 
     local player, distance = GetClosestPlayer()
     if isTooFar(player, distance) then return end
-    if exports.ox_inventory:Search('count', Config.HandCuffItem) == 0 then
+    if exports.ox_inventory:Search('count', config.handcuffItems) == 0 then
         exports.qbx_core:Notify(Lang:t('error.no_cuff'), 'error')
         return
     end

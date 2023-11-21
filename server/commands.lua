@@ -1,3 +1,6 @@
+local config = require 'config.server'
+local sharedConfig = require 'config.shared'
+
 ---if player is not leo or not on duty, notifies them
 ---@param player number|Player
 ---@param minGrade? integer
@@ -39,7 +42,7 @@ lib.addCommand('grantlicense', {
         }
     },
  }, function(source, args)
-    if not checkLeoAndOnDuty(source, Config.LicenseRank) then
+    if not checkLeoAndOnDuty(source, config.licenseRank) then
         exports.qbx_core:Notify(source, Lang:t('error.error_rank_license'), 'error')
         return
     end
@@ -75,7 +78,7 @@ lib.addCommand('revokelicense',{
         }
     },
 }, function(source, args)
-    if not checkLeoAndOnDuty(source, Config.LicenseRank) then
+    if not checkLeoAndOnDuty(source, config.licenseRank) then
         exports.qbx_core:Notify(source, Lang:t('error.rank_revoke'), 'error')
         return
     end
@@ -114,7 +117,7 @@ lib.addCommand('pobject', {
         return
     end
 
-    if Config.Objects[type] then
+    if sharedConfig.objects[type] then
         TriggerClientEvent('police:client:spawnPObj', source, type)
     end
 end)

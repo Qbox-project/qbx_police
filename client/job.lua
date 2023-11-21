@@ -1,4 +1,6 @@
 -- Variables
+local config = require 'config.client'
+local sharedConfig = require 'config.shared'
 local currentGarage = 0
 local inFingerprint = false
 local fingerprintSessionId = nil
@@ -18,7 +20,7 @@ end
 
 local function setCarItemsInfo()
 	local items = {}
-	for _, item in pairs(Config.CarItems) do
+	for _, item in pairs(config.carItems) do
 		local itemInfo = exports.ox_inventory:Items()[item.name:lower()]
 		items[item.slot] = {
 			name = itemInfo.name,
@@ -34,7 +36,7 @@ local function setCarItemsInfo()
 			slot = item.slot
 		}
 	end
-	Config.CarItems = items
+	config.carItems = items
 end
 
 local function doCarDamage(currentVehicle, veh)
@@ -82,7 +84,7 @@ end
 
 local function takeOutImpound(vehicle)
     if not inImpound then return end
-    local coords = Config.Locations.impound[currentGarage]
+    local coords = sharedConfig.locations.impound[currentGarage]
     if not coords then return end
     local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicle.vehicle, coords, vehicle.plate, true)
     local timeout = 100
@@ -101,7 +103,7 @@ end
 
 local function takeOutVehicle(vehicleInfo)
     if not inGarage then return end
-    local coords = Config.Locations.vehicle[currentGarage]
+    local coords = sharedConfig.locations.vehicle[currentGarage]
     if not coords then return end
 
     local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicleInfo, coords, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)), true)
@@ -118,20 +120,20 @@ local function takeOutVehicle(vehicleInfo)
     setCarItemsInfo()
     SetEntityHeading(veh, coords.w)
     SetVehicleFuelLevel(veh, 100.0)
-    if Config.VehicleSettings[vehicleInfo] then
-        if Config.VehicleSettings[vehicleInfo].extras then
-            SetVehicleExtras(veh, Config.VehicleSettings[vehicleInfo].extras)
+    if config.vehicleSettings[vehicleInfo] then
+        if config.vehicleSettings[vehicleInfo].extras then
+            SetVehicleExtras(veh, config.vehicleSettings[vehicleInfo].extras)
         end
-        if Config.VehicleSettings[vehicleInfo].livery then
-            SetVehicleLivery(veh, Config.VehicleSettings[vehicleInfo].livery)
+        if config.vehicleSettings[vehicleInfo].livery then
+            SetVehicleLivery(veh, config.vehicleSettings[vehicleInfo].livery)
         end
     end
-    TriggerServerEvent('inventory:server:addTrunkItems', GetPlate(veh), Config.CarItems)
+    TriggerServerEvent('inventory:server:addTrunkItems', GetPlate(veh), config.carItems)
     SetVehicleEngineOn(veh, true, true, false)
 end
 
 local function openGarageMenu()
-    local authorizedVehicles = Config.AuthorizedVehicles[QBX.PlayerData.job.grade.level]
+    local authorizedVehicles = config.authorizedVehicles[QBX.PlayerData.job.grade.level]
     local options = {}
 
     for veh, label in pairs(authorizedVehicles) do
@@ -143,7 +145,7 @@ local function openGarageMenu()
         }
     end
 
-    for veh, label in pairs(Config.WhitelistedVehicles) do
+    for veh, label in pairs(config.whitelistedVehicles) do
         options[#options + 1] = {
             title = label,
             onSelect = function()
@@ -207,7 +209,7 @@ end
 
 local function openEvidenceMenu()
     local pos = GetEntityCoords(cache.ped)
-    for k, v in pairs(Config.Locations.evidence) do
+    for k, v in pairs(sharedConfig.locations.evidence) do
         if #(pos - v) < 1 then
             openEvidenceLockerSelectInput(k)
             return
@@ -219,7 +221,7 @@ local function spawnHelicopter()
     if not inHelicopter then return end
     local plyCoords = GetEntityCoords(cache.ped)
     local coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
-    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, Config.PoliceHelicopter, coords, 'ZULU'..tostring(math.random(1000, 9999)), true)
+    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, config.policeHelicopter, coords, 'ZULU'..tostring(math.random(1000, 9999)), true)
     local timeout = 100
     while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
         Wait(10)
@@ -436,14 +438,14 @@ end
 
 -- Threads
 
-if Config.UseTarget then
+if config.useTarget then
     CreateThread(function()
-        for i = 1, #Config.Locations.duty do
+        for i = 1, #sharedConfig.locations.duty do
             exports.ox_target:addBoxZone({
-                coords = Config.Locations.duty[i],
+                coords = sharedConfig.locations.duty[i],
                 size = vec3(1,1,3),
                 distance = 1.5,
-                debug = Config.PolyDebug,
+                debug = config.polyDebug,
                 options = {
                     {
                         label = Lang:t('info.onoff_duty'),
@@ -456,12 +458,12 @@ if Config.UseTarget then
         end
     end)
 else
-    for i = 1, #Config.Locations.duty do
+    for i = 1, #sharedConfig.locations.duty do
         lib.zones.box({
-            coords = Config.Locations.duty[i],
+            coords = sharedConfig.locations.duty[i],
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            debug = Config.PolyDebug,
+            debug = config.polyDebug,
             onEnter = function()
                 inPrompt = true
                 if not QBX.PlayerData.job.onduty then
@@ -481,12 +483,12 @@ end
 
 CreateThread(function()
     -- Evidence Storage
-    for _, v in pairs(Config.Locations.evidence) do
+    for _, v in pairs(sharedConfig.locations.evidence) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            debug = Config.PolyDebug,
+            debug = config.polyDebug,
             onEnter = function()
                 if QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty then
                     inPrompt = true
@@ -502,12 +504,12 @@ CreateThread(function()
     end
 
     -- Personal Stash
-    for _, v in pairs(Config.Locations.stash) do
+    for _, v in pairs(sharedConfig.locations.stash) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            debug = Config.PolyDebug,
+            debug = config.polyDebug,
             onEnter = function()
                 inStash = true
                 inPrompt = true
@@ -523,13 +525,13 @@ CreateThread(function()
     end
 
     -- Police Trash
-    for i = 1, #Config.Locations.trash do
-        local v = Config.Locations.trash[i]
+    for i = 1, #sharedConfig.locations.trash do
+        local v = sharedConfig.locations.trash[i]
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            debug = Config.PolyDebug,
+            debug = config.polyDebug,
             onEnter = function()
                 inTrash = true
                 inPrompt = true
@@ -547,12 +549,12 @@ CreateThread(function()
     end
 
     -- Fingerprints
-    for _, v in pairs(Config.Locations.fingerprint) do
+    for _, v in pairs(sharedConfig.locations.fingerprint) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            debug = Config.PolyDebug,
+            debug = config.polyDebug,
             onEnter = function()
                 inFingerprint = true
                 inPrompt = true
@@ -570,12 +572,12 @@ CreateThread(function()
     end
 
     -- Helicopter
-    for _, v in pairs(Config.Locations.helicopter) do
+    for _, v in pairs(sharedConfig.locations.helicopter) do
         lib.zones.box({
             coords = v,
             size = vec3(4, 4, 4),
             rotation = 0.0,
-            debug = Config.PolyDebug,
+            debug = config.polyDebug,
             onEnter = function()
                 inHelicopter = true
                 inPrompt = true
@@ -597,12 +599,12 @@ CreateThread(function()
     end
 
     -- Police Impound
-    for k, v in pairs(Config.Locations.impound) do
+    for k, v in pairs(sharedConfig.locations.impound) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            debug = Config.PolyDebug,
+            debug = config.polyDebug,
             onEnter = function()
                 inImpound = true
                 inPrompt = true
@@ -627,12 +629,12 @@ CreateThread(function()
     end
 
     -- Police Garage
-    for k, v in pairs(Config.Locations.vehicle) do
+    for k, v in pairs(sharedConfig.locations.vehicle) do
         lib.zones.box({
             coords = v,
             size = vec3(2, 2, 2),
             rotation = 0.0,
-            debug = Config.PolyDebug,
+            debug = config.polyDebug,
             onEnter = function()
                 if QBX.PlayerData.job.onduty and QBX.PlayerData.job.type == 'leo' then
                     inGarage = true

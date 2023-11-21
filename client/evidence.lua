@@ -1,4 +1,5 @@
 -- Variables
+local config = require 'config.client'
 local currentStatusList = {}
 local casings = {}
 local currentCasing = nil
@@ -258,7 +259,7 @@ CreateThread(function()
                 metadata = {
                     type = Lang:t('info.casing'),
                     street = getStreetLabel(casings[currentCasing].coords),
-                    ammolabel = Config.AmmoLabels[exports.qbx_core:GetWeapons()[casings[currentCasing].type].ammotype],
+                    ammolabel = config.ammoLabels[exports.qbx_core:GetWeapons()[casings[currentCasing].type].ammotype],
                     ammotype = casings[currentCasing].type,
                     serie = casings[currentCasing].serie
                 },

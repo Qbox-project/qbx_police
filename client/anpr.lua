@@ -1,11 +1,14 @@
-if not Config.UseRadars then return end
+local config = require 'config.client'.radars
+local sharedConfig = require 'config.shared'.radars
+
+if not config.enableRadars then return end
 
 local speedCams = {}
 
 local function speedRange(speed)
 	speed = math.ceil(speed)
-	for k, v in pairs(Config.SpeedFines) do
-		if speed < v.maxspeed then
+	for k, v in pairs(sharedConfig.speedFines) do
+		if speed < v.maxSpeed then
 			TriggerServerEvent('police:server:Radar', k)
 			TriggerServerEvent('InteractSound_SV:PlayOnSource', 'speedcamera', 0.25)
 			break
@@ -16,7 +19,7 @@ end
 local function handleSpeedCam(speedCam, radar)
 	if not cache.vehicle or cache.seat ~= -1 or GetVehicleClass(cache.vehicle) == 18 then return end
 	local plate = GetPlate(cache.vehicle)
-	local speed = GetEntitySpeed(cache.vehicle) * (Config.MPH and 2.236936 or 3.6)
+	local speed = GetEntitySpeed(cache.vehicle) * (config.useMPH and 2.236936 or 3.6)
 	local overLimit = speed - speedCam.speed
 
 	lib.callback('police:server:isPlateFlagged', false, function(result)
@@ -30,12 +33,12 @@ local function handleSpeedCam(speedCam, radar)
 		TriggerServerEvent('police:server:FlaggedPlateTriggered', radar, plate, street)
 	end, plate)
 
-	if not Config.SpeedFines or overLimit < 0 then return end
+	if not sharedConfig.speedFines or overLimit < 0 then return end
 	speedRange(overLimit)
 end
 
 CreateThread(function()
-	for _, value in pairs(Config.Radars) do
+	for _, value in pairs(config.locations) do
 		speedCams[#speedCams + 1] = lib.points.new({
 			coords = value.coords.xyz,
 			distance = 20.0,
