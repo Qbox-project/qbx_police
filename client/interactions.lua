@@ -357,7 +357,7 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
             cuffType = 16
             exports.qbx_core:Notify(Lang:t('info.cuff'), 'success')
         else
-            cuffType = 49
+            cuffType = 48
             exports.qbx_core:Notify(Lang:t('info.cuffed_walk'), 'success')
         end
         getCuffedAnimation(playerId)
