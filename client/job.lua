@@ -444,10 +444,10 @@ if config.useTarget then
             exports.ox_target:addBoxZone({
                 coords = sharedConfig.locations.duty[i],
                 size = vec3(1,1,3),
-                distance = 1.5,
                 debug = config.polyDebug,
                 options = {
                     {
+			distance = 1.5,
                         label = Lang:t('info.onoff_duty'),
                         icon = 'fa-solid fa-sign-in-alt',
                         onSelect = ToggleDuty,
