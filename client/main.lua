@@ -1,11 +1,13 @@
 local config = require 'config.shared'
 
+-- Variables
 cuffType = 1
 isEscorted = false
 IsLoggedIn = LocalPlayer.state.isLoggedIn
 local dutyBlips = {}
 
-local function createDutyBlips(playerId, playerLabel, playerJob, playerLocation)
+-- Functions
+local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     local ped = GetPlayerPed(playerId)
     local blip = GetBlipFromEntity(ped)
     if not DoesBlipExist(blip) then
@@ -18,7 +20,11 @@ local function createDutyBlips(playerId, playerLabel, playerJob, playerLocation)
         ShowHeadingIndicatorOnBlip(blip, true)
         SetBlipRotation(blip, math.ceil(playerLocation.w))
         SetBlipScale(blip, 1.0)
-        SetBlipColour(blip, playerJob == 'police' and 38 or 5)
+        if playerJob == 'police' then
+            SetBlipColour(blip, 38)
+        else
+            SetBlipColour(blip, 5)
+        end
         SetBlipAsShortRange(blip, true)
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentString(playerLabel)
@@ -27,25 +33,35 @@ local function createDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     end
 
     if GetBlipFromEntity(cache.ped) == blip then
-        RemoveBlip(blip) -- Ensure we remove our own blip.
+        -- Ensure we remove our own blip.
+        RemoveBlip(blip)
     end
 end
 
+-- Events
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     TriggerServerEvent('police:server:SetHandcuffStatus', false)
     TriggerServerEvent('police:server:UpdateCurrentCops')
 
     local trackerClothingData = {}
 
-    local metadata = QBX.PlayerData.metadata.tracker
-    trackerClothingData.outfitData = {
-        accessory = {
-            item = metadata and 13 or -1,
-            texture = 0
+    if QBX.PlayerData.metadata.tracker then
+        trackerClothingData.outfitData = {
+            accessory = {
+                item = 13,
+                texture = 0
+            }
         }
-    }
+    else
+        trackerClothingData.outfitData = {
+            accessory = {
+                item = -1,
+                texture = 0
+            }
+        }
+    end
 
-    TriggerEvent('illenium-appearance:client:loadJobOutfit', trackerClothingData)
+    TriggerEvent('qb-clothing:client:loadOutfit', trackerClothingData)
 
     if QBX.PlayerData.job and QBX.PlayerData.job.type ~= 'leo' then
         if dutyBlips then
@@ -112,7 +128,7 @@ RegisterNetEvent('police:client:UpdateBlips', function(players)
         if players then
             for _, data in pairs(players) do
                 local id = GetPlayerFromServerId(data.source)
-                createDutyBlips(id, data.label, data.job, data.location)
+                CreateDutyBlips(id, data.label, data.job, data.location)
             end
         end
     end
@@ -120,10 +136,14 @@ end)
 
 RegisterNetEvent('police:client:policeAlert', function(coords, text, camId)
     local street1, street2 = GetStreetNameAtCoord(coords.x, coords.y, coords.z)
-    local street1name, street2name = GetStreetNameFromHashKey(street1), GetStreetNameFromHashKey(street2)
-    exports.qbx_core:Notify(text, 'inform', 5000, street1name.. ' ' ..street2name.. (camId and '- Camera ID: ' .. camId or ''))
+    local street1name = GetStreetNameFromHashKey(street1)
+    local street2name = GetStreetNameFromHashKey(street2)
+    if camId then
+        exports.qbx_core:Notify(text, 'inform', 5000, street1name.. ' ' ..street2name.. '- Camera ID: ' .. camId)
+    else
+        exports.qbx_core:Notify(text,'inform', 5000, street1name.. ' ' ..street2name)
+    end
     PlaySound(-1, 'Lose_1st', 'GTAO_FM_Events_Soundset', false, 0, true)
-
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
     local blip2 = AddBlipForCoord(coords.x, coords.y, coords.z)
@@ -169,6 +189,7 @@ RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
     TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {lastname = QBX.PlayerData.charinfo.lastname, callsign = QBX.PlayerData.metadata.callsign}))
 end)
 
+-- Threads
 CreateThread(function()
     for _, station in pairs(config.locations.stations) do
         local blip = AddBlipForCoord(station.coords.x, station.coords.y, station.coords.z)
