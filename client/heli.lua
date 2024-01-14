@@ -201,7 +201,7 @@ end
 
 local function handleInVehicle()
     if not IsLoggedIn then return end
-    if not QBX.PlayerData.job.type == 'leo' and not QBX.PlayerData.job.onduty then return end
+    if not (QBX.PlayerData.job.type == 'leo') or not QBX.PlayerData.job.onduty then return end
     if isHeliHighEnough(cache.vehicle) then
         if IsControlJustPressed(0, toggleHeliCam) then -- Toggle Helicam
             PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', false)
