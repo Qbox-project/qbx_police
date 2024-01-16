@@ -1,4 +1,3 @@
--- Variables
 local config = require 'config.client'
 local currentStatusList = {}
 local casings = {}
@@ -50,7 +49,6 @@ local function dnaHash(s)
     return h
 end
 
--- Events
 RegisterNetEvent('evidence:client:SetStatus', function(statusId, time)
     if time > 0 and statusList[statusId] then
         if not currentStatusList?[statusId] or currentStatusList[statusId].time < 20 then
@@ -167,8 +165,6 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
     end
 end)
 
--- Threads
-
 local function updateStatus()
     if not IsLoggedIn then return end
     if currentStatusList and next(currentStatusList) then
@@ -241,7 +237,7 @@ end
 ---@param args DrawEvidenceIfInRangeArgs
 local function drawEvidenceIfInRange(args)
     if getPlayerDistanceFromCoords(args.coords) >= 1.5 then return end
-    DrawText3D(args.text, args.coords)
+    qbx.drawText3d({text = args.text, coords = args.coords})
     if IsControlJustReleased(0, 47) then
         TriggerServerEvent(args.serverEventOnPickup, args.evidenceId, args.metadata)
     end

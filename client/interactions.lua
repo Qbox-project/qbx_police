@@ -1,8 +1,6 @@
--- Variables
 local config = require 'config.client'
 local isEscorting = false
 
--- Functions
 exports('IsHandcuffed', function()
     return QBX.PlayerData.metadata.ishandcuffed
 end)
@@ -92,7 +90,7 @@ end
 local function handcuffedEscorted()
     local sleep = 1000
     local anim = {{dict = 'mp_arresting', anim = 'idle'}, {dict = 'mp_arrest_paired', anim = 'crook_p2_back_right'}}
-    
+
     if not IsLoggedIn then return sleep end
     if isEscorted then
         sleep = 0
@@ -111,7 +109,6 @@ local function handcuffedEscorted()
     return sleep
 end
 
--- Events
 RegisterNetEvent('police:client:SetOutVehicle', function()
     if not cache.vehicle then return end
     TaskLeaveVehicle(cache.ped, cache.vehicle, 16)
@@ -120,7 +117,8 @@ end)
 RegisterNetEvent('police:client:PutInVehicle', function()
     if not QBX.PlayerData.metadata.ishandcuffed and not isEscorted then return end
 
-    local vehicle = exports.qbx_core:GetClosestVehicle()
+    local coords = GetEntityCoords(cache.ped)
+    local vehicle = lib.getClosestVehicle(coords)
     if not DoesEntityExist(vehicle) then return end
 
     for i = GetVehicleMaxNumberOfPassengers(vehicle), 0, -1 do
@@ -149,7 +147,8 @@ local function isTooFar(player, distance, maxDistance)
 end
 
 RegisterNetEvent('police:client:SearchPlayer', function()
-    local player, distance = GetClosestPlayer()
+    local coords = GetEntityCoords(cache.ped)
+    local player, _, distance = lib.getClosestPlayer(coords)
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     exports.ox_inventory:openNearbyInventory()
@@ -157,16 +156,17 @@ RegisterNetEvent('police:client:SearchPlayer', function()
 end)
 
 RegisterNetEvent('police:client:SeizeCash', function()
-    local player, distance = GetClosestPlayer()
+    local coords = GetEntityCoords(cache.ped)
+    local player, _, distance = lib.getClosestPlayer(coords)
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     TriggerServerEvent('police:server:SeizeCash', playerId)
 end)
 
 RegisterNetEvent('police:client:RobPlayer', function()
-    local player, distance = GetClosestPlayer()
+    local coords = GetEntityCoords(cache.ped)
+    local player, playerPed, distance = lib.getClosestPlayer(coords)
     if isTooFar(player, distance) then return end
-    local playerPed = GetPlayerPed(player)
     local playerId = GetPlayerServerId(player)
     if not (IsEntityPlayingAnim(playerPed, 'missminuteman_1ig_2', 'handsup_base', 3) or IsEntityPlayingAnim(playerPed, 'mp_arresting', 'idle', 3) or isTargetDead(playerId)) then
         exports.qbx_core:Notify(Lang:t('error.no_rob'), 'error')
@@ -207,7 +207,8 @@ RegisterNetEvent('police:client:RobPlayer', function()
 end)
 
 RegisterNetEvent('police:client:JailPlayer', function()
-    local player, distance = GetClosestPlayer()
+    local coords = GetEntityCoords(cache.ped)
+    local player, _, distance = lib.getClosestPlayer(coords)
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     local dialog = lib.inputDialog(Lang:t('info.jail_time_input'), {
@@ -221,7 +222,8 @@ RegisterNetEvent('police:client:JailPlayer', function()
 end)
 
 RegisterNetEvent('police:client:BillPlayer', function()
-    local player, distance = GetClosestPlayer()
+    local coords = GetEntityCoords(cache.ped)
+    local player, _, distance = lib.getClosestPlayer(coords)
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     local dialog = lib.inputDialog(Lang:t('info.bill'), {
@@ -235,7 +237,8 @@ RegisterNetEvent('police:client:BillPlayer', function()
 end)
 
 local function triggerIfHandsFree(eventName)
-    local player, distance = GetClosestPlayer()
+    local coords = GetEntityCoords(cache.ped)
+    local player, _, distance = lib.getClosestPlayer(coords)
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     if QBX.PlayerData.metadata.ishandcuffed or isEscorted then return end
@@ -255,7 +258,8 @@ RegisterNetEvent('police:client:EscortPlayer', function()
 end)
 
 RegisterNetEvent('police:client:KidnapPlayer', function()
-    local player, distance = GetClosestPlayer()
+    local coords = GetEntityCoords(cache.ped)
+    local player, _, distance = lib.getClosestPlayer(coords)
     if isTooFar(player, distance) then return end
     local playerId = GetPlayerServerId(player)
     if IsPedInAnyVehicle(GetPlayerPed(player), false) or QBX.PlayerData.metadata.ishandcuffed or isEscorted then return end
@@ -264,7 +268,8 @@ end)
 
 RegisterNetEvent('police:client:CuffPlayerSoft', function()
     if IsPedRagdoll(cache.ped) then return end
-    local player, distance = GetClosestPlayer()
+    local coords = GetEntityCoords(cache.ped)
+    local player, _, distance = lib.getClosestPlayer(coords)
     if isTooFar(player, distance, 1.5) then return end
     local playerId = GetPlayerServerId(player)
     if IsPedInAnyVehicle(GetPlayerPed(player), false) or cache.vehicle then
@@ -277,8 +282,8 @@ end)
 
 RegisterNetEvent('police:client:CuffPlayer', function()
     if IsPedRagdoll(cache.ped) then return end
-
-    local player, distance = GetClosestPlayer()
+    local coords = GetEntityCoords(cache.ped)
+    local player, _, distance = lib.getClosestPlayer(coords)
     if isTooFar(player, distance) then return end
     if exports.ox_inventory:Search('count', config.handcuffItems) == 0 then
         exports.qbx_core:Notify(Lang:t('error.no_cuff'), 'error')
@@ -372,7 +377,6 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
     end
 end)
 
--- Threads
 CreateThread(function()
     while true do
         Wait(handcuffedEscorted())

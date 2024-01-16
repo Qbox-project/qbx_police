@@ -1,12 +1,9 @@
 local config = require 'config.shared'
-
--- Variables
 cuffType = 1
 isEscorted = false
 IsLoggedIn = LocalPlayer.state.isLoggedIn
 local dutyBlips = {}
 
--- Functions
 local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     local ped = GetPlayerPed(playerId)
     local blip = GetBlipFromEntity(ped)
@@ -38,7 +35,6 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     end
 end
 
--- Events
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     TriggerServerEvent('police:server:SetHandcuffStatus', false)
     TriggerServerEvent('police:server:UpdateCurrentCops')
@@ -189,7 +185,6 @@ RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
     TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {lastname = QBX.PlayerData.charinfo.lastname, callsign = QBX.PlayerData.metadata.callsign}))
 end)
 
--- Threads
 CreateThread(function()
     for _, station in pairs(config.locations.stations) do
         local blip = AddBlipForCoord(station.coords.x, station.coords.y, station.coords.z)

@@ -1,4 +1,3 @@
--- Variables
 local config = require 'config.client'
 local sharedConfig = require 'config.shared'
 local currentGarage = 0
@@ -122,13 +121,13 @@ local function takeOutVehicle(vehicleInfo)
     SetVehicleFuelLevel(veh, 100.0)
     if config.vehicleSettings[vehicleInfo] then
         if config.vehicleSettings[vehicleInfo].extras then
-            SetVehicleExtras(veh, config.vehicleSettings[vehicleInfo].extras)
+            qbx.setVehicleExtras(veh, config.vehicleSettings[vehicleInfo].extras)
         end
         if config.vehicleSettings[vehicleInfo].livery then
             SetVehicleLivery(veh, config.vehicleSettings[vehicleInfo].livery)
         end
     end
-    TriggerServerEvent('inventory:server:addTrunkItems', GetPlate(veh), config.carItems)
+    TriggerServerEvent('inventory:server:addTrunkItems', qbx.getVehiclePlate(veh), config.carItems)
     SetVehicleEngineOn(veh, true, true, false)
 end
 
@@ -170,7 +169,7 @@ local function openImpoundMenu()
     else
         local vehicles = exports.qbx_core:GetVehiclesByName()
         for _, v in pairs(result) do
-            local enginePercent = math.round(v.engine / 10, 0)
+            local enginePercent = qbx.math.round(v.engine / 10, 0)
             local currentFuel = v.fuel
             local vName = vehicles[v.vehicle].name
 
@@ -310,13 +309,11 @@ local function uiPrompt(promptType, id)
     end)
 end
 
---NUI Callbacks
 RegisterNUICallback('closeFingerprint', function(_, cb)
     SetNuiFocus(false, false)
     cb('ok')
 end)
 
---Events
 RegisterNetEvent('police:client:showFingerprint', function(playerId)
     openFingerprintUi()
     fingerprintSessionId = playerId
@@ -363,7 +360,8 @@ RegisterNetEvent('police:client:CallAnim', function()
 end)
 
 RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
-    local vehicle = GetClosestVehicle()
+    local coords = GetEntityCoords(cache.ped)
+    local vehicle = lib.getClosestVehicle(coords)
     if not DoesEntityExist(vehicle) then return end
 
     local bodyDamage = math.ceil(GetVehicleBodyHealth(vehicle))
@@ -405,7 +403,7 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
         },
     })
     then
-        local plate = GetPlate(vehicle)
+        local plate = qbx.getVehiclePlate(vehicle)
         TriggerServerEvent('police:server:Impound', plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
         DeleteVehicle(vehicle)
         exports.qbx_core:Notify(Lang:t('success.impounded'), 'success')
@@ -435,8 +433,6 @@ function ToggleDuty()
     TriggerServerEvent('QBCore:ToggleDuty')
     TriggerServerEvent('police:server:UpdateCurrentCops')
 end
-
--- Threads
 
 if config.useTarget then
     CreateThread(function()
