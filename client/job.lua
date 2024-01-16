@@ -127,7 +127,6 @@ local function takeOutVehicle(vehicleInfo)
             SetVehicleLivery(veh, config.vehicleSettings[vehicleInfo].livery)
         end
     end
-    TriggerServerEvent('inventory:server:addTrunkItems', qbx.getVehiclePlate(veh), config.carItems)
     SetVehicleEngineOn(veh, true, true, false)
 end
 
