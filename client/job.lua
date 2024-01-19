@@ -57,11 +57,9 @@ local function doCarDamage(currentVehicle, veh)
     SetVehicleEngineHealth(currentVehicle, engine)
 
 	if smash then
-		SmashVehicleWindow(currentVehicle, 0)
-		SmashVehicleWindow(currentVehicle, 1)
-		SmashVehicleWindow(currentVehicle, 2)
-		SmashVehicleWindow(currentVehicle, 3)
-		SmashVehicleWindow(currentVehicle, 4)
+        for i = 0, 4 do
+            SmashVehicleWindow(currentVehicle, i)
+        end
 	end
 
 	if damageOutside then
@@ -71,10 +69,9 @@ local function doCarDamage(currentVehicle, veh)
 	end
 
 	if popTires then
-        SetVehicleTyreBurst(currentVehicle, 1, false, 990.0)
-        SetVehicleTyreBurst(currentVehicle, 2, false, 990.0)
-        SetVehicleTyreBurst(currentVehicle, 3, false, 990.0)
-        SetVehicleTyreBurst(currentVehicle, 4, false, 990.0)
+        for i = 1, 4 do
+            SetVehicleTyreBurst(currentVehicle, i, false, 990.0)
+        end
 	end
 
 	if body < 1000 then
