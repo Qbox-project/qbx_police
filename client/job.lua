@@ -482,48 +482,6 @@ else
 end
 
 CreateThread(function()
-    -- Evidence Storage
-    for _, v in pairs(sharedConfig.locations.evidence) do
-        lib.zones.box({
-            coords = v,
-            size = vec3(2, 2, 2),
-            rotation = 0.0,
-            debug = config.polyDebug,
-            onEnter = function()
-                if QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty then
-                    inPrompt = true
-                    lib.showTextUI(Lang:t('info.evidence'))
-                    uiPrompt('evidence')
-                end
-            end,
-            onExit = function()
-                lib.hideTextUI()
-                inPrompt = false
-            end
-        })
-    end
-
-    -- Personal Stash
-    for _, v in pairs(sharedConfig.locations.stash) do
-        lib.zones.box({
-            coords = v,
-            size = vec3(2, 2, 2),
-            rotation = 0.0,
-            debug = config.polyDebug,
-            onEnter = function()
-                inStash = true
-                inPrompt = true
-                lib.showTextUI(Lang:t('info.stash_enter'))
-                uiPrompt('stash')
-            end,
-            onExit = function()
-                lib.hideTextUI()
-                inPrompt = false
-                inStash = false
-            end
-        })
-    end
-
     -- Police Trash
     for i = 1, #sharedConfig.locations.trash do
         local v = sharedConfig.locations.trash[i]
