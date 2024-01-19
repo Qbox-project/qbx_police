@@ -45,12 +45,12 @@ return {
         evidence = { -- Not currently used, use ox_inventory evidence system
         },
         stations = {
-            {label = 'Mission Row Police Station', coords = vec3(434.0, -983.0, 30.7), disable = false},
-            {label = 'Vinewood Police Station', coords = vec3(637.1, 1.6, 81.8), disable = true},
-            {label = 'Vespucci Police Station', coords = vec3(-1092.6, -808.1, 19.3), disable = true},
-            {label = 'Davis Police Station', coords = vec3(368.0, -1618.8, 29.3), disable = true },
-            {label = 'Sandy Shores Police Station', coords = vec3(1853.4, 3684.5, 34.3), disable = false},
-            {label = 'Paleto Bay Police Station', coords = vec3(-448.4, 6011.8, 31.7), disable = true},
+            {label = 'Mission Row Police Station', coords = vec3(434.0, -983.0, 30.7)},
+            {label = 'Sandy Shores Police Station', coords = vec3(1853.4, 3684.5, 34.3)},
+            -- {label = 'Vinewood Police Station', coords = vec3(637.1, 1.6, 81.8)},
+            -- {label = 'Vespucci Police Station', coords = vec3(-1092.6, -808.1, 19.3)},
+            -- {label = 'Davis Police Station', coords = vec3(368.0, -1618.8, 29.3)},
+            -- {label = 'Paleto Bay Police Station', coords = vec3(-448.4, 6011.8, 31.7)},
         },
     },
 
