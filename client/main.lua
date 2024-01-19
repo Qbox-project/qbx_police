@@ -202,9 +202,5 @@ CreateThread(function()
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentString(station.label)
         EndTextCommandSetBlipName(blip)
-
-        if station.disable then
-            SetBlipDisplay(blip, 0)
-        end
     end
 end)
