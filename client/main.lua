@@ -192,10 +192,9 @@ end)
 -- Threads
 
 CreateThread(function()
-    -- Create markers for police stations
     for _, station in pairs(config.locations.stations) do
         local blip = AddBlipForCoord(station.coords.x, station.coords.y, station.coords.z)
-        SetBlipSprite(blip, 60)  -- You can change the sprite number as desired
+        SetBlipSprite(blip, 60)
         SetBlipAsShortRange(blip, true)
         SetBlipScale(blip, 0.8)
         SetBlipColour(blip, 29)
