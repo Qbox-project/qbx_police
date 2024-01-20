@@ -1,5 +1,6 @@
 RegisterNetEvent('police:client:CheckDistance', function()
-    local player, distance = GetClosestPlayer()
+    local coords = GetEntityCoords(cache.ped)
+    local player, _, distance = lib.getClosestPlayer(coords)
     if player ~= -1 and distance < 2.5 then
         local playerId = GetPlayerServerId(player)
         TriggerServerEvent('police:server:SetTracker', playerId)

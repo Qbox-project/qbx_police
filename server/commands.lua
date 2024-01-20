@@ -223,7 +223,6 @@ lib.addCommand('flagplate', {
         isflagged = true,
         reason = table.concat(reason, ' ')
     }
-    TriggerClientEvent('ox_lib:notify', source, {description = Lang:t('info.vehicle_flagged', {vehicle = args[1]:upper(), reason = table.concat(reason, ' ')})})
     exports.qbx_core:Notify(source, Lang:t('info.vehicle_flagged', {vehicle = args[1]:upper(), reason = table.concat(reason, ' ')}), 'inform')
 end)
 

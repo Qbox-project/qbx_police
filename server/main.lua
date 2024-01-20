@@ -97,7 +97,7 @@ lib.callback.register('police:GetImpoundedVehicles', function()
 end)
 
 lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate, warp)
-    local netId = SpawnVehicle(source, model, coords, warp)
+    local netId = qbx.spawnVehicle({spawnSource = source, model = model, coords = coords, warp = warp})
     if not netId or netId == 0 then return end
     local veh = NetworkGetEntityFromNetworkId(netId)
     if not veh or veh == 0 then return end
@@ -241,7 +241,7 @@ RegisterNetEvent('police:server:SetPlayerOutVehicle', function(playerId)
     if not exports.qbx_core:GetPlayer(src) or not escortPlayer then return end
 
     if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand then
-        
+
         TriggerClientEvent('police:client:SetOutVehicle', escortPlayer.PlayerData.source)
     else
         exports.qbx_core:Notify(src, Lang:t('error.not_cuffed_dead'), 'error')
