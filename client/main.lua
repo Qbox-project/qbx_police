@@ -192,6 +192,7 @@ CreateThread(function()
         SetBlipAsShortRange(blip, true)
         SetBlipScale(blip, 0.8)
         SetBlipColour(blip, 29)
+        
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentString(station.label)
         EndTextCommandSetBlipName(blip)
