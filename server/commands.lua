@@ -184,18 +184,9 @@ lib.addCommand('sc', {help = Lang:t('commands.softcuff')}, function(source)
     TriggerClientEvent('police:client:CuffPlayerSoft', source)
 end)
 
-lib.addCommand('cam', {
-    help = Lang:t('commands.camera'),
-    params = {
-        {
-            name = 'camid',
-            type = 'number',
-            help = Lang:t('info.camera_id_help')
-        }
-    },
- }, function(source, args)
+lib.addCommand({'cam', 'camera'}, {help = Lang:t('commands.camera')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
-    TriggerClientEvent('police:client:ActiveCamera', source, args.camid)
+    TriggerClientEvent('police:client:showcamera', source)
 end)
 
 lib.addCommand('flagplate', {
