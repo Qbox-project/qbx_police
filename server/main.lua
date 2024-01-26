@@ -329,7 +329,7 @@ RegisterNetEvent('police:server:checkBank', function(playerId)
     local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
     if not player or not searchedPlayer then return end
 
-    if searchedPlayer then 
+    if searchedPlayer then
         TriggerClientEvent('chat:addMessage', source, {
         template = '<div class="chat-message success">Player has $'..searchedPlayer.PlayerData.money.bank..' in his bank account.</div>',
         })
@@ -341,11 +341,9 @@ RegisterNetEvent('police:server:checkLicenses', function(playerId)
     if isTargetTooFar(src, playerId, 2.5) then return end
     
     local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
-    if searchedPlayer then 
+    if searchedPlayer then
         local licences = searchedPlayer.PlayerData.metadata.licences
         local str = ""
-        local index = 0
-        local max = 0
 
         for k,v in pairs(licences) do
             if k and v then
