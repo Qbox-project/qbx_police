@@ -321,6 +321,58 @@ RegisterNetEvent('police:server:FlaggedPlateTriggered', function(radar, plate, s
     end
 end)
 
+RegisterNetEvent('police:server:checkBank', function(playerId)
+    local src = source
+    if isTargetTooFar(src, playerId, 2.5) then return end
+
+    local player = exports.qbx_core:GetPlayer(src)
+    local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
+    if not player or not searchedPlayer then return end
+
+    if searchedPlayer then 
+        TriggerClientEvent('chat:addMessage', source, {
+        template = '<div class="chat-message success">Player has $'..searchedPlayer.PlayerData.money.bank..' in his bank account.</div>',
+        })
+    end
+end)
+
+RegisterNetEvent('police:server:checkLicenses', function(playerId)
+    local src = source
+    if isTargetTooFar(src, playerId, 2.5) then return end
+    
+    local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
+    if searchedPlayer ~= nil then 
+        local licences = searchedPlayer.PlayerData.metadata.licences
+        local str = ""
+        local index = 0
+        local max = 0
+
+        for k,v in pairs(licences) do
+            if k and v then
+                str = str .. k:gsub("^%l", string.upper) .. ', '
+            end
+        end
+        TriggerClientEvent('chat:addMessage', source, {
+            template = '<div class="chat-message success">Player Licenses: ' .. (#str == 0 and "No Licenses" or str:sub(1,#str-2)) .. '</div>',
+        })
+    end
+end)
+
+RegisterNetEvent('police:server:SeizeDriverLicense', function(playerId)
+    local src = source
+    local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
+    if searchedPlayer then
+        local driverLicense = searchedPlayer.PlayerData.metadata.licences.driver
+        if driverLicense then
+            local licenses = {driver = false}
+            searchedPlayer.Functions.SetMetaData("licences", licenses)
+            exports.qbx_core:Notify(searchedPlayer.PlayerData.source, 'Your driving license has been confiscated')
+        else
+            exports.qbx_core:Notify(src, 'No drivers license', 'error')
+        end
+    end
+end)
+
 RegisterNetEvent('police:server:SearchPlayer', function(playerId)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
