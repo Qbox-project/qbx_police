@@ -162,14 +162,6 @@ RegisterNetEvent('police:client:checkLicenses', function()
     TriggerServerEvent('police:server:checkLicenses', playerId)
 end)
 
-RegisterNetEvent('police:client:SeizeDriverLicense', function()
-    local coords = GetEntityCoords(cache.ped)
-    local player, _, distance = lib.getClosestPlayer(coords)
-    if isTooFar(player, distance) then return end
-    local playerId = GetPlayerServerId(player)
-    TriggerServerEvent('police:server:SeizeDriverLicense', playerId)
-end)
-
 RegisterNetEvent('police:client:SearchPlayer', function()
     local coords = GetEntityCoords(cache.ped)
     local player, _, distance = lib.getClosestPlayer(coords)
