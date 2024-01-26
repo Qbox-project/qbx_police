@@ -1,132 +1,55 @@
-local config = require 'config.client'.securityCameras
-local currentCamIndex = 0
-local createdCam = 0
-local currentScaleform = -1
+local config = require 'config.client'
+local InsideCam = false
+local tabletProp = nil
 
-local function getCurrentTime()
-    local hours = GetClockHours()
-    local minutes = GetClockMinutes()
-    if hours < 10 then
-        hours = tostring(0 .. GetClockHours())
-    end
-    if minutes < 10 then
-        minutes = tostring(0 .. GetClockMinutes())
-    end
-    return tostring(hours .. ':' .. minutes)
+local function updateCameraControlsText()
+    local text = {
+        ('------ Camera Controls ------  \n'),
+        ('Rotate Left [Left Arrow]  \n'),
+        ('Rotate Right [Right Arrow]  \n'),
+        ('Tilt Up [Up Arrow]  \n'),
+        ('Tilt Down [Down Arrow]  \n'),
+        ('Zoom In [Scroll Up]  \n'),
+        ('Zoom Out [Scroll Down]  \n'),
+        ('Close Camera [ESC / BACKSPACE]  \n'),
+    }
+    lib.showTextUI(table.concat(text))
 end
 
-local function createInstructionalScaleform(scaleform)
-    scaleform = lib.requestScaleformMovie(scaleform)
-    PushScaleformMovieFunction(scaleform, 'CLEAR_ALL')
-    PopScaleformMovieFunctionVoid()
+local function useTablet(ped)
+    lib.requestModel(`prop_cs_tablet`)
+    lib.requestAnimDict('amb@code_human_in_bus_passenger_idles@female@tablet@base')
 
-    PushScaleformMovieFunction(scaleform, 'SET_CLEAR_SPACE')
-    PushScaleformMovieFunctionParameterInt(200)
-    PopScaleformMovieFunctionVoid()
+    if DoesEntityExist(tabletProp) then
+        DeleteEntity(tabletProp)
+    end
+    
+    tabletProp = CreateObject(`prop_cs_tablet`, 0.0, 0.0, 0.0, true, true, false)
+    local boneIndex = GetPedBoneIndex(ped, 60309)
 
-    PushScaleformMovieFunction(scaleform, 'SET_DATA_SLOT')
-    PushScaleformMovieFunctionParameterInt(1)
-    ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 194, true))
-    BeginTextCommandScaleformString('STRING')
-    AddTextComponentScaleform(Lang:t('info.close_camera'))
-    EndTextCommandScaleformString()
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, 'DRAW_INSTRUCTIONAL_BUTTONS')
-    PopScaleformMovieFunctionVoid()
-
-    PushScaleformMovieFunction(scaleform, 'SET_BACKGROUND_COLOUR')
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(0)
-    PushScaleformMovieFunctionParameterInt(80)
-    PopScaleformMovieFunctionVoid()
-
-    return scaleform
+    SetCurrentPedWeapon(ped, `weapon_unarmed`, true)
+    AttachEntityToEntity(tabletProp, ped, boneIndex, 0.03, 0.002, -0.0, 10.0, 160.0, 0.0, true, false, false, false, 2, true)
+    SetModelAsNoLongerNeeded(`prop_cs_tablet`)
+    TaskPlayAnim(ped, 'amb@code_human_in_bus_passenger_idles@female@tablet@base', 'base', 3.0, 3.0, -1, 49, 0, 0, 0, 0)
 end
 
-local function changeSecurityCamera(x, y, z, r)
-    if createdCam ~= 0 then
-        DestroyCam(createdCam, false)
-        createdCam = 0
-    end
-
-    if currentScaleform ~= -1 then
-        SetScaleformMovieAsNoLongerNeeded(currentScaleform)
-        currentScaleform = -1
-    end
-
-    local cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
-    SetCamCoord(cam, x, y, z)
-    SetCamRot(cam, r.x, r.y, r.z, 2)
-    RenderScriptCams(true, false, 0, true, true)
-    Wait(250)
-    createdCam = cam
-    currentScaleform = createInstructionalScaleform('instructional_buttons')
+local function removeTablet(ped)
+    ClearPedTasks(ped)
+    Wait(300)
+    DeleteEntity(tabletProp)
 end
-
-local function closeSecurityCamera()
-    DestroyCam(createdCam, false)
-    RenderScriptCams(false, false, 1, true, true)
-    createdCam = 0
-    SetScaleformMovieAsNoLongerNeeded(currentScaleform)
-    currentScaleform = -1
-    ClearTimecycleModifier()
-    SetFocusEntity(cache.ped)
-    if config.hideRadar then
-        DisplayRadar(true)
-    end
-    FreezeEntityPosition(cache.ped, false)
-end
-
-RegisterNetEvent('police:client:ActiveCamera', function(camId)
-    if GetInvokingResource() then return end
-    if config.cameras[camId] then
-        DoScreenFadeOut(250)
-        while not IsScreenFadedOut() do
-            Wait(0)
-        end
-        SendNUIMessage({
-            type = 'enablecam',
-            label = config.cameras[camId].label,
-            id = camId,
-            connected = config.cameras[camId].isOnline,
-            time = getCurrentTime(),
-        })
-        local firstCamX = config.cameras[camId].coords.x
-        local firstCamY = config.cameras[camId].coords.y
-        local firstCamZ = config.cameras[camId].coords.z
-        local firstCamR = config.cameras[camId].r
-        SetFocusArea(firstCamX, firstCamY, firstCamZ, firstCamX, firstCamY, firstCamZ)
-        changeSecurityCamera(firstCamX, firstCamY, firstCamZ, firstCamR)
-        currentCamIndex = camId
-        DoScreenFadeIn(250)
-    elseif camId == 0 then
-        DoScreenFadeOut(250)
-        while not IsScreenFadedOut() do
-            Wait(0)
-        end
-        closeSecurityCamera()
-        SendNUIMessage({
-            type = 'disablecam',
-        })
-        DoScreenFadeIn(250)
-    else
-        exports.qbx_core:Notify(Lang:t('error.no_camera'), 'error')
-    end
-end)
 
 RegisterNetEvent('police:client:DisableAllCameras', function()
     if GetInvokingResource() then return end
-    for k in pairs(config.cameras) do
-        config.cameras[k].isOnline = false
+    for k in pairs(config.securityCameras) do
+        config.securityCameras[k].isOnline = false
     end
 end)
 
 RegisterNetEvent('police:client:EnableAllCameras', function()
     if GetInvokingResource() then return end
-    for k in pairs(config.cameras) do
-        config.cameras[k].isOnline = true
+    for k in pairs(config.securityCameras) do
+        config.securityCameras[k].isOnline = true
     end
 end)
 
@@ -134,76 +57,115 @@ RegisterNetEvent('police:client:SetCamera', function(key, isOnline)
     if GetInvokingResource() then return end
     if type(key) == 'table' and table.type(key) == 'array' then
         for _, v in pairs(key) do
-            config.cameras[v].isOnline = isOnline
+            config.securityCameras[v].isOnline = isOnline
         end
     elseif type(key) == 'number' then
-        config.cameras[key].isOnline = isOnline
+        config.securityCameras[key].isOnline = isOnline
     else
         error('police:client:SetCamera did not receive the right type of key\nreceived type: ' .. type(key) .. '\nreceived value: ' .. key)
     end
 end)
 
-local function listenForCamControls()
-    DrawScaleformMovieFullscreen(currentScaleform, 255, 255, 255, 255, 0)
-    SetTimecycleModifier('scanline_cam_cheap')
+RegisterNetEvent('police:client:showcamera', function()
+    local menu = {
+        id = 'camera_menu',
+        title = 'Camera List',
+        options = {}
+    }
+
+    for camId, cameraData in pairs(config.securityCameras) do
+        if cameraData.isOnline then
+            table.insert(menu.options, {
+                title = string.format('[Cam %d] %s', camId, cameraData.label),
+                onSelect = function()
+                    TriggerEvent('police:client:opencamera', camId) 
+                end,
+            })
+        end
+    end
+
+    lib.registerContext(menu)
+    lib.showContext('camera_menu')
+end)
+
+RegisterNetEvent('police:client:opencamera', function(cameraId)
+    local coords = config.securityCameras[tonumber(cameraId)].coords
+    cameraId = tonumber(cameraId)
+
+    SetTimecycleModifier('heliGunCam')
     SetTimecycleModifierStrength(1.0)
 
-    if config.hideRadar then
-        DisplayRadar(false)
+    local scaleform = RequestScaleformMovie('TRAFFIC_CAM')
+    while not HasScaleformMovieLoaded(scaleform) do
+        Wait(0)
     end
 
-    -- CLOSE CAMERAS
-    if IsControlJustPressed(1, 177) then
-        DoScreenFadeOut(250)
-        while not IsScreenFadedOut() do
-            Wait(0)
+    securityCam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
+    SetCamCoord(securityCam, coords.x, coords.y, (coords.z + 1.2))
+    SetCamRot(securityCam, -15.0, 0.0, coords.w)
+    SetCamFov(securityCam, 110.0)
+    RenderScriptCams(true, false, 0, 1, 0)
+    PushScaleformMovieFunction(scaleform, 'PLAY_CAM_MOVIE')
+    SetFocusArea(coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
+    PopScaleformMovieFunctionVoid()
+
+    InsideCam = true
+    updateCameraControlsText()
+    useTablet(cache.ped)
+
+    while InsideCam do
+        SetCamCoord(securityCam, coords.x, coords.y, (coords.z + 1.2))
+        PushScaleformMovieFunction(scaleform, 'SET_ALT_FOV_HEADING')
+        PushScaleformMovieFunctionParameterFloat(1.0)
+        PushScaleformMovieFunctionParameterFloat(GetCamRot(securityCam, 2).z)
+        PopScaleformMovieFunctionVoid()
+        DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255)
+        local CamRot = GetCamRot(securityCam, 2)
+        
+        if IsControlPressed(1, 108) or IsControlPressed(1, 174) then -- DPAD LEFT
+            SetCamRot(securityCam, CamRot.x, 0.0, CamRot.z + 0.7, 2)
         end
-        closeSecurityCamera()
-        SendNUIMessage({
-            type = 'disablecam',
-        })
-        DoScreenFadeIn(250)
-    end
 
-    ---------------------------------------------------------------------------
-    -- CAMERA ROTATION CONTROLS
-    ---------------------------------------------------------------------------
-    if config.cameras[currentCamIndex].canRotate then
-        local getCamRot = GetCamRot(createdCam, 2)
+        if IsControlPressed(1, 107) or IsControlPressed(1, 175) then -- DPAD RIGHT
+            SetCamRot(securityCam, CamRot.x, 0.0, CamRot.z - 0.7, 2)
+        end
 
-        -- ROTATE UP
-        if IsControlPressed(0, 32) then
-            if getCamRot.x <= 0.0 then
-                SetCamRot(createdCam, getCamRot.x + 0.7, 0.0, getCamRot.z, 2)
+        if IsControlPressed(1, 61) or IsControlPressed(1, 188) then -- DPAD UP
+            SetCamRot(securityCam, CamRot.x + 0.7, 0.0, CamRot.z, 2)
+        end
+
+        if IsControlPressed(1, 60) or IsControlPressed(1, 187) then -- DPAD DOWN
+            SetCamRot(securityCam, CamRot.x - 0.7, 0.0, CamRot.z, 2)
+        end
+
+        local camFov = GetCamFov(securityCam)
+        if IsControlPressed(1, 241) then -- SCROLL UP
+            if camFov <= 20.0 then 
+                camFov = 20.0 
             end
+            SetCamFov(securityCam, camFov - 3.0)
         end
 
-        -- ROTATE DOWN
-        if IsControlPressed(0, 8) then
-            if getCamRot.x >= -50.0 then
-                SetCamRot(createdCam, getCamRot.x - 0.7, 0.0, getCamRot.z, 2)
+        if IsControlPressed(1, 242) then -- SCROLL DOWN
+            if camFov >= 90.0 then 
+                camFov = 90.0
             end
+            SetCamFov(securityCam, camFov + 3.0)
         end
 
-        -- ROTATE LEFT
-        if IsControlPressed(0, 34) then
-            SetCamRot(createdCam, getCamRot.x, 0.0, getCamRot.z + 0.7, 2)
+        if IsControlJustPressed(1, 177) then -- ESC - Backspace
+            InsideCam = false
         end
 
-        -- ROTATE RIGHT
-        if IsControlPressed(0, 9) then
-            SetCamRot(createdCam, getCamRot.x, 0.0, getCamRot.z - 0.7, 2)
-        end
+        Wait(1)
     end
-end
 
-CreateThread(function()
-    while true do
-        if createdCam == 0 or currentScaleform == -1 then
-            Wait(2000)
-        else
-            listenForCamControls()
-            Wait(0)
-        end
-    end
+    lib.hideTextUI()
+    removeTablet(cache.ped)
+    ClearPedTasks(PlayerPedId())
+    ClearTimecycleModifier()
+    ClearFocus()
+    RenderScriptCams(false, false, 0, 1, 0)
+    SetScaleformMovieAsNoLongerNeeded(scaleform)
+    DestroyCam(securityCam, true)
 end)
