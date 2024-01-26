@@ -356,21 +356,6 @@ RegisterNetEvent('police:server:checkLicenses', function(playerId)
     end
 end)
 
-RegisterNetEvent('police:server:SeizeDriverLicense', function(playerId)
-    local src = source
-    local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
-    if searchedPlayer then
-        local driverLicense = searchedPlayer.PlayerData.metadata.licences.driver
-        if driverLicense then
-            local licenses = {driver = false}
-            searchedPlayer.Functions.SetMetaData("licences", licenses)
-            exports.qbx_core:Notify(searchedPlayer.PlayerData.source, 'Your driving license has been confiscated')
-        else
-            exports.qbx_core:Notify(src, 'No drivers license', 'error')
-        end
-    end
-end)
-
 RegisterNetEvent('police:server:SearchPlayer', function(playerId)
     local src = source
     if isTargetTooFar(src, playerId, 2.5) then return end
