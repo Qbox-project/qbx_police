@@ -341,7 +341,7 @@ RegisterNetEvent('police:server:checkLicenses', function(playerId)
     if isTargetTooFar(src, playerId, 2.5) then return end
     
     local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
-    if searchedPlayer ~= nil then 
+    if searchedPlayer then 
         local licences = searchedPlayer.PlayerData.metadata.licences
         local str = ""
         local index = 0
