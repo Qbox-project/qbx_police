@@ -78,7 +78,7 @@ RegisterNetEvent('police:client:showcamera', function()
             table.insert(menu.options, {
                 title = string.format('[Cam %d] %s', camId, cameraData.label),
                 onSelect = function()
-                    TriggerEvent('police:client:opencamera', camId) 
+                    TriggerEvent('police:client:opencamera', camId)
                 end,
             })
         end
@@ -140,14 +140,14 @@ RegisterNetEvent('police:client:opencamera', function(cameraId)
 
         local camFov = GetCamFov(securityCam)
         if IsControlPressed(1, 241) then -- SCROLL UP
-            if camFov <= 20.0 then 
+            if camFov <= 20.0 then
                 camFov = 20.0 
             end
             SetCamFov(securityCam, camFov - 3.0)
         end
 
         if IsControlPressed(1, 242) then -- SCROLL DOWN
-            if camFov >= 90.0 then 
+            if camFov >= 90.0 then
                 camFov = 90.0
             end
             SetCamFov(securityCam, camFov + 3.0)
