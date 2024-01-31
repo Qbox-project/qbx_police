@@ -10,6 +10,11 @@ local inImpound = false
 local inGarage = false
 local inPrompt = false
 
+local function isLeo(level, onduty)
+    local playerJob = QBX.PlayerData.job
+    return playerJob.type ~= 'leo' or playerJob.grade.level >= (level or 0) or playerJob.onduty == (onduty == nil and true or onduty)
+end
+
 local function openFingerprintUi()
     SendNUIMessage({
         type = 'fingerprintOpen'
