@@ -12,13 +12,13 @@ local updatingCops = false
 ---@param minGrade? integer
 ---@return boolean
 function IsLeoAndOnDuty(player, minGrade)
+    minGrade = minGrade or 0
+
     if not player or player.PlayerData.job.type ~= 'leo' or not player.PlayerData.job.onduty then
         return false
     end
-    if minGrade then
-        return player.PlayerData.job.grade.level >= minGrade
-    end
-    return true
+
+    return player.PlayerData.job.grade.level >= minGrade
 end
 
 -- Functions
