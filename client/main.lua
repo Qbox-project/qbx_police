@@ -3,6 +3,12 @@ cuffType = 1
 isEscorted = false
 IsLoggedIn = LocalPlayer.state.isLoggedIn
 local dutyBlips = {}
+local departments = {
+    police = 3,
+    bcso = 2,
+    sasp = 31,
+    ambulance = 1,
+}
 
 local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     local ped = GetPlayerPed(playerId)
@@ -17,8 +23,8 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
         ShowHeadingIndicatorOnBlip(blip, true)
         SetBlipRotation(blip, math.ceil(playerLocation.w))
         SetBlipScale(blip, 1.0)
-        if playerJob == 'police' then
-            SetBlipColour(blip, 38)
+        if departments[playerJob] ~= nil then
+            SetBlipColour(blip, departments[playerJob])
         else
             SetBlipColour(blip, 5)
         end
