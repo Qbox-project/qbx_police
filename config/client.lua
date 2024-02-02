@@ -54,8 +54,8 @@ return {
         [45] = {coords = vec4(-627.09, -230.15, 38.06, 187.17), label = 'Vangelico Jewelery - CAM#2', isOnline = true},
         [46] = {coords = vec4(-620.23, -224.39, 38.06, 138.98), label = 'Vangelico Jewelery - CAM#3', isOnline = true},
         [47] = {coords = vec4(-622.57, -235.57, 38.06, 53.63), label = 'Vangelico Jewelery - CAM#4', isOnline = true},
-		[48] = {coords = vec4(434.190, -978.340, 33.165, 53.63), label = 'Los Santos Police Department - CAM#1', isOnline = true},
-		[49] = {coords = vec4(458.513, -1017.173, 31.428, 53.63), label = 'Los Santos Police Department - CAM#2', isOnline = true},
+        [48] = {coords = vec4(434.190, -978.340, 33.165, 53.63), label = 'Los Santos Police Department - CAM#1', isOnline = true},
+        [49] = {coords = vec4(458.513, -1017.173, 31.428, 53.63), label = 'Los Santos Police Department - CAM#2', isOnline = true},
     },
 
     authorizedVehicles = {
