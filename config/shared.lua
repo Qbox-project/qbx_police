@@ -10,6 +10,30 @@ return {
         tabe = {model = `prop_table_03`, freeze = true},
         monitor = {model = `des_tvsmash_root`, freeze = true},
     },
+	
+    departments = {
+        police = {
+            label = 'Los Santos Police Department',
+            blipcolor = 3,
+            vehicleLivery = 0,
+            plate = 'LSPD',
+        },
+        bcso = {
+            label = 'Blaine County Sheriff\'s Office',
+            blipcolor = 2,
+            vehicleLivery = 1,
+            plate = 'BCSO',
+        },
+        sasp = {
+            label = 'San Andreas State Police',
+            blipcolor = 31,
+            vehicleLivery = 2,
+            plate = 'SASP',
+        },
+        ambulance = {
+            blipcolor = 1,
+        },
+    },
 
     locations = {
         duty = {
