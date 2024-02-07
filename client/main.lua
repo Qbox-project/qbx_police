@@ -8,14 +8,37 @@ local dutyBlips = {}
 local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     local ped = GetPlayerPed(playerId)
     local blip = GetBlipFromEntity(ped)
+    local classVeh = GetVehicleClass(cache.vehicle)
     if not DoesBlipExist(blip) then
         if NetworkIsPlayerActive(playerId) then
             blip = AddBlipForEntity(ped)
         else
             blip = AddBlipForCoord(playerLocation.x, playerLocation.y, playerLocation.z)
         end
-        SetBlipSprite(blip, 1)
-        ShowHeadingIndicatorOnBlip(blip, true)
+        
+        if classVeh == 15 then -- boats
+            SetBlipSprite(blip, 43)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        elseif classVeh == 14 then -- plane
+            SetBlipSprite(blip, 427)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        elseif classVeh == 16 then -- motor
+            SetBlipSprite(blip, 307)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        elseif classVeh == 8 then -- police vehicles
+            SetBlipSprite(blip, 226)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        elseif classVeh == 18 then -- walk
+            SetBlipSprite(blip, 56)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        elseif classVeh == 0 then
+            SetBlipSprite(blip, 126)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        else -- all vehicles
+            SetBlipSprite(blip, 225)
+            ShowHeadingIndicatorOnBlip(blip, true)
+        end
+
         SetBlipRotation(blip, math.ceil(playerLocation.w))
         SetBlipScale(blip, 1.0)
         if sharedConfig.departments[playerJob] then
