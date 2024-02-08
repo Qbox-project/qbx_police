@@ -26,7 +26,7 @@ local function updateBlips()
     local dutyPlayers = {}
     local players = exports.qbx_core:GetQBPlayers()
     for _, v in pairs(players) do
-        if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.name == 'ambulance') and v.PlayerData.job.onduty then
+        if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.type == 'ems') and v.PlayerData.job.onduty then
             local coords = GetEntityCoords(GetPlayerPed(v.PlayerData.source))
             local heading = GetEntityHeading(GetPlayerPed(v.PlayerData.source))
             dutyPlayers[#dutyPlayers+1] = {
@@ -211,7 +211,7 @@ RegisterNetEvent('police:server:EscortPlayer', function(playerId)
     local escortPlayer = exports.qbx_core:GetPlayer(playerId)
     if not player or not escortPlayer then return end
 
-    if (player.PlayerData.job.type == 'leo' or player.PlayerData.job.name == 'ambulance') or (escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand) then
+    if (player.PlayerData.job.type == 'leo' or player.PlayerData.job.type == 'ems') or (escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand) then
         TriggerClientEvent('police:client:GetEscorted', escortPlayer.PlayerData.source, player.PlayerData.source)
     else
         exports.qbx_core:Notify(src, Lang:t('error.not_cuffed_dead'), 'error')
