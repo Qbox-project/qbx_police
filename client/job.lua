@@ -108,13 +108,12 @@ local function takeOutVehicle(vehicleInfo)
     local plate = Lang:t('info.police_plate')..tostring(math.random(1000, 9999))
     local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicleInfo, coords, plate, true)
 
-    lib.waitFor(function()
+    local veh = lib.waitFor(function()
         if NetworkDoesEntityExistWithNetworkId(netId) then
             return NetToVeh(netId)
         end
     end)
 
-    local veh = NetToVeh(netId)
     if veh == 0 then
         exports.qbx_core:Notify('Something went wrong spawning the vehicle', 'error')
         return
