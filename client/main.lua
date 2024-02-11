@@ -114,7 +114,7 @@ RegisterNetEvent('police:client:sendBillingMail', function(amount)
 end)
 
 RegisterNetEvent('police:client:UpdateBlips', function(players)
-    if QBX.PlayerData.job and (QBX.PlayerData.job.type == 'leo' or QBX.PlayerData.job.name == 'ambulance') and QBX.PlayerData.job.onduty then
+    if QBX.PlayerData.job and (QBX.PlayerData.job.type == 'leo' or QBX.PlayerData.job.type == 'ems') and QBX.PlayerData.job.onduty then
         if dutyBlips then
             for _, v in pairs(dutyBlips) do
                 RemoveBlip(v)
