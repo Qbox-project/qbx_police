@@ -85,14 +85,13 @@ local function takeOutImpound(vehicle)
 
     local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicle.vehicle, coords, vehicle.plate)
 
-    lib.waitFor(function()
+    local veh = lib.waitFor(function()
         if NetworkDoesEntityExistWithNetworkId(netId) then
             return NetToVeh(netId)
         end
     end)
 
     local properties = lib.callback.await('qb-garage:server:GetVehicleProperties', false, vehicle.plate)
-    local veh = NetToVeh(netId)
     lib.setVehicleProperties(veh, properties)
     SetVehicleFuelLevel(veh, vehicle.fuel)
     doCarDamage(veh, vehicle)
