@@ -82,14 +82,16 @@ local function takeOutImpound(vehicle)
     if not inImpound then return end
     local coords = sharedConfig.locations.impound[currentGarage]
     if not coords then return end
-    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicle.vehicle, coords, vehicle.plate, true)
-    local timeout = 100
-    while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
-        Wait(10)
-        timeout -= 1
-    end
+
+    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicle.vehicle, coords, vehicle.plate)
+
+    local veh = lib.waitFor(function()
+        if NetworkDoesEntityExistWithNetworkId(netId) then
+            return NetToVeh(netId)
+        end
+    end)
+
     local properties = lib.callback.await('qb-garage:server:GetVehicleProperties', false, vehicle.plate)
-    local veh = NetToVeh(netId)
     lib.setVehicleProperties(veh, properties)
     SetVehicleFuelLevel(veh, vehicle.fuel)
     doCarDamage(veh, vehicle)
@@ -102,13 +104,15 @@ local function takeOutVehicle(vehicleInfo)
     local coords = sharedConfig.locations.vehicle[currentGarage]
     if not coords then return end
 
-    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicleInfo, coords, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)), true)
-    local timeout = 100
-    while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
-        Wait(10)
-        timeout -= 1
-    end
-    local veh = NetToVeh(netId)
+    local plate = Lang:t('info.police_plate')..tostring(math.random(1000, 9999))
+    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicleInfo, coords, plate, true)
+
+    local veh = lib.waitFor(function()
+        if NetworkDoesEntityExistWithNetworkId(netId) then
+            return NetToVeh(netId)
+        end
+    end)
+
     if veh == 0 then
         exports.qbx_core:Notify('Something went wrong spawning the vehicle', 'error')
         return
