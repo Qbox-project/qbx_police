@@ -49,7 +49,35 @@ local function escortActions()
 end
 
 local function handcuffActions()
-    lib.disableControls:Add(24,257,25,263,45,22,44,37,23,288,289,170,167,26,73,199,59,71,72,36,264,257,140,141,142,143,75,27,75)
+    lib.disableControls:Add(
+        24, -- Attack
+        257, -- Attack 2
+        25, -- Aim
+        263, -- Melee Attack 1
+        45, -- Reload
+        22, -- Jump
+        44, -- Cover
+        37, -- Select Weapon
+        23, -- Also 'enter'?
+        288, -- Disable phone
+        289, -- Inventory
+        170, -- Animations
+        167, -- Job
+        26, -- Disable looking behind
+        73, -- Disable clearing animation
+        199, -- Disable pause screen
+        59, -- Disable steering in vehicle
+        71, -- Disable driving forward in vehicle
+        72, -- Disable reversing in vehicle
+        36, -- Disable going stealth
+        264, -- Disable melee
+        257, -- Disable melee
+        140, -- Disable melee
+        141, -- Disable melee
+        142, -- Disable melee
+        143, -- Disable melee
+        75  -- Disable exit vehicle
+    )
     EnableControlAction(0, 249, true) -- Added for talking while cuffed
     EnableControlAction(0, 46, true)  -- Added for talking while cuffed
 end
