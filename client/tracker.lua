@@ -1,12 +1,12 @@
 RegisterNetEvent('police:client:CheckDistance', function()
     local coords = GetEntityCoords(cache.ped)
-    local player, _, distance = lib.getClosestPlayer(coords)
-    if player ~= -1 and distance < 2.5 then
-        local playerId = GetPlayerServerId(player)
-        TriggerServerEvent('police:server:SetTracker', playerId)
-    else
+    local player = lib.getClosestPlayer(coords, 2.5, false)
+    if not player then
         exports.qbx_core:Notify(Lang:t('error.none_nearby'), 'error')
+        return
     end
+    local playerId = GetPlayerServerId(player)
+    TriggerServerEvent('police:server:SetTracker', playerId)
 end)
 
 RegisterNetEvent('police:client:SetTracker', function(bool)
