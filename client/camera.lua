@@ -1,5 +1,5 @@
 local config = require 'config.client'
-local InsideCam = false
+local insideCam = false
 local tabletProp = nil
 
 local function updateCameraControlsText()
@@ -39,6 +39,88 @@ local function removeTablet(ped)
     DeleteEntity(tabletProp)
 end
 
+RegisterNetEvent('police:client:opencamera', function(cameraId)
+    local coords = config.securityCameras[tonumber(cameraId)].coords
+    cameraId = tonumber(cameraId)
+
+    SetTimecycleModifier('heliGunCam')
+    SetTimecycleModifierStrength(1.0)
+
+    local scaleform = RequestScaleformMovie('TRAFFIC_CAM')
+    while not HasScaleformMovieLoaded(scaleform) do
+        Wait(0)
+    end
+
+    securityCam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
+    SetCamCoord(securityCam, coords.x, coords.y, (coords.z + 1.2))
+    SetCamRot(securityCam, -15.0, 0.0, coords.w)
+    SetCamFov(securityCam, 110.0)
+    RenderScriptCams(true, false, 0, 1, 0)
+    PushScaleformMovieFunction(scaleform, 'PLAY_CAM_MOVIE')
+    SetFocusArea(coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
+    PopScaleformMovieFunctionVoid()
+
+    insideCam = true
+    updateCameraControlsText()
+    useTablet(cache.ped)
+
+    while insideCam do
+        SetCamCoord(securityCam, coords.x, coords.y, (coords.z + 1.2))
+        PushScaleformMovieFunction(scaleform, 'SET_ALT_FOV_HEADING')
+        PushScaleformMovieFunctionParameterFloat(1.0)
+        PushScaleformMovieFunctionParameterFloat(GetCamRot(securityCam, 2).z)
+        PopScaleformMovieFunctionVoid()
+        DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255)
+        local camRot = GetCamRot(securityCam, 2)
+        
+        if IsControlPressed(1, 108) or IsControlPressed(1, 174) then -- DPAD LEFT
+            SetCamRot(securityCam, camRot.x, 0.0, camRot.z + 0.7, 2)
+        end
+
+        if IsControlPressed(1, 107) or IsControlPressed(1, 175) then -- DPAD RIGHT
+            SetCamRot(securityCam, camRot.x, 0.0, camRot.z - 0.7, 2)
+        end
+
+        if IsControlPressed(1, 61) or IsControlPressed(1, 188) then -- DPAD UP
+            SetCamRot(securityCam, camRot.x + 0.7, 0.0, camRot.z, 2)
+        end
+
+        if IsControlPressed(1, 60) or IsControlPressed(1, 187) then -- DPAD DOWN
+            SetCamRot(securityCam, camRot.x - 0.7, 0.0, camRot.z, 2)
+        end
+
+        local camFov = GetCamFov(securityCam)
+        if IsControlPressed(1, 241) then -- SCROLL UP
+            if camFov <= 20.0 then
+                camFov = 20.0 
+            end
+            SetCamFov(securityCam, camFov - 3.0)
+        end
+
+        if IsControlPressed(1, 242) then -- SCROLL DOWN
+            if camFov >= 90.0 then
+                camFov = 90.0
+            end
+            SetCamFov(securityCam, camFov + 3.0)
+        end
+
+        if IsControlJustPressed(1, 177) then -- ESC - Backspace
+            insideCam = false
+        end
+
+        Wait(0)
+    end
+
+    lib.hideTextUI()
+    removeTablet(cache.ped)
+    ClearPedTasks(cache.ped)
+    ClearTimecycleModifier()
+    ClearFocus()
+    RenderScriptCams(false, false, 0, 1, 0)
+    SetScaleformMovieAsNoLongerNeeded(scaleform)
+    DestroyCam(securityCam, true)
+end)
+
 RegisterNetEvent('police:client:DisableAllCameras', function()
     if GetInvokingResource() then return end
     for k in pairs(config.securityCameras) do
@@ -66,7 +148,7 @@ RegisterNetEvent('police:client:SetCamera', function(key, isOnline)
     end
 end)
 
-RegisterNetEvent('police:client:showcamera', function()
+RegisterNetEvent('police:client:showCamera', function()
     local menu = {
         id = 'camera_menu',
         title = 'Camera List',
@@ -75,97 +157,15 @@ RegisterNetEvent('police:client:showcamera', function()
 
     for camId, cameraData in pairs(config.securityCameras) do
         if cameraData.isOnline then
-            table.insert(menu.options, {
+            menu.options[#menu.options + 1] = {
                 title = string.format('[Cam %d] %s', camId, cameraData.label),
                 onSelect = function()
                     TriggerEvent('police:client:opencamera', camId)
                 end,
-            })
+            }
         end
     end
 
     lib.registerContext(menu)
     lib.showContext('camera_menu')
-end)
-
-RegisterNetEvent('police:client:opencamera', function(cameraId)
-    local coords = config.securityCameras[tonumber(cameraId)].coords
-    cameraId = tonumber(cameraId)
-
-    SetTimecycleModifier('heliGunCam')
-    SetTimecycleModifierStrength(1.0)
-
-    local scaleform = RequestScaleformMovie('TRAFFIC_CAM')
-    while not HasScaleformMovieLoaded(scaleform) do
-        Wait(0)
-    end
-
-    securityCam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
-    SetCamCoord(securityCam, coords.x, coords.y, (coords.z + 1.2))
-    SetCamRot(securityCam, -15.0, 0.0, coords.w)
-    SetCamFov(securityCam, 110.0)
-    RenderScriptCams(true, false, 0, 1, 0)
-    PushScaleformMovieFunction(scaleform, 'PLAY_CAM_MOVIE')
-    SetFocusArea(coords.x, coords.y, coords.z, 0.0, 0.0, 0.0)
-    PopScaleformMovieFunctionVoid()
-
-    InsideCam = true
-    updateCameraControlsText()
-    useTablet(cache.ped)
-
-    while InsideCam do
-        SetCamCoord(securityCam, coords.x, coords.y, (coords.z + 1.2))
-        PushScaleformMovieFunction(scaleform, 'SET_ALT_FOV_HEADING')
-        PushScaleformMovieFunctionParameterFloat(1.0)
-        PushScaleformMovieFunctionParameterFloat(GetCamRot(securityCam, 2).z)
-        PopScaleformMovieFunctionVoid()
-        DrawScaleformMovieFullscreen(scaleform, 255, 255, 255, 255)
-        local CamRot = GetCamRot(securityCam, 2)
-        
-        if IsControlPressed(1, 108) or IsControlPressed(1, 174) then -- DPAD LEFT
-            SetCamRot(securityCam, CamRot.x, 0.0, CamRot.z + 0.7, 2)
-        end
-
-        if IsControlPressed(1, 107) or IsControlPressed(1, 175) then -- DPAD RIGHT
-            SetCamRot(securityCam, CamRot.x, 0.0, CamRot.z - 0.7, 2)
-        end
-
-        if IsControlPressed(1, 61) or IsControlPressed(1, 188) then -- DPAD UP
-            SetCamRot(securityCam, CamRot.x + 0.7, 0.0, CamRot.z, 2)
-        end
-
-        if IsControlPressed(1, 60) or IsControlPressed(1, 187) then -- DPAD DOWN
-            SetCamRot(securityCam, CamRot.x - 0.7, 0.0, CamRot.z, 2)
-        end
-
-        local camFov = GetCamFov(securityCam)
-        if IsControlPressed(1, 241) then -- SCROLL UP
-            if camFov <= 20.0 then
-                camFov = 20.0 
-            end
-            SetCamFov(securityCam, camFov - 3.0)
-        end
-
-        if IsControlPressed(1, 242) then -- SCROLL DOWN
-            if camFov >= 90.0 then
-                camFov = 90.0
-            end
-            SetCamFov(securityCam, camFov + 3.0)
-        end
-
-        if IsControlJustPressed(1, 177) then -- ESC - Backspace
-            InsideCam = false
-        end
-
-        Wait(1)
-    end
-
-    lib.hideTextUI()
-    removeTablet(cache.ped)
-    ClearPedTasks(PlayerPedId())
-    ClearTimecycleModifier()
-    ClearFocus()
-    RenderScriptCams(false, false, 0, 1, 0)
-    SetScaleformMovieAsNoLongerNeeded(scaleform)
-    DestroyCam(securityCam, true)
 end)
