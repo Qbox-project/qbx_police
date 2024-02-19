@@ -186,7 +186,7 @@ end)
 
 lib.addCommand({'cam', 'camera'}, {help = Lang:t('commands.camera')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
-    TriggerClientEvent('police:client:showcamera', source)
+    TriggerClientEvent('police:client:showCamera', source)
 end)
 
 lib.addCommand('flagplate', {
