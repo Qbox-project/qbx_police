@@ -306,7 +306,7 @@ lib.addCommand('paytow', {
         return exports.qbx_core:Notify(source, Lang:t('error.not_towdriver'), 'error')
     end
 
-    otherPlayer.Functions.AddMoney('bank', 500, 'police-tow-paid')
+    otherPlayer.Functions.AddMoney('bank', config.towPay, 'police-tow-paid')
     exports.qbx_core:Notify(otherPlayer.PlayerData.source, Lang:t('success.tow_paid'), 'success')
     exports.qbx_core:Notify(source, Lang:t('info.tow_driver_paid'), 'inform')
 end)
@@ -332,7 +332,7 @@ lib.addCommand('paylawyer', {
         return exports.qbx_core:Notify(source, Lang:t('error.not_lawyer'), 'error')
     end
 
-    otherPlayer.Functions.AddMoney('bank', 500, 'police-lawyer-paid')
+    otherPlayer.Functions.AddMoney('bank', config.lawyerPay, 'police-lawyer-paid')
     exports.qbx_core:Notify(otherPlayer.PlayerData.source, Lang:t('success.tow_paid'), 'success')
     exports.qbx_core:Notify(source, Lang:t('info.paid_lawyer'), 'inform')
 end)
