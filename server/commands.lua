@@ -46,7 +46,7 @@ lib.addCommand('grantlicense', {
         exports.qbx_core:Notify(source, Lang:t('error.error_rank_license'), 'error')
         return
     end
-    if not config.validLicense[args.license] then
+    if not config.validLicenses[args.license] then
         exports.qbx_core:Notify(source, Lang:t('info.license_type'), 'error')
         return
     end
@@ -82,7 +82,7 @@ lib.addCommand('revokelicense',{
         exports.qbx_core:Notify(source, Lang:t('error.rank_revoke'), 'error')
         return
     end
-    if not config.validLicense[args.license] then
+    if not config.validLicenses[args.license] then
         exports.qbx_core:Notify(source, Lang:t('error.error_license'), 'error')
         return
     end
