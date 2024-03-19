@@ -46,7 +46,7 @@ RegisterNetEvent('police:client:opencamera', function(cameraId)
     SetTimecycleModifier('heliGunCam')
     SetTimecycleModifierStrength(1.0)
 
-    local scaleform = RequestScaleformMovie('TRAFFIC_CAM')
+    local scaleform = lib.requestScaleformMovie('TRAFFIC_CAM')
     while not HasScaleformMovieLoaded(scaleform) do
         Wait(0)
     end
