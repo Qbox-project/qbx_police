@@ -12,7 +12,7 @@ local inPrompt = false
 
 local function isLeo(level, onduty)
     local playerJob = QBX.PlayerData.job
-    return playerJob.type ~= 'leo' or playerJob.grade.level >= (level or 0) or playerJob.onduty == (onduty == nil and true or onduty)
+    return playerJob.type == 'leo' and playerJob.grade.level >= (level or 0) and playerJob.onduty == (onduty == nil and true or onduty)
 end
 
 local function openFingerprintUi()
