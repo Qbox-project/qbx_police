@@ -4,6 +4,14 @@ cuffType = 1
 isEscorted = false
 IsLoggedIn = LocalPlayer.state.isLoggedIn
 local dutyBlips = {}
+local vehicleBlipMapping = {
+    [15] = 43, -- boats
+    [14] = 427, -- planes
+    [16] = 307, -- motorcycles
+    [8] = 226, -- police vehicles
+    [18] = 56, -- pedestrians
+    [0] = 1, -- unclassified
+}
 
 local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     local ped = GetPlayerPed(playerId)
@@ -15,29 +23,10 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
         else
             blip = AddBlipForCoord(playerLocation.x, playerLocation.y, playerLocation.z)
         end
-        
-        if classVeh == 15 then -- boats
-            SetBlipSprite(blip, 43)
-            ShowHeadingIndicatorOnBlip(blip, true)
-        elseif classVeh == 14 then -- plane
-            SetBlipSprite(blip, 427)
-            ShowHeadingIndicatorOnBlip(blip, true)
-        elseif classVeh == 16 then -- motor
-            SetBlipSprite(blip, 307)
-            ShowHeadingIndicatorOnBlip(blip, true)
-        elseif classVeh == 8 then -- police vehicles
-            SetBlipSprite(blip, 226)
-            ShowHeadingIndicatorOnBlip(blip, true)
-        elseif classVeh == 18 then -- walk
-            SetBlipSprite(blip, 56)
-            ShowHeadingIndicatorOnBlip(blip, true)
-        elseif classVeh == 0 then
-            SetBlipSprite(blip, 126)
-            ShowHeadingIndicatorOnBlip(blip, true)
-        else -- all vehicles
-            SetBlipSprite(blip, 225)
-            ShowHeadingIndicatorOnBlip(blip, true)
-        end
+
+        local blipSprite = vehicleBlipMapping[classVeh] or 225
+        SetBlipSprite(blip, blipSprite)
+        ShowHeadingIndicatorOnBlip(blip, true)
 
         SetBlipRotation(blip, math.ceil(playerLocation.w))
         SetBlipScale(blip, 1.0)
@@ -55,8 +44,7 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     end
 
     if GetBlipFromEntity(cache.ped) == blip then
-        -- Ensure we remove our own blip.
-        RemoveBlip(blip)
+        RemoveBlip(blip) -- Ensure we remove our own blip.
     end
 end
 
