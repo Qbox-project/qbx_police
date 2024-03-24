@@ -46,7 +46,7 @@ lib.addCommand('grantlicense', {
         exports.qbx_core:Notify(source, Lang:t('error.error_rank_license'), 'error')
         return
     end
-    if args.license ~= 'driver' and args.license ~= 'weapon' then
+    if not config.validLicenses[args.license] then
         exports.qbx_core:Notify(source, Lang:t('info.license_type'), 'error')
         return
     end
@@ -82,7 +82,7 @@ lib.addCommand('revokelicense',{
         exports.qbx_core:Notify(source, Lang:t('error.rank_revoke'), 'error')
         return
     end
-    if args.license ~= 'driver' and args.license ~= 'weapon' then
+    if not config.validLicenses[args.license] then
         exports.qbx_core:Notify(source, Lang:t('error.error_license'), 'error')
         return
     end
@@ -302,7 +302,7 @@ lib.addCommand('paytow', {
     if not checkLeoAndOnDuty(source) then return end
     local otherPlayer = exports.qbx_core:GetPlayer(args.id)
     if not otherPlayer then return end
-    if otherPlayer.PlayerData.job.name ~= 'tow' then
+    if not config.towJobs[otherPlayer.PlayerData.job.name] then
         return exports.qbx_core:Notify(source, Lang:t('error.not_towdriver'), 'error')
     end
 
@@ -328,7 +328,7 @@ lib.addCommand('paylawyer', {
 
     local otherPlayer = exports.qbx_core:GetPlayer(args.id)
     if not otherPlayer then return end
-    if otherPlayer.PlayerData.job.name ~= 'lawyer' then
+    if not config.lawyerJobs[otherPlayer.PlayerData.job.name] then
         return exports.qbx_core:Notify(source, Lang:t('error.not_lawyer'), 'error')
     end
 
