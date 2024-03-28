@@ -16,6 +16,8 @@ local function checkLeoAndOnDuty(player, minGrade)
     return true
 end
 
+exports('checkLeoAndOnDuty', checkLeoAndOnDuty)
+
 local function dnaHash(s)
     return string.gsub(s, '.', function(c)
         return string.format('%02x', string.byte(c))
