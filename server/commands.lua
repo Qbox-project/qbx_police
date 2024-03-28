@@ -322,7 +322,7 @@ lib.addCommand('paylawyer', {
     },
  }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
-    if player.PlayerData.job.type ~= 'leo' and player.PlayerData.job.name ~= 'judge' then
+    if not allowPayLawyer.types[player.PlayerData.job.type] or not allowPayLawyer.jobs[player.PlayerData.job.name] then
         return exports.qbx_core:Notify(source, Lang:t('error.on_duty_police_only'), 'error')
     end
 
