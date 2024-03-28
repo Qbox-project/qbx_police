@@ -108,7 +108,6 @@ local Translations = {
         stash_enter = '[E] Enter Locker',
         evidence = '[E] - Evidence',
         target_location = 'The location of %{firstname} %{lastname} is marked on your map',
-
         new_call = 'New Call',
         officer_down = 'Officer %{lastname} | %{callsign} Down',
         plate_triggered = 'A vehicle with plate %{plate} was flagged on %{street} by radar #%{radar}',
