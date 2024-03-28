@@ -49,18 +49,6 @@ local function generateId(table)
     return id
 end
 
-RegisterNetEvent('police:server:SendTrackerLocation', function(coords, requestId)
-    local target = exports.qbx_core:GetPlayer(source)
-    local msg = Lang:t('info.target_location', {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname})
-    local alertData = {
-        title = Lang:t('info.anklet_location'),
-        coords = coords,
-        description = msg
-    }
-    TriggerClientEvent('police:client:TrackerMessage', requestId, msg, coords)
-    TriggerClientEvent('qb-phone:client:addPoliceAlert', requestId, alertData)
-end)
-
 -- Items
 exports.qbx_core:CreateUseableItem('handcuffs', function(source)
     local player = exports.qbx_core:GetPlayer(source)
@@ -520,27 +508,6 @@ RegisterNetEvent('police:server:showFingerprintId', function(sessionId)
     local fid = player.PlayerData.metadata.fingerprint
     TriggerClientEvent('police:client:showFingerprintId', sessionId, fid)
     TriggerClientEvent('police:client:showFingerprintId', source, fid)
-end)
-
-RegisterNetEvent('police:server:SetTracker', function(targetId)
-    local src = source
-    if isTargetTooFar(src, targetId, 2.5) then return end
-
-    local target = exports.qbx_core:GetPlayer(targetId)
-    if not exports.qbx_core:GetPlayer(src) or not target then return end
-
-    local trackerMeta = target.PlayerData.metadata.tracker
-    if trackerMeta then
-        target.Functions.SetMetaData('tracker', false)
-        exports.qbx_core:Notify(targetId, Lang:t('success.anklet_taken_off'), 'success')
-        exports.qbx_core:Notify(src, Lang:t('success.took_anklet_from', {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname}), 'success')
-        TriggerClientEvent('police:client:SetTracker', targetId, false)
-    else
-        target.Functions.SetMetaData('tracker', true)
-        exports.qbx_core:Notify(targetId, Lang:t('success.put_anklet'), 'success')
-        exports.qbx_core:Notify(src, Lang:t('success.put_anklet_on', {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname}), 'success')
-        TriggerClientEvent('police:client:SetTracker', targetId, true)
-    end
 end)
 
 RegisterNetEvent('police:server:SyncSpikes', function(table)

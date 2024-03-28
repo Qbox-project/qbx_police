@@ -53,8 +53,6 @@ Police Job for QBOX :police_officer:
 - /impound - Impounds nearby vehicle permanently.
 - /paytow [id] - Makes payment to the tow driver.
 - /paylawyer [id] - Makes payment to the lawyer.
-- /anklet - Places anklet (tracking device) on nearby player.
-- /ankletlocation [citizenId] - Get the location of the player with the specified citizenId.
 - /takedna [id] - Takes a DNA sample from the player.
 - /911p [message] - Sends a report to the police.
 

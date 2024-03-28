@@ -337,30 +337,6 @@ lib.addCommand('paylawyer', {
     exports.qbx_core:Notify(source, Lang:t('info.paid_lawyer'), 'inform')
 end)
 
-lib.addCommand('anklet', {help = Lang:t('commands.anklet')}, function(source)
-    if not checkLeoAndOnDuty(source) then return end
-    TriggerClientEvent('police:client:CheckDistance', source)
-end)
-
-lib.addCommand('ankletlocation', {
-    help = Lang:t('commands.ankletlocation'),
-    params = {
-        {
-            name = 'cid',
-            type = 'string',
-            help = Lang:t('info.citizen_id')
-        }
-    },
-}, function(source, args)
-    if not checkLeoAndOnDuty(source) then return end
-    local target = exports.qbx_core:GetPlayerByCitizenId(args.cid)
-    if not target then return end
-    if not target.PlayerData.metadata.tracker then
-        return exports.qbx_core:Notify(source, Lang:t('error.no_anklet'), 'error')
-    end
-    TriggerClientEvent('police:client:SendTrackerLocation', target.PlayerData.source, source)
-end)
-
 lib.addCommand('takedna', {
     help = Lang:t('commands.takedna'),
     params = {

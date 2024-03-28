@@ -39,26 +39,6 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     TriggerServerEvent('police:server:SetHandcuffStatus', false)
     TriggerServerEvent('police:server:UpdateCurrentCops')
 
-    local trackerClothingData = {}
-
-    if QBX.PlayerData.metadata.tracker then
-        trackerClothingData.outfitData = {
-            accessory = {
-                item = 13,
-                texture = 0
-            }
-        }
-    else
-        trackerClothingData.outfitData = {
-            accessory = {
-                item = -1,
-                texture = 0
-            }
-        }
-    end
-
-    TriggerEvent('qb-clothing:client:loadOutfit', trackerClothingData)
-
     if QBX.PlayerData.job and QBX.PlayerData.job.type ~= 'leo' then
         if dutyBlips then
             for _, v in pairs(dutyBlips) do
