@@ -6,6 +6,14 @@ return {
         driver = true,
         weapon = true,
     },
+    allowPayLawyer = {
+        jobs = {
+            judge = true,
+        },
+        types = {
+            leo = true,
+        }
+    },
     towJobs = { -- tow jobs
         tow = true,
     },
