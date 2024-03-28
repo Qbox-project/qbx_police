@@ -107,7 +107,7 @@ local function getVehicleInView(cam)
     --DrawLine(coords, coords + (forward_vector * 100.0), 255, 0, 0, 255) -- debug line to show LOS of cam
     local rayHandle = CastRayPointToPoint(coords, coords + (forwardVector * 400.0), 10, cache.vehicle, 0)
     local _, _, _, _, entityHit = GetRaycastResult(rayHandle)
-    return IsEntityAVehicle(entityHit) and entityHit or 0
+    return entityHit > 0 and IsEntityAVehicle(entityHit) or 0
 end
 
 local function renderVehicleInfo(vehicle)
