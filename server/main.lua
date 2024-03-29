@@ -174,7 +174,7 @@ RegisterNetEvent('police:server:TakeOutImpound', function(plate, garage)
     local playerPed = GetPlayerPed(src)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = sharedConfig.locations.impound[garage]
-    if #(playerCoords - targetCoords) > 10.0 then return DropPlayer(src, 'Attempted exploit abuse') end
+    if #(playerCoords - targetCoords) > 10.0 then return end
 
     Unimpound(plate)
     exports.qbx_core:Notify(src, Lang:t('success.impound_vehicle_removed'), 'success')
@@ -186,7 +186,6 @@ local function isTargetTooFar(src, targetId, maxDistance)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
     if #(playerCoords - targetCoords) > maxDistance then
-        DropPlayer(src, 'Attempted exploit abuse')
         return true
     end
     return false
