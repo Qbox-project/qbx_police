@@ -186,13 +186,12 @@ RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
 end)
 
 CreateThread(function()
-    for _, station in pairs(config.locations.stations) do
+    for i, station in ipairs(config.locations.stations) do
         local blip = AddBlipForCoord(station.coords.x, station.coords.y, station.coords.z)
-        SetBlipSprite(blip, 60)
+        SetBlipSprite(blip, station.sprite)
         SetBlipAsShortRange(blip, true)
-        SetBlipScale(blip, 0.8)
-        SetBlipColour(blip, 29)
-        
+        SetBlipScale(blip, station.size)
+        SetBlipColour(blip, station.colour)
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentString(station.label)
         EndTextCommandSetBlipName(blip)
