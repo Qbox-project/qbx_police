@@ -99,7 +99,7 @@ local function handcuffedEscorted()
     if not QBX.PlayerData.metadata.ishandcuffed then return sleep end
     sleep = 0
     handcuffActions()
-    if QBX.PlayerData.metadata.isdead then return sleep end
+    if QBX.PlayerData.metadata.isdead or QBX.PlayerData.metadata.inlaststand then return sleep end
     for i = 1, #anim do
         if IsEntityPlayingAnim(cache.ped, anim[i].dict, anim[i].anim, 3) then return sleep end
     end
