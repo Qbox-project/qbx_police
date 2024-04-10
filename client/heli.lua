@@ -103,9 +103,9 @@ end
 
 local function getVehicleInView(cam)
     local coords = GetCamCoord(cam)
-    local forwardVector = rotAnglesToVec(GetCamRot(cam, 2))
+    local forwardVector = coords + (rotAnglesToVec(GetCamRot(cam, 2)) * 400.0)
     --DrawLine(coords, coords + (forward_vector * 100.0), 255, 0, 0, 255) -- debug line to show LOS of cam
-    local rayHandle = CastRayPointToPoint(coords, coords + (forwardVector * 400.0), 10, cache.vehicle, 0)
+    local rayHandle = CastRayPointToPoint(coords.x, coords.y, coords.z, forwardVector.x, forwardVector.y, forwardVector.z, 10, cache.vehicle, 0)
     local _, _, _, _, entityHit = GetRaycastResult(rayHandle)
     return entityHit > 0 and IsEntityAVehicle(entityHit) or 0
 end
