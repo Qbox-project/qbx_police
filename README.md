@@ -3,11 +3,6 @@ Police Job for QBOX :police_officer:
 
 ## Dependencies
 - [qbx_core](https://github.com/Qbox-project/qbx_core)
-- [qbx_management](https://github.com/Qbox-project/qbx_management) - For the boss menu
-- [qbx_garages](https://github.com/Qbox-project/qbx_garages) - For the vehicle spawner
-- [qbx_clothing](https://github.com/Qbox-project/qbx_clothing) - For the locker room
-- [qbx_phone](https://github.com/Qbox-project/qbx_phone) - For the MEOS app and notifications etc.
-- [qbx_smallresources](https://github.com/Qbox-project/qbx_smallresources) - For logging certain events
 - [ox_lib](https://github.com/overextended/ox_lib) - For UI elements and cached data
 
 ## Screenshots
