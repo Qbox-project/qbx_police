@@ -166,7 +166,11 @@ lib.addCommand('unjail', {
     }
 }, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
-    TriggerClientEvent('prison:client:UnjailPerson', args.id)
+    if GetResourceState('qbx_prison') == 'started' then
+        exports.qbx_prison:ReleasePlayer(args.id)
+    else
+        TriggerClientEvent('prison:client:UnjailPerson', args.id)
+    end
 end)
 
 lib.addCommand('clearblood', {help = Lang:t('commands.clearblood')}, function(source)

@@ -292,7 +292,11 @@ RegisterNetEvent('police:server:JailPlayer', function(playerId, time)
         hasRecord = true,
         date = currentDate
     })
-    TriggerClientEvent('police:client:SendToJail', otherPlayer.PlayerData.source, time)
+    if GetResourceState('qbx_prison') == 'started' then
+        exports.qbx_prison:JailPlayer(otherPlayer.PlayerData.source, time)
+    else
+        TriggerClientEvent('police:client:SendToJail', otherPlayer.PlayerData.source, time)
+    end
     exports.qbx_core:Notify(src, Lang:t('info.sent_jail_for', {time = time}), 'inform')
 end)
 
