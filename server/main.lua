@@ -1,5 +1,4 @@
 local sharedConfig = require 'config.shared'
-local QBCore = exports['qb-core']:GetCoreObject()
 Plates = {}
 local playerStatus = {}
 local casings = {}
@@ -12,13 +11,13 @@ local updatingCops = false
 ---@param minGrade? integer
 ---@return boolean
 function IsLeoAndOnDuty(player, minGrade)
+    minGrade = minGrade or 0
+
     if not player or player.PlayerData.job.type ~= 'leo' or not player.PlayerData.job.onduty then
         return false
     end
-    if minGrade then
-        return player.PlayerData.job.grade.level >= minGrade
-    end
-    return true
+
+    return player.PlayerData.job.grade.level >= minGrade
 end
 
 -- Functions
@@ -26,7 +25,7 @@ local function updateBlips()
     local dutyPlayers = {}
     local players = exports.qbx_core:GetQBPlayers()
     for _, v in pairs(players) do
-        if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.name == 'ambulance') and v.PlayerData.job.onduty then
+        if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.type == 'ems') and v.PlayerData.job.onduty then
             local coords = GetEntityCoords(GetPlayerPed(v.PlayerData.source))
             local heading = GetEntityHeading(GetPlayerPed(v.PlayerData.source))
             dutyPlayers[#dutyPlayers+1] = {
@@ -96,8 +95,8 @@ lib.callback.register('police:GetImpoundedVehicles', function()
     return FetchImpoundedVehicles()
 end)
 
-lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate, warp)
-    local netId = SpawnVehicle(source, model, coords, warp)
+lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate)
+    local netId = qbx.spawnVehicle({model = model, spawnSource = coords, warp = source})
     if not netId or netId == 0 then return end
     local veh = NetworkGetEntityFromNetworkId(netId)
     if not veh or veh == 0 then return end
@@ -111,11 +110,6 @@ local function isPlateFlagged(plate)
     return Plates and Plates[plate] and Plates[plate].isflagged
 end
 
----@deprecated use qbx_police:server:isPlateFlagged
-QBCore.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
-    lib.print.warn(GetInvokingResource(), 'invoked deprecated callback police:IsPlateFlagged. Use qbx_police:server:isPlateFlagged instead.')
-    cb(isPlateFlagged(plate))
-end)
 
 lib.callback.register('qbx_police:server:isPlateFlagged', function(_, plate)
     return isPlateFlagged(plate)
@@ -131,13 +125,22 @@ local function isPoliceForcePresent()
     return false
 end
 
----@deprecated
-QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
-    lib.print.warn(GetInvokingResource(), 'invoked deprecated callback police:server:IsPoliceForcePresent. Use lib callback qbx_police:server:isPoliceForcePresent instead')
-    cb(isPoliceForcePresent())
-end)
-
 lib.callback.register('qbx_police:server:isPoliceForcePresent', isPoliceForcePresent)
+
+if GetConvar('qbx:enablebridge', 'true') == 'true' then
+    local QBCore = exports['qb-core']:GetCoreObject()
+    ---@deprecated use qbx_police:server:isPlateFlagged
+    QBCore.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
+        lib.print.warn(GetInvokingResource(), 'invoked deprecated callback police:IsPlateFlagged. Use qbx_police:server:isPlateFlagged instead.')
+        cb(isPlateFlagged(plate))
+    end)
+
+    ---@deprecated
+    QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
+        lib.print.warn(GetInvokingResource(), 'invoked deprecated callback police:server:IsPoliceForcePresent. Use lib callback qbx_police:server:isPoliceForcePresent instead')
+        cb(isPoliceForcePresent())
+    end)
+end
 
 -- Events
 RegisterNetEvent('police:server:Radar', function(fine)
@@ -145,7 +148,7 @@ RegisterNetEvent('police:server:Radar', function(fine)
     local price  = sharedConfig.radars.speedFines[fine].fine
     local player = exports.qbx_core:GetPlayer(source)
     if not player.Functions.RemoveMoney('bank', math.floor(price), 'Radar Fine') then return end
-    exports.qbx_management:AddMoney('police', price)
+    exports['Renewed-Banking']:AddMoney('police', price)
     exports.qbx_core:Notify(source, Lang:t('info.fine_received', {fine = price}), 'inform')
 end)
 
@@ -174,7 +177,7 @@ RegisterNetEvent('police:server:TakeOutImpound', function(plate, garage)
     local playerPed = GetPlayerPed(src)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = sharedConfig.locations.impound[garage]
-    if #(playerCoords - targetCoords) > 10.0 then return DropPlayer(src, 'Attempted exploit abuse') end
+    if #(playerCoords - targetCoords) > 10.0 then return end
 
     Unimpound(plate)
     exports.qbx_core:Notify(src, Lang:t('success.impound_vehicle_removed'), 'success')
@@ -186,7 +189,6 @@ local function isTargetTooFar(src, targetId, maxDistance)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
     if #(playerCoords - targetCoords) > maxDistance then
-        DropPlayer(src, 'Attempted exploit abuse')
         return true
     end
     return false
@@ -211,7 +213,7 @@ RegisterNetEvent('police:server:EscortPlayer', function(playerId)
     local escortPlayer = exports.qbx_core:GetPlayer(playerId)
     if not player or not escortPlayer then return end
 
-    if (player.PlayerData.job.type == 'leo' or player.PlayerData.job.name == 'ambulance') or (escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand) then
+    if (player.PlayerData.job.type == 'leo' or player.PlayerData.job.type == 'ems') or (escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand) then
         TriggerClientEvent('police:client:GetEscorted', escortPlayer.PlayerData.source, player.PlayerData.source)
     else
         exports.qbx_core:Notify(src, Lang:t('error.not_cuffed_dead'), 'error')
@@ -241,7 +243,7 @@ RegisterNetEvent('police:server:SetPlayerOutVehicle', function(playerId)
     if not exports.qbx_core:GetPlayer(src) or not escortPlayer then return end
 
     if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand then
-        
+
         TriggerClientEvent('police:client:SetOutVehicle', escortPlayer.PlayerData.source)
     else
         exports.qbx_core:Notify(src, Lang:t('error.not_cuffed_dead'), 'error')
@@ -271,7 +273,7 @@ RegisterNetEvent('police:server:BillPlayer', function(playerId, price)
     if not player or not otherPlayer or player.PlayerData.job.type ~= 'leo' then return end
 
     otherPlayer.Functions.RemoveMoney('bank', price, 'paid-bills')
-    exports.qbx_management:AddMoney('police', price)
+    exports['Renewed-Banking']:AddMoney('police', price)
     exports.qbx_core:Notify(otherPlayer.PlayerData.source, Lang:t('info.fine_received', {fine = price}), 'inform')
 end)
 
@@ -293,7 +295,11 @@ RegisterNetEvent('police:server:JailPlayer', function(playerId, time)
         hasRecord = true,
         date = currentDate
     })
-    TriggerClientEvent('police:client:SendToJail', otherPlayer.PlayerData.source, time)
+    if GetResourceState('qbx_prison') == 'started' then
+        exports.qbx_prison:JailPlayer(otherPlayer.PlayerData.source, time)
+    else
+        TriggerClientEvent('police:client:SendToJail', otherPlayer.PlayerData.source, time)
+    end
     exports.qbx_core:Notify(src, Lang:t('info.sent_jail_for', {time = time}), 'inform')
 end)
 

@@ -79,7 +79,6 @@ local function closeSecurityCamera()
     FreezeEntityPosition(cache.ped, false)
 end
 
--- Events
 RegisterNetEvent('police:client:ActiveCamera', function(camId)
     if GetInvokingResource() then return end
     if config.cameras[camId] then
@@ -198,7 +197,6 @@ local function listenForCamControls()
     end
 end
 
--- Threads
 CreateThread(function()
     while true do
         if createdCam == 0 or currentScaleform == -1 then

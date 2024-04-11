@@ -11,16 +11,22 @@ jobs:
     name: Create New Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4.1.1
+      - name: Get App Token
+        uses: actions/create-github-app-token@v1
+        id: generate_token
         with:
-          fetch-depth: 0
-          ref: ${{ github.event.repository.default_branch }}
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
 
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 20.x
 
       - name: Bump manifest version
         run: node .github/actions/bump-manifest-version.js
@@ -28,28 +34,13 @@ jobs:
           TGT_RELEASE_VERSION: ${{ inputs.version }}
 
       - name: Push manifest change
-        uses: EndBug/add-and-commit@latest
+        uses: EndBug/add-and-commit@v9
         with:
           add: fxmanifest.lua
           push: true
-          author_name: Manifest Bumper
-          author_email: 41898282+github-actions[bot]@users.noreply.github.com
           message: 'chore: bump manifest version to ${{ inputs.version }}'
-          tag_push: '--force'
-  
-      - name: Install ZIP
-        run: sudo apt install zip
 
-      - name: Bundle files
+      - name: Push Git Tag
         run: |
-          rm -rf ./.github ./.vscode ./.git
-          zip -r ./${{ github.event.repository.name }}.zip ./
-
-      - name: Create Release
-        uses: 'marvinpinto/action-automatic-releases@latest'
-        with:
-          title: ${{ inputs.version }}
-          repo_token: '${{ secrets.GITHUB_TOKEN }}'
-          automatic_release_tag: ${{ inputs.version }}
-          prerelease: false
-          files: ${{ github.event.repository.name }}.zip
+          git tag ${{ inputs.version }}
+          git push origin ${{ inputs.version }}

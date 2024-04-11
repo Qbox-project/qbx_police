@@ -1,4 +1,3 @@
--- Variables
 local config = require 'config.client'
 local sharedConfig = require 'config.shared'
 local currentGarage = 0
@@ -57,11 +56,9 @@ local function doCarDamage(currentVehicle, veh)
     SetVehicleEngineHealth(currentVehicle, engine)
 
 	if smash then
-		SmashVehicleWindow(currentVehicle, 0)
-		SmashVehicleWindow(currentVehicle, 1)
-		SmashVehicleWindow(currentVehicle, 2)
-		SmashVehicleWindow(currentVehicle, 3)
-		SmashVehicleWindow(currentVehicle, 4)
+        for i = 0, 4 do
+            SmashVehicleWindow(currentVehicle, i)
+        end
 	end
 
 	if damageOutside then
@@ -71,10 +68,9 @@ local function doCarDamage(currentVehicle, veh)
 	end
 
 	if popTires then
-        SetVehicleTyreBurst(currentVehicle, 1, false, 990.0)
-        SetVehicleTyreBurst(currentVehicle, 2, false, 990.0)
-        SetVehicleTyreBurst(currentVehicle, 3, false, 990.0)
-        SetVehicleTyreBurst(currentVehicle, 4, false, 990.0)
+        for i = 1, 4 do
+            SetVehicleTyreBurst(currentVehicle, i, false, 990.0)
+        end
 	end
 
 	if body < 1000 then
@@ -86,14 +82,16 @@ local function takeOutImpound(vehicle)
     if not inImpound then return end
     local coords = sharedConfig.locations.impound[currentGarage]
     if not coords then return end
-    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicle.vehicle, coords, vehicle.plate, true)
-    local timeout = 100
-    while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
-        Wait(10)
-        timeout -= 1
-    end
+
+    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicle.vehicle, coords, vehicle.plate)
+
+    local veh = lib.waitFor(function()
+        if NetworkDoesEntityExistWithNetworkId(netId) then
+            return NetToVeh(netId)
+        end
+    end)
+
     local properties = lib.callback.await('qb-garage:server:GetVehicleProperties', false, vehicle.plate)
-    local veh = NetToVeh(netId)
     lib.setVehicleProperties(veh, properties)
     SetVehicleFuelLevel(veh, vehicle.fuel)
     doCarDamage(veh, vehicle)
@@ -106,13 +104,15 @@ local function takeOutVehicle(vehicleInfo)
     local coords = sharedConfig.locations.vehicle[currentGarage]
     if not coords then return end
 
-    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicleInfo, coords, Lang:t('info.police_plate')..tostring(math.random(1000, 9999)), true)
-    local timeout = 100
-    while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
-        Wait(10)
-        timeout -= 1
-    end
-    local veh = NetToVeh(netId)
+    local plate = Lang:t('info.police_plate')..tostring(math.random(1000, 9999))
+    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicleInfo, coords, plate, true)
+
+    local veh = lib.waitFor(function()
+        if NetworkDoesEntityExistWithNetworkId(netId) then
+            return NetToVeh(netId)
+        end
+    end)
+
     if veh == 0 then
         exports.qbx_core:Notify('Something went wrong spawning the vehicle', 'error')
         return
@@ -122,13 +122,12 @@ local function takeOutVehicle(vehicleInfo)
     SetVehicleFuelLevel(veh, 100.0)
     if config.vehicleSettings[vehicleInfo] then
         if config.vehicleSettings[vehicleInfo].extras then
-            SetVehicleExtras(veh, config.vehicleSettings[vehicleInfo].extras)
+            qbx.setVehicleExtras(veh, config.vehicleSettings[vehicleInfo].extras)
         end
         if config.vehicleSettings[vehicleInfo].livery then
             SetVehicleLivery(veh, config.vehicleSettings[vehicleInfo].livery)
         end
     end
-    TriggerServerEvent('inventory:server:addTrunkItems', GetPlate(veh), config.carItems)
     SetVehicleEngineOn(veh, true, true, false)
 end
 
@@ -170,7 +169,7 @@ local function openImpoundMenu()
     else
         local vehicles = exports.qbx_core:GetVehiclesByName()
         for _, v in pairs(result) do
-            local enginePercent = math.round(v.engine / 10, 0)
+            local enginePercent = qbx.math.round(v.engine / 10, 0)
             local currentFuel = v.fuel
             local vName = vehicles[v.vehicle].name
 
@@ -310,13 +309,11 @@ local function uiPrompt(promptType, id)
     end)
 end
 
---NUI Callbacks
 RegisterNUICallback('closeFingerprint', function(_, cb)
     SetNuiFocus(false, false)
     cb('ok')
 end)
 
---Events
 RegisterNetEvent('police:client:showFingerprint', function(playerId)
     openFingerprintUi()
     fingerprintSessionId = playerId
@@ -363,7 +360,8 @@ RegisterNetEvent('police:client:CallAnim', function()
 end)
 
 RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
-    local vehicle = GetClosestVehicle()
+    local coords = GetEntityCoords(cache.ped)
+    local vehicle = lib.getClosestVehicle(coords)
     if not DoesEntityExist(vehicle) then return end
 
     local bodyDamage = math.ceil(GetVehicleBodyHealth(vehicle))
@@ -405,7 +403,7 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
         },
     })
     then
-        local plate = GetPlate(vehicle)
+        local plate = qbx.getVehiclePlate(vehicle)
         TriggerServerEvent('police:server:Impound', plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
         DeleteVehicle(vehicle)
         exports.qbx_core:Notify(Lang:t('success.impounded'), 'success')
@@ -435,8 +433,6 @@ function ToggleDuty()
     TriggerServerEvent('QBCore:ToggleDuty')
     TriggerServerEvent('police:server:UpdateCurrentCops')
 end
-
--- Threads
 
 if config.useTarget then
     CreateThread(function()
@@ -482,48 +478,6 @@ else
 end
 
 CreateThread(function()
-    -- Evidence Storage
-    for _, v in pairs(sharedConfig.locations.evidence) do
-        lib.zones.box({
-            coords = v,
-            size = vec3(2, 2, 2),
-            rotation = 0.0,
-            debug = config.polyDebug,
-            onEnter = function()
-                if QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty then
-                    inPrompt = true
-                    lib.showTextUI(Lang:t('info.evidence'))
-                    uiPrompt('evidence')
-                end
-            end,
-            onExit = function()
-                lib.hideTextUI()
-                inPrompt = false
-            end
-        })
-    end
-
-    -- Personal Stash
-    for _, v in pairs(sharedConfig.locations.stash) do
-        lib.zones.box({
-            coords = v,
-            size = vec3(2, 2, 2),
-            rotation = 0.0,
-            debug = config.polyDebug,
-            onEnter = function()
-                inStash = true
-                inPrompt = true
-                lib.showTextUI(Lang:t('info.stash_enter'))
-                uiPrompt('stash')
-            end,
-            onExit = function()
-                lib.hideTextUI()
-                inPrompt = false
-                inStash = false
-            end
-        })
-    end
-
     -- Police Trash
     for i = 1, #sharedConfig.locations.trash do
         local v = sharedConfig.locations.trash[i]

@@ -5,6 +5,10 @@ return {
         roadsign = {model = `prop_snow_sign_road_06g`, freeze = true},
         tent = {model = `prop_gazebo_03`, freeze = true},
         light = {model = `prop_worklight_03b`, freeze = true},
+        chair = {model = `prop_chair_08`, freeze = true},
+        chairs = {model = `prop_chair_pile_01`, freeze = true},
+        tabe = {model = `prop_table_03`, freeze = true},
+        monitor = {model = `des_tvsmash_root`, freeze = true},
     },
 
     locations = {
@@ -41,9 +45,12 @@ return {
         evidence = { -- Not currently used, use ox_inventory evidence system
         },
         stations = {
-            {label = 'Police Station', coords = vec4(428.23, -984.28, 29.76, 3.5)},
-            {label = 'Prison', coords = vec4(1845.903, 2585.873, 45.672, 272.249)},
-            {label = 'Police Station Paleto', coords = vec4(-451.55, 6014.25, 31.716, 223.81)},
+            {label = 'Mission Row Police Station', coords = vec3(434.0, -983.0, 30.7)},
+            {label = 'Sandy Shores Police Station', coords = vec3(1853.4, 3684.5, 34.3)},
+            -- {label = 'Vinewood Police Station', coords = vec3(637.1, 1.6, 81.8)},
+            -- {label = 'Vespucci Police Station', coords = vec3(-1092.6, -808.1, 19.3)},
+            -- {label = 'Davis Police Station', coords = vec3(368.0, -1618.8, 29.3)},
+            -- {label = 'Paleto Bay Police Station', coords = vec3(-448.4, 6011.8, 31.7)},
         },
     },
 

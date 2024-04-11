@@ -142,7 +142,6 @@ RegisterNetEvent('police:client:SyncSpikes', function(table)
     spawnedSpikes = table
 end)
 
--- Threads
 CreateThread(function()
     while true do
         if IsLoggedIn then

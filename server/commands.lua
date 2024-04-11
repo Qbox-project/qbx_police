@@ -46,7 +46,7 @@ lib.addCommand('grantlicense', {
         exports.qbx_core:Notify(source, Lang:t('error.error_rank_license'), 'error')
         return
     end
-    if args.license ~= 'driver' and args.license ~= 'weapon' then
+    if not config.validLicenses[args.license] then
         exports.qbx_core:Notify(source, Lang:t('info.license_type'), 'error')
         return
     end
@@ -82,7 +82,7 @@ lib.addCommand('revokelicense',{
         exports.qbx_core:Notify(source, Lang:t('error.rank_revoke'), 'error')
         return
     end
-    if args.license ~= 'driver' and args.license ~= 'weapon' then
+    if not config.validLicenses[args.license] then
         exports.qbx_core:Notify(source, Lang:t('error.error_license'), 'error')
         return
     end
@@ -166,7 +166,11 @@ lib.addCommand('unjail', {
     }
 }, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
-    TriggerClientEvent('prison:client:UnjailPerson', args.id)
+    if GetResourceState('qbx_prison') == 'started' then
+        exports.qbx_prison:ReleasePlayer(args.id)
+    else
+        TriggerClientEvent('prison:client:UnjailPerson', args.id)
+    end
 end)
 
 lib.addCommand('clearblood', {help = Lang:t('commands.clearblood')}, function(source)
@@ -223,7 +227,6 @@ lib.addCommand('flagplate', {
         isflagged = true,
         reason = table.concat(reason, ' ')
     }
-    TriggerClientEvent('ox_lib:notify', source, {description = Lang:t('info.vehicle_flagged', {vehicle = args[1]:upper(), reason = table.concat(reason, ' ')})})
     exports.qbx_core:Notify(source, Lang:t('info.vehicle_flagged', {vehicle = args[1]:upper(), reason = table.concat(reason, ' ')}), 'inform')
 end)
 
@@ -303,11 +306,11 @@ lib.addCommand('paytow', {
     if not checkLeoAndOnDuty(source) then return end
     local otherPlayer = exports.qbx_core:GetPlayer(args.id)
     if not otherPlayer then return end
-    if otherPlayer.PlayerData.job.name ~= 'tow' then
+    if not config.towJobs[otherPlayer.PlayerData.job.name] then
         return exports.qbx_core:Notify(source, Lang:t('error.not_towdriver'), 'error')
     end
 
-    otherPlayer.Functions.AddMoney('bank', 500, 'police-tow-paid')
+    otherPlayer.Functions.AddMoney('bank', config.towPay, 'police-tow-paid')
     exports.qbx_core:Notify(otherPlayer.PlayerData.source, Lang:t('success.tow_paid'), 'success')
     exports.qbx_core:Notify(source, Lang:t('info.tow_driver_paid'), 'inform')
 end)
@@ -329,11 +332,11 @@ lib.addCommand('paylawyer', {
 
     local otherPlayer = exports.qbx_core:GetPlayer(args.id)
     if not otherPlayer then return end
-    if otherPlayer.PlayerData.job.name ~= 'lawyer' then
+    if not config.lawyerJobs[otherPlayer.PlayerData.job.name] then
         return exports.qbx_core:Notify(source, Lang:t('error.not_lawyer'), 'error')
     end
 
-    otherPlayer.Functions.AddMoney('bank', 500, 'police-lawyer-paid')
+    otherPlayer.Functions.AddMoney('bank', config.lawyerPay, 'police-lawyer-paid')
     exports.qbx_core:Notify(otherPlayer.PlayerData.source, Lang:t('success.tow_paid'), 'success')
     exports.qbx_core:Notify(source, Lang:t('info.paid_lawyer'), 'inform')
 end)

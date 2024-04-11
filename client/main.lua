@@ -1,12 +1,9 @@
 local config = require 'config.shared'
-
--- Variables
 cuffType = 1
 isEscorted = false
 IsLoggedIn = LocalPlayer.state.isLoggedIn
 local dutyBlips = {}
 
--- Functions
 local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     local ped = GetPlayerPed(playerId)
     local blip = GetBlipFromEntity(ped)
@@ -38,7 +35,6 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     end
 end
 
--- Events
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     TriggerServerEvent('police:server:SetHandcuffStatus', false)
     TriggerServerEvent('police:server:UpdateCurrentCops')
@@ -118,7 +114,7 @@ RegisterNetEvent('police:client:sendBillingMail', function(amount)
 end)
 
 RegisterNetEvent('police:client:UpdateBlips', function(players)
-    if QBX.PlayerData.job and (QBX.PlayerData.job.type == 'leo' or QBX.PlayerData.job.name == 'ambulance') and QBX.PlayerData.job.onduty then
+    if QBX.PlayerData.job and (QBX.PlayerData.job.type == 'leo' or QBX.PlayerData.job.type == 'ems') and QBX.PlayerData.job.onduty then
         if dutyBlips then
             for _, v in pairs(dutyBlips) do
                 RemoveBlip(v)
@@ -189,7 +185,6 @@ RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
     TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {lastname = QBX.PlayerData.charinfo.lastname, callsign = QBX.PlayerData.metadata.callsign}))
 end)
 
--- Threads
 CreateThread(function()
     for _, station in pairs(config.locations.stations) do
         local blip = AddBlipForCoord(station.coords.x, station.coords.y, station.coords.z)
@@ -197,6 +192,7 @@ CreateThread(function()
         SetBlipAsShortRange(blip, true)
         SetBlipScale(blip, 0.8)
         SetBlipColour(blip, 29)
+        
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentString(station.label)
         EndTextCommandSetBlipName(blip)
