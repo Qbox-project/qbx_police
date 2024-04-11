@@ -1,5 +1,4 @@
 local sharedConfig = require 'config.shared'
-local QBCore = exports['qb-core']:GetCoreObject()
 Plates = {}
 local playerStatus = {}
 local casings = {}
@@ -111,11 +110,6 @@ local function isPlateFlagged(plate)
     return Plates and Plates[plate] and Plates[plate].isflagged
 end
 
----@deprecated use qbx_police:server:isPlateFlagged
-QBCore.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
-    lib.print.warn(GetInvokingResource(), 'invoked deprecated callback police:IsPlateFlagged. Use qbx_police:server:isPlateFlagged instead.')
-    cb(isPlateFlagged(plate))
-end)
 
 lib.callback.register('qbx_police:server:isPlateFlagged', function(_, plate)
     return isPlateFlagged(plate)
@@ -131,13 +125,22 @@ local function isPoliceForcePresent()
     return false
 end
 
----@deprecated
-QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
-    lib.print.warn(GetInvokingResource(), 'invoked deprecated callback police:server:IsPoliceForcePresent. Use lib callback qbx_police:server:isPoliceForcePresent instead')
-    cb(isPoliceForcePresent())
-end)
-
 lib.callback.register('qbx_police:server:isPoliceForcePresent', isPoliceForcePresent)
+
+if GetConvar('qbx:enablebridge', 'true') == 'true' then
+    local QBCore = exports['qb-core']:GetCoreObject()
+    ---@deprecated use qbx_police:server:isPlateFlagged
+    QBCore.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
+        lib.print.warn(GetInvokingResource(), 'invoked deprecated callback police:IsPlateFlagged. Use qbx_police:server:isPlateFlagged instead.')
+        cb(isPlateFlagged(plate))
+    end)
+
+    ---@deprecated
+    QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
+        lib.print.warn(GetInvokingResource(), 'invoked deprecated callback police:server:IsPoliceForcePresent. Use lib callback qbx_police:server:isPoliceForcePresent instead')
+        cb(isPoliceForcePresent())
+    end)
+end
 
 -- Events
 RegisterNetEvent('police:server:Radar', function(fine)
