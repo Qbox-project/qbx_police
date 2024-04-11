@@ -107,7 +107,7 @@ local function getVehicleInView(cam)
     --DrawLine(coords, coords + (forward_vector * 100.0), 255, 0, 0, 255) -- debug line to show LOS of cam
     local rayHandle = CastRayPointToPoint(coords.x, coords.y, coords.z, forwardVector.x, forwardVector.y, forwardVector.z, 10, cache.vehicle, 0)
     local _, _, _, _, entityHit = GetRaycastResult(rayHandle)
-    return (entityHit > 0 and IsEntityAVehicle(entityHit)) and entityHit or 0
+    return entityHit <= 0 and nil or IsEntityAVehicle(entityHit) and entityHit
 end
 
 local function renderVehicleInfo(vehicle)
@@ -262,7 +262,8 @@ local function handleInVehicle()
             else
                 zoomValue = (1.0 / (FOV_MAX - FOV_MIN)) * (fov - FOV_MIN)
                 checkInputRotation(cam, zoomValue)
-                vehicleLockState = DoesEntityExist(getVehicleInView(cam)) and VEHICLE_LOCK_STATE.scanning or VEHICLE_LOCK_STATE.dormant
+                vehicleDetected = getVehicleInView(cam)
+                vehicleLockState = DoesEntityExist(vehicleDetected) and VEHICLE_LOCK_STATE.scanning or VEHICLE_LOCK_STATE.dormant
             end
             handleZoom(cam)
             hideHudThisFrame()
