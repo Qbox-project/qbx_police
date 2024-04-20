@@ -1,4 +1,3 @@
-local config = require 'config.client'
 local currentStatusList = {}
 local casings = {}
 local currentCasing = nil
@@ -7,6 +6,8 @@ local currentBloodDrop = nil
 local fingerprints = {}
 local currentFingerprint = 0
 local shotAmount = 0
+
+local qbShared = require '@qbx_core.shared.main'
 
 local statusList = {
     fight = Lang:t('evidence.red_hands'),
@@ -255,7 +256,7 @@ CreateThread(function()
                 metadata = {
                     type = Lang:t('info.casing'),
                     street = getStreetLabel(casings[currentCasing].coords),
-                    ammolabel = config.ammoLabels[exports.qbx_core:GetWeapons()[casings[currentCasing].type].ammotype],
+                    ammolabel = qbShared.AmmoTypes[qbShared.WeaponHashes[casings[currentCasing].type].ammoname].label,
                     ammotype = casings[currentCasing].type,
                     serie = casings[currentCasing].serie
                 },

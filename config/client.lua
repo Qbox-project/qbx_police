@@ -115,15 +115,6 @@ return {
 
     whitelistedVehicles = {},
 
-    ammoLabels = {
-        AMMO_PISTOL = '9x19mm parabellum bullet',
-        AMMO_SMG = '9x19mm parabellum bullet',
-        AMMO_RIFLE = '7.62x39mm bullet',
-        AMMO_MG = '7.92x57mm mauser bullet',
-        AMMO_SHOTGUN = '12-gauge bullet',
-        AMMO_SNIPER = 'Large caliber bullet',
-    },
-
     radars = {
         -- Radars will fine the driver if the vehicle is over the defined speed limit
         -- Regardless of the speed, If the vehicle is flagged it sends a notification to the police
