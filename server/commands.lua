@@ -386,8 +386,8 @@ lib.addCommand('takedna', {
     local info = {
         label = Lang:t('info.dna_sample'),
         type = 'dna',
-        dnalabel = dnaHash(otherPlayer.PlayerData.citizenId),
-        description = dnaHash(otherPlayer.PlayerData.citizenId)
+        dnalabel = dnaHash(otherPlayer.PlayerData.citizenid),
+        description = dnaHash(otherPlayer.PlayerData.citizenid)
     }
     if not player.Functions.AddItem('filled_evidence_bag', 1, false, info) then return end
 end)
