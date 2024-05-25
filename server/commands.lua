@@ -135,14 +135,14 @@ lib.addCommand('callsign', {
     help = Lang:t('commands.callsign'),
     params = {
         {
-            name = 'name',
+            name = 'callsign',
             type = 'string',
             help = Lang:t('info.callsign_name')
         }
     },
  }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
-    player.Functions.SetMetaData('callsign', table.concat(args, ' '))
+    player.Functions.SetMetaData('callsign', args.callsign)
 end)
 
 lib.addCommand('clearcasings', {help = Lang:t('commands.clear_casign')}, function(source)
