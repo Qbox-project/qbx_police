@@ -104,7 +104,7 @@ local function takeOutVehicle(vehicleInfo)
     local coords = sharedConfig.locations.vehicle[currentGarage]
     if not coords then return end
 
-    local plate = Lang:t('info.police_plate')..tostring(math.random(1000, 9999))
+    local plate = Lang:t('info.police_plate')..tostring(lib.string.random('1111'))
     local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicleInfo, coords, plate, true)
 
     local veh = lib.waitFor(function()
@@ -220,7 +220,7 @@ local function spawnHelicopter()
     if not inHelicopter then return end
     local plyCoords = GetEntityCoords(cache.ped)
     local coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
-    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, config.policeHelicopter, coords, 'ZULU'..tostring(math.random(1000, 9999)), true)
+    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, config.policeHelicopter, coords, 'ZULU'..lib.string.random('1111'), true)
     local timeout = 100
     while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
         Wait(10)

@@ -4,7 +4,6 @@ local playerStatus = {}
 local casings = {}
 local bloodDrops = {}
 local fingerDrops = {}
-local objects = {}
 local updatingCops = false
 
 ---@param player Player
@@ -40,10 +39,10 @@ local function updateBlips()
 end
 
 local function generateId(table)
-    local id = math.random(10000, 99999)
+    local id = lib.string.random('11111')
     if not table then return id end
     while table[id] do
-        id = math.random(10000, 99999)
+        id = lib.string.random('11111')
     end
     return id
 end
@@ -367,17 +366,6 @@ RegisterNetEvent('police:server:RobPlayer', function(playerId)
     exports.qbx_core:Notify(player.PlayerData.source, Lang:t('info.stolen_money', {stolen = money}), 'inform')
 end)
 
-RegisterNetEvent('police:server:spawnObject', function(type)
-    local src = source
-    local objectId = generateId(objects)
-    objects[objectId] = type
-    TriggerClientEvent('police:client:spawnObject', src, objectId, type)
-end)
-
-RegisterNetEvent('police:server:deleteObject', function(objectId)
-    TriggerClientEvent('police:client:removeObject', -1, objectId)
-end)
-
 RegisterNetEvent('police:server:Impound', function(plate, fullImpound, price, body, engine, fuel)
     local src = source
     price = price or 0
@@ -546,10 +534,6 @@ RegisterNetEvent('police:server:SetTracker', function(targetId)
         exports.qbx_core:Notify(src, Lang:t('success.put_anklet_on', {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname}), 'success')
         TriggerClientEvent('police:client:SetTracker', targetId, true)
     end
-end)
-
-RegisterNetEvent('police:server:SyncSpikes', function(table)
-    TriggerClientEvent('police:client:SyncSpikes', -1, table)
 end)
 
 AddEventHandler('onServerResourceStart', function(resource)

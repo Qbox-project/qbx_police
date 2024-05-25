@@ -1,5 +1,6 @@
 local Translations = {
     error = {
+        in_vehicle = 'You can\'t do it in a vehicle',
         license_already = 'Player already has a license',
         error_license = 'Player doesn\'t have that license',
         no_camera = 'Camera doesn\'t exist',
