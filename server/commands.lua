@@ -109,10 +109,7 @@ lib.addCommand('pobject', {
 
     if type == 'delete' then
         TriggerClientEvent('police:client:deleteObject', source)
-        return
-    end
-
-    if sharedConfig.objects[type] then
+    elseif sharedConfig.objects[type] then
         TriggerClientEvent('police:client:spawnPObj', source, type)
     end
 end)
@@ -129,13 +126,11 @@ end)
 
 lib.addCommand('callsign', {
     help = locale('commands.callsign'),
-    params = {
-        {
-            name = 'callsign',
-            type = 'number',
-            help = locale('info.callsign_name')
-        }
-    },
+    params = {{
+        name = 'callsign',
+        type = 'number',
+        help = locale('info.callsign_name')
+    }},
  }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     player.Functions.SetMetaData('callsign', args.callsign)
@@ -155,13 +150,11 @@ end)
 
 lib.addCommand('unjail', {
     help = locale('commands.unjail_player'),
-    params = {
-        {
-            name = 'id',
-            type = 'playerId',
-            help = locale('info.player_id')
-        }
-    }
+    params = {{
+        name = 'id',
+        type = 'playerId',
+        help = locale('info.player_id')
+    }}
 }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     if not checkLeoAndOnDuty(player) then return end
@@ -192,13 +185,11 @@ end)
 
 lib.addCommand('cam', {
     help = locale('commands.camera'),
-    params = {
-        {
-            name = 'camid',
-            type = 'number',
-            help = locale('info.camera_id_help')
-        }
-    },
+    params = {{
+        name = 'camid',
+        type = 'number',
+        help = locale('info.camera_id_help')
+    }},
  }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     if not checkLeoAndOnDuty(player) then return end
@@ -236,13 +227,11 @@ end)
 
 lib.addCommand('unflagplate', {
     help = locale('commands.unflagplate'),
-    params = {
-        {
-            name = 'plate',
-            type = 'string',
-            help = locale('info.plate_number')
-        }
-    },
+    params = {{
+        name = 'plate',
+        type = 'string',
+        help = locale('info.plate_number')
+    }},
 }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     if not checkLeoAndOnDuty(player) then return end
@@ -260,13 +249,11 @@ end)
 
 lib.addCommand('plateinfo', {
     help = locale('commands.plateinfo'),
-    params = {
-        {
-            name = 'plate',
-            type = 'string',
-            help = locale('info.plate_number')
-        }
-    },
+    params = {{
+        name = 'plate',
+        type = 'string',
+        help = locale('info.plate_number')
+    }},
 }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     if not checkLeoAndOnDuty(player) then return end
@@ -282,13 +269,11 @@ end)
 
 lib.addCommand('depot', {
     help = locale('commands.depot'),
-    params = {
-        {
-            name = 'price',
-            type = 'number',
-            help = locale('info.impound_price')
-        }
-    },
+    params = {{
+        name = 'price',
+        type = 'number',
+        help = locale('info.impound_price')
+    }},
 }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     if not checkLeoAndOnDuty(player) then return end
@@ -303,13 +288,11 @@ end)
 
 lib.addCommand('paytow', {
     help = locale('commands.paytow'),
-    params = {
-        {
-            name = 'id',
-            type = 'playerId',
-            help = locale('info.player_id')
-        }
-    },
+    params = {{
+        name = 'id',
+        type = 'playerId',
+        help = locale('info.player_id')
+    }},
 }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     if not checkLeoAndOnDuty(player) then return end
@@ -326,13 +309,11 @@ end)
 
 lib.addCommand('paylawyer', {
     help = locale('commands.paylawyer'),
-    params = {
-        {
-            name = 'id',
-            type = 'playerId',
-            help = locale('info.player_id')
-        }
-    },
+    params = {{
+        name = 'id',
+        type = 'playerId',
+        help = locale('info.player_id')
+    }},
  }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     if player.PlayerData.job.type ~= 'leo' and player.PlayerData.job.name ~= 'judge' then
@@ -358,13 +339,11 @@ end)
 
 lib.addCommand('ankletlocation', {
     help = locale('commands.ankletlocation'),
-    params = {
-        {
-            name = 'cid',
-            type = 'string',
-            help = locale('info.citizen_id')
-        }
-    },
+    params = {{
+        name = 'cid',
+        type = 'string',
+        help = locale('info.citizen_id')
+    }},
 }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     if not checkLeoAndOnDuty(player) then return end
@@ -378,13 +357,11 @@ end)
 
 lib.addCommand('takedna', {
     help = locale('commands.takedna'),
-    params = {
-        {
-            name = 'id',
-            type = 'playerId',
-            help = locale('info.player_id')
-        }
-    },
+    params = {{
+        name = 'id',
+        type = 'playerId',
+        help = locale('info.player_id')
+    }},
 }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     local otherPlayer = exports.qbx_core:GetPlayer(args.id)
@@ -405,13 +382,11 @@ end)
 
 lib.addCommand('911p', {
     help = locale('commands.police_report'),
-    params = {
-        {
-            name = 'message',
-            type = 'string',
-            help = locale('commands.message_sent')
-        }
-    },
+    params = {{
+        name = 'message',
+        type = 'string',
+        help = locale('commands.message_sent')
+    }},
 }, function(source, args)
     local message
     if args.message then message = table.concat(args, ' ') else message = locale('commands.civilian_call') end
