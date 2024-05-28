@@ -8,33 +8,35 @@ local updatingCops = false
 
 ---@param player Player
 ---@param minGrade? integer
----@return boolean
+---@return boolean?
 function IsLeoAndOnDuty(player, minGrade)
-    minGrade = minGrade or 0
-
-    if not player or player.PlayerData.job.type ~= 'leo' or not player.PlayerData.job.onduty then
-        return false
+    local job = player.PlayerData.job
+    if job and job.type == 'leo' and job.onduty then
+        return job.grade.level >= (minGrade or 0)
     end
-
-    return player.PlayerData.job.grade.level >= minGrade
 end
 
 -- Functions
 local function updateBlips()
     local dutyPlayers = {}
     local players = exports.qbx_core:GetQBPlayers()
-    for _, v in pairs(players) do
-        if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.type == 'ems') and v.PlayerData.job.onduty then
-            local coords = GetEntityCoords(GetPlayerPed(v.PlayerData.source))
-            local heading = GetEntityHeading(GetPlayerPed(v.PlayerData.source))
+    for i = 1, #players do
+        local playerData = players[i].PlayerData
+        local job = playerData.job
+        if (job.type == 'leo' or job.type == 'ems') and job.onduty then
+            local source = playerData.source
+            local ped = GetPlayerPed(source)
+            local coords = GetEntityCoords(ped)
+            local heading = GetEntityHeading(ped)
             dutyPlayers[#dutyPlayers+1] = {
-                source = v.PlayerData.source,
-                label = v.PlayerData.metadata.callsign,
-                job = v.PlayerData.job.name,
+                job = job.name,
+                source = source,
+                label = playerData.metadata.callsign,
                 location = vec4(coords.x, coords.y, coords.z, heading)
             }
         end
     end
+
     TriggerClientEvent('police:client:UpdateBlips', -1, dutyPlayers)
 end
 
@@ -49,9 +51,9 @@ end
 
 RegisterNetEvent('police:server:SendTrackerLocation', function(coords, requestId)
     local target = exports.qbx_core:GetPlayer(source)
-    local msg = Lang:t('info.target_location', {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname})
+    local msg = locale('info.target_location', target.PlayerData.charinfo.firstname, target.PlayerData.charinfo.lastname)
     local alertData = {
-        title = Lang:t('info.anklet_location'),
+        title = locale('info.anklet_location'),
         coords = coords,
         description = msg
     }
@@ -67,8 +69,13 @@ exports.qbx_core:CreateUseableItem('handcuffs', function(source)
 end)
 
 exports.qbx_core:CreateUseableItem('moneybag', function(source, item)
+    if not item.info or item.info == '' then return end
     local player = exports.qbx_core:GetPlayer(source)
-    if not player or not player.Functions.GetItemByName('moneybag') or not item.info or item.info == '' or player.PlayerData.job.type == 'leo' or not player.Functions.RemoveItem('moneybag', 1, item.slot) then return end
+    if not player
+        or player.PlayerData.job.type == 'leo'
+        or not player.Functions.GetItemByName('moneybag')
+        or not player.Functions.RemoveItem('moneybag', 1, item.slot)
+    then return end
     player.Functions.AddMoney('cash', tonumber(item.info.cash), 'used-moneybag')
 end)
 
@@ -78,15 +85,16 @@ lib.callback.register('police:server:isPlayerDead', function(_, playerId)
     return player.PlayerData.metadata.isdead
 end)
 
-lib.callback.register('police:GetPlayerStatus', function(_, playerId)
-    local player = exports.qbx_core:GetPlayer(playerId)
-    if not player or not playerStatus[player.PlayerData.source] or not next(playerStatus[player.PlayerData.source]) then
-        return {}
-    end
+lib.callback.register('police:GetPlayerStatus', function(_, targetSrc)
+    local player = exports.qbx_core:GetPlayer(targetSrc)
+    if not player or not next(playerStatus[targetSrc]) then return {} end
+    local status = playerStatus[targetSrc]
+
     local statList = {}
-    for k in pairs(playerStatus[player.PlayerData.source]) do
-        statList[#statList + 1] = playerStatus[player.PlayerData.source][k].text
+    for i = 1, #status do
+        statList[#statList + 1] = status[i].text
     end
+
     return statList
 end)
 
@@ -94,13 +102,13 @@ lib.callback.register('police:GetImpoundedVehicles', function()
     return FetchImpoundedVehicles()
 end)
 
-lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate)
+lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate, vehId)
     local netId, veh = qbx.spawnVehicle({model = model, spawnSource = coords, warp = source})
-    if not netId or netId == 0 then return end
-    if not veh or veh == 0 then return end
+    if not netId or netId == 0 or not veh or veh == 0 then return end
 
+    if vehId then Entity(veh).state.vehicleid = vehId end
     SetVehicleNumberPlateText(veh, plate)
-    TriggerClientEvent('vehiclekeys:client:SetOwner', source, plate)
+    exports.qbx_vehiclekeys:GiveKeys(source, plate)
     return netId
 end)
 
@@ -115,12 +123,12 @@ end)
 
 local function isPoliceForcePresent()
     local players = exports.qbx_core:GetQBPlayers()
-    for _, v in pairs(players) do
-        if v and v.PlayerData.job.type == 'leo' and v.PlayerData.job.grade.level >= 2 then
+    for i = 1, #players do
+        local job = players[i].PlayerData.job
+        if job.type == 'leo' and job.grade.level >= 2 then
             return true
         end
     end
-    return false
 end
 
 lib.callback.register('qbx_police:server:isPoliceForcePresent', isPoliceForcePresent)
@@ -142,12 +150,12 @@ end
 
 -- Events
 RegisterNetEvent('police:server:Radar', function(fine)
-    local source = source
+    local src = source
     local price  = sharedConfig.radars.speedFines[fine].fine
-    local player = exports.qbx_core:GetPlayer(source)
+    local player = exports.qbx_core:GetPlayer(src)
     if not player.Functions.RemoveMoney('bank', math.floor(price), 'Radar Fine') then return end
     exports['Renewed-Banking']:addAccountMoney('police', price)
-    exports.qbx_core:Notify(source, Lang:t('info.fine_received', {fine = price}), 'inform')
+    exports.qbx_core:Notify(src, locale('info.fine_received', price), 'inform')
 end)
 
 RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource)
@@ -158,11 +166,11 @@ RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource
     for k, v in pairs(players) do
         if IsLeoAndOnDuty(v) then
             if camId then
-                local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text .. Lang:t('info.camera_id') .. camId}
+                local alertData = {title = locale('info.new_call'), coords = coords, description = text .. locale('info.camera_id') .. camId}
                 TriggerClientEvent('qb-phone:client:addPoliceAlert', k, alertData)
                 TriggerClientEvent('police:client:policeAlert', k, coords, text, camId)
             else
-                local alertData = {title = Lang:t('info.new_call'), coords = coords, description = text}
+                local alertData = {title = locale('info.new_call'), coords = coords, description = text}
                 TriggerClientEvent('qb-phone:client:addPoliceAlert', k, alertData)
                 TriggerClientEvent('police:client:policeAlert', k, coords, text)
             end
@@ -171,134 +179,137 @@ RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource
 end)
 
 RegisterNetEvent('police:server:TakeOutImpound', function(plate, garage)
-    local src = source
-    local playerPed = GetPlayerPed(src)
-    local playerCoords = GetEntityCoords(playerPed)
-    local targetCoords = sharedConfig.locations.impound[garage]
-    if #(playerCoords - targetCoords) > 10.0 then return end
+    local src = tonumber(source)
+    if not src then return end
+    local playerCoords = GetEntityCoords(GetPlayerPed(src))
+    if #(playerCoords - sharedConfig.locations.impound[garage]) > 10.0 then return end
 
     Unimpound(plate)
-    exports.qbx_core:Notify(src, Lang:t('success.impound_vehicle_removed'), 'success')
+    exports.qbx_core:Notify(src, locale('success.impound_vehicle_removed'), 'success')
 end)
 
-local function isTargetTooFar(src, targetId, maxDistance)
+local function isTargetTooFar(src, targetSrc, maxDistance)
+    maxDistance = maxDistance or 2.5
     local playerPed = GetPlayerPed(src)
-    local targetPed = GetPlayerPed(targetId)
+    local targetPed = GetPlayerPed(targetSrc)
     local playerCoords = GetEntityCoords(playerPed)
     local targetCoords = GetEntityCoords(targetPed)
     if #(playerCoords - targetCoords) > maxDistance then
         return true
     end
-    return false
 end
 
-RegisterNetEvent('police:server:CuffPlayer', function(playerId, isSoftcuff)
+RegisterNetEvent('police:server:CuffPlayer', function(cuffedSrc, isSoftcuff)
     local src = source
-    if isTargetTooFar(src, playerId, 2.5) then return end
+    if isTargetTooFar(src, cuffedSrc) then return end
 
     local player = exports.qbx_core:GetPlayer(src)
-    local cuffedPlayer = exports.qbx_core:GetPlayer(playerId)
-    if not player or not cuffedPlayer or (not player.Functions.GetItemByName('handcuffs') and player.PlayerData.job.type ~= 'leo') then return end
+    if not player then return end
+    local cuffedPlayer = exports.qbx_core:GetPlayer(cuffedSrc)
+    if not cuffedPlayer or not player.Functions.GetItemByName('handcuffs') then return end
 
     TriggerClientEvent('police:client:GetCuffed', cuffedPlayer.PlayerData.source, player.PlayerData.source, isSoftcuff)
 end)
 
-RegisterNetEvent('police:server:EscortPlayer', function(playerId)
+RegisterNetEvent('police:server:EscortPlayer', function(escortSrc)
     local src = source
-    if isTargetTooFar(src, playerId, 2.5) then return end
+    if isTargetTooFar(src, escortSrc) then return end
 
-    local player = exports.qbx_core:GetPlayer(source)
-    local escortPlayer = exports.qbx_core:GetPlayer(playerId)
-    if not player or not escortPlayer then return end
+    local player = exports.qbx_core:GetPlayer(src)
+    if not player then return end
+    local escortPlayer = exports.qbx_core:GetPlayer(escortSrc)
+    if not escortPlayer then return end
 
     if (player.PlayerData.job.type == 'leo' or player.PlayerData.job.type == 'ems') or (escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand) then
         TriggerClientEvent('police:client:GetEscorted', escortPlayer.PlayerData.source, player.PlayerData.source)
     else
-        exports.qbx_core:Notify(src, Lang:t('error.not_cuffed_dead'), 'error')
+        exports.qbx_core:Notify(src, locale('error.not_cuffed_dead'), 'error')
     end
 end)
 
-RegisterNetEvent('police:server:KidnapPlayer', function(playerId)
+RegisterNetEvent('police:server:KidnapPlayer', function(kidnapedSrc)
     local src = source
-    if isTargetTooFar(src, playerId, 2.5) then return end
+    if isTargetTooFar(src, kidnapedSrc) then return end
     local player = exports.qbx_core:GetPlayer(source)
-    local escortPlayer = exports.qbx_core:GetPlayer(playerId)
+    local escortPlayer = exports.qbx_core:GetPlayer(kidnapedSrc)
     if not player or not escortPlayer then return end
 
     if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand then
         TriggerClientEvent('police:client:GetKidnappedTarget', escortPlayer.PlayerData.source, player.PlayerData.source)
         TriggerClientEvent('police:client:GetKidnappedDragger', player.PlayerData.source, escortPlayer.PlayerData.source)
     else
-        exports.qbx_core:Notify(src, Lang:t('error.not_cuffed_dead'), 'error')
+        exports.qbx_core:Notify(src, locale('error.not_cuffed_dead'), 'error')
     end
 end)
 
-RegisterNetEvent('police:server:SetPlayerOutVehicle', function(playerId)
+RegisterNetEvent('police:server:SetPlayerOutVehicle', function(targetSrc)
     local src = source
-    if isTargetTooFar(src, playerId, 2.5) then return end
+    if isTargetTooFar(src, targetSrc) then return end
 
-    local escortPlayer = exports.qbx_core:GetPlayer(playerId)
-    if not exports.qbx_core:GetPlayer(src) or not escortPlayer then return end
-
-    if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand then
-
-        TriggerClientEvent('police:client:SetOutVehicle', escortPlayer.PlayerData.source)
-    else
-        exports.qbx_core:Notify(src, Lang:t('error.not_cuffed_dead'), 'error')
+    local escortPlayer = exports.qbx_core:GetPlayer(targetSrc)
+    if not escortPlayer then return end
+    local metadata = escortPlayer.PlayerData.metadata
+    if not (metadata.ishandcuffed or metadata.isdead or metadata.inlaststand) then
+        return exports.qbx_core:Notify(src, locale('error.not_cuffed_dead'), 'error')
     end
+
+    TriggerClientEvent('police:client:SetOutVehicle', escortPlayer.PlayerData.source)
 end)
 
-RegisterNetEvent('police:server:PutPlayerInVehicle', function(playerId)
+RegisterNetEvent('police:server:PutPlayerInVehicle', function(targetSrc)
     local src = source
-    if isTargetTooFar(src, playerId, 2.5) then return end
+    if isTargetTooFar(src, targetSrc) then return end
 
-    local escortPlayer = exports.qbx_core:GetPlayer(playerId)
-    if not exports.qbx_core:GetPlayer(src) or not escortPlayer then return end
+    local escortPlayer = exports.qbx_core:GetPlayer(targetSrc)
+    if not escortPlayer then return end
+    local metadata = escortPlayer.PlayerData.metadata
 
-    if escortPlayer.PlayerData.metadata.ishandcuffed or escortPlayer.PlayerData.metadata.isdead or escortPlayer.PlayerData.metadata.inlaststand then
-        TriggerClientEvent('police:client:PutInVehicle', escortPlayer.PlayerData.source)
-    else
-        exports.qbx_core:Notify(src, Lang:t('error.not_cuffed_dead'), 'error')
+    if not (metadata.ishandcuffed or metadata.isdead or metadata.inlaststand) then
+        return exports.qbx_core:Notify(src, locale('error.not_cuffed_dead'), 'error')
     end
+
+    TriggerClientEvent('police:client:PutInVehicle', escortPlayer.PlayerData.source)
 end)
 
-RegisterNetEvent('police:server:BillPlayer', function(playerId, price)
+RegisterNetEvent('police:server:BillPlayer', function(targetSrc, price)
     local src = source
-    if isTargetTooFar(src, playerId, 2.5) then return end
+    if isTargetTooFar(src, targetSrc) then return end
 
     local player = exports.qbx_core:GetPlayer(src)
-    local otherPlayer = exports.qbx_core:GetPlayer(playerId)
-    if not player or not otherPlayer or player.PlayerData.job.type ~= 'leo' then return end
+    if not player or player.PlayerData.job.type ~= 'leo' then return end
+    local targetPlayer = exports.qbx_core:GetPlayer(targetSrc)
+    if not targetPlayer then return end
 
-    otherPlayer.Functions.RemoveMoney('bank', price, 'paid-bills')
+    if not targetPlayer.Functions.RemoveMoney('bank', price, 'paid-bills') then return end
     exports['Renewed-Banking']:addAccountMoney('police', price)
-    exports.qbx_core:Notify(otherPlayer.PlayerData.source, Lang:t('info.fine_received', {fine = price}), 'inform')
+    exports.qbx_core:Notify(targetPlayer.PlayerData.source, locale('info.fine_received', price), 'inform')
 end)
 
-RegisterNetEvent('police:server:JailPlayer', function(playerId, time)
+RegisterNetEvent('police:server:JailPlayer', function(targetSrc, time)
     local src = source
-    if isTargetTooFar(src, playerId, 2.5) then return end
+    if isTargetTooFar(src, targetSrc) then return end
 
     local player = exports.qbx_core:GetPlayer(src)
-    local otherPlayer = exports.qbx_core:GetPlayer(playerId)
-    if not player or not otherPlayer or player.PlayerData.job.type ~= 'leo' then return end
+    if not player or player.PlayerData.job.type ~= 'leo' then return end
+    local targetPlayer = exports.qbx_core:GetPlayer(targetSrc)
+    if not targetPlayer then return end
 
     local currentDate = os.date('*t')
     if currentDate.day == 31 then
         currentDate.day = 30
     end
 
-    otherPlayer.Functions.SetMetaData('injail', time)
-    otherPlayer.Functions.SetMetaData('criminalrecord', {
+    targetPlayer.Functions.SetMetaData('injail', time)
+    targetPlayer.Functions.SetMetaData('criminalrecord', {
         hasRecord = true,
         date = currentDate
     })
     if GetResourceState('qbx_prison') == 'started' then
-        exports.qbx_prison:JailPlayer(otherPlayer.PlayerData.source, time)
+        exports.qbx_prison:JailPlayer(targetPlayer.PlayerData.source, time)
     else
-        TriggerClientEvent('police:client:SendToJail', otherPlayer.PlayerData.source, time)
+        TriggerClientEvent('police:client:SendToJail', targetPlayer.PlayerData.source, time)
     end
-    exports.qbx_core:Notify(src, Lang:t('info.sent_jail_for', {time = time}), 'inform')
+    exports.qbx_core:Notify(src, locale('info.sent_jail_for', time), 'inform')
 end)
 
 RegisterNetEvent('police:server:SetHandcuffStatus', function(isHandcuffed)
@@ -312,58 +323,61 @@ RegisterNetEvent('heli:spotlight', function(state)
 end)
 
 RegisterNetEvent('police:server:FlaggedPlateTriggered', function(radar, plate, street)
-    local src = source
-    local ped = GetPlayerPed(src)
-    local coords = GetEntityCoords(ped)
+    local src = tonumber(source)
+    if not src then return end
+    local coords = GetEntityCoords(GetPlayerPed(src))
     local players = exports.qbx_core:GetQBPlayers()
-    for k, v in pairs(players) do
-        if v and IsLeoAndOnDuty(v) then
-            local alertData = {title = Lang:t('info.new_call'), coords = coords, description = Lang:t('info.plate_triggered', {plate = plate, street = street, radar = radar})}
-            TriggerClientEvent('qb-phone:client:addPoliceAlert', k, alertData)
-            TriggerClientEvent('police:client:policeAlert', k, coords, Lang:t('info.plate_triggered_blip', {radar = radar}))
+    for i = 1, #players do
+        if IsLeoAndOnDuty(players[i]) then
+            local alertData = {title = locale('info.new_call'), coords = coords, description = locale('info.plate_triggered', plate, street, radar)}
+            TriggerClientEvent('qb-phone:client:addPoliceAlert', i, alertData)
+            TriggerClientEvent('police:client:policeAlert', i, coords, locale('info.plate_triggered_blip', radar))
         end
     end
 end)
 
-RegisterNetEvent('police:server:SearchPlayer', function(playerId)
+RegisterNetEvent('police:server:SearchPlayer', function(targetSrc)
     local src = source
-    if isTargetTooFar(src, playerId, 2.5) then return end
+    if isTargetTooFar(src, targetSrc) then return end
 
-    local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
-    if not exports.qbx_core:GetPlayer(src) or not searchedPlayer then return end
+    local targetPlayer = exports.qbx_core:GetPlayer(targetSrc)
+    if not targetPlayer then return end
 
-    exports.qbx_core:Notify(src, Lang:t('info.searched_success'), 'inform')
-    exports.qbx_core:Notify(searchedPlayer.PlayerData.source, Lang:t('info.being_searched'), 'inform')
+    exports.qbx_core:Notify(src, locale('info.searched_success'), 'inform')
+    exports.qbx_core:Notify(targetPlayer.PlayerData.source, locale('info.being_searched'), 'inform')
 end)
 
-RegisterNetEvent('police:server:SeizeCash', function(playerId)
+RegisterNetEvent('police:server:SeizeCash', function(targetSrc)
     local src = source
-    if isTargetTooFar(src, playerId, 2.5) then return end
+    if isTargetTooFar(src, targetSrc) then return end
 
     local player = exports.qbx_core:GetPlayer(src)
-    local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
-    if not player or not searchedPlayer then return end
+    if not player then return end
+    local targetPlayer = exports.qbx_core:GetPlayer(targetSrc)
+    if not targetPlayer then return end
 
-    local moneyAmount = searchedPlayer.PlayerData.money.cash
-    local info = { cash = moneyAmount }
-    searchedPlayer.Functions.RemoveMoney('cash', moneyAmount, 'police-cash-seized')
-    player.Functions.AddItem('moneybag', 1, false, info)
-    exports.qbx_core:Notify(searchedPlayer.PlayerData.source, Lang:t('info.cash_confiscated'), 'inform')
+    local moneyAmount = targetPlayer.PlayerData.money.cash
+    targetPlayer.Functions.RemoveMoney('cash', moneyAmount, 'police-cash-seized')
+    player.Functions.AddItem('moneybag', 1, false, { cash = moneyAmount })
+    exports.qbx_core:Notify(targetPlayer.PlayerData.source, locale('info.cash_confiscated'), 'inform')
 end)
 
-RegisterNetEvent('police:server:RobPlayer', function(playerId)
+RegisterNetEvent('police:server:RobPlayer', function(targetSrc)
     local src = source
-    if isTargetTooFar(src, playerId, 2.5) then return end
+    if isTargetTooFar(src, targetSrc) then return end
 
     local player = exports.qbx_core:GetPlayer(src)
-    local searchedPlayer = exports.qbx_core:GetPlayer(playerId)
-    if not player or not searchedPlayer then return end
+    if not player then return end
+    local targetPlayer = exports.qbx_core:GetPlayer(targetSrc)
+    if not player or not targetPlayer then return end
 
-    local money = searchedPlayer.PlayerData.money.cash
-    player.Functions.AddMoney('cash', money, 'police-player-robbed')
-    searchedPlayer.Functions.RemoveMoney('cash', money, 'police-player-robbed')
-    exports.qbx_core:Notify(searchedPlayer.PlayerData.source, Lang:t('info.cash_robbed', {money = money}), 'inform')
-    exports.qbx_core:Notify(player.PlayerData.source, Lang:t('info.stolen_money', {stolen = money}), 'inform')
+    local money = targetPlayer.PlayerData.money.cash
+    if targetPlayer.Functions.RemoveMoney('cash', money, 'police-player-robbed') then
+        player.Functions.AddMoney('cash', money, 'police-player-robbed')
+    end
+
+    exports.qbx_core:Notify(targetPlayer.PlayerData.source, locale('info.cash_robbed', money), 'inform')
+    exports.qbx_core:Notify(player.PlayerData.source, locale('info.stolen_money', money), 'inform')
 end)
 
 RegisterNetEvent('police:server:Impound', function(plate, fullImpound, price, body, engine, fuel)
@@ -372,10 +386,10 @@ RegisterNetEvent('police:server:Impound', function(plate, fullImpound, price, bo
     if not IsVehicleOwned(plate) then return end
     if not fullImpound then
         ImpoundWithPrice(price, body, engine, fuel, plate)
-        exports.qbx_core:Notify(src, Lang:t('info.vehicle_taken_depot', {price = price}), 'inform')
+        exports.qbx_core:Notify(src, locale('info.vehicle_taken_depot', price), 'inform')
     else
         ImpoundForever(body, engine, fuel, plate)
-        exports.qbx_core:Notify(src, Lang:t('info.vehicle_seized'), 'inform')
+        exports.qbx_core:Notify(src, locale('info.vehicle_seized'), 'inform')
     end
 end)
 
@@ -421,7 +435,7 @@ RegisterNetEvent('evidence:server:AddBlooddropToInventory', function(bloodId, bl
     metadata.description = metadata.description..'\n\nCollected By: '..playerName
     metadata.description = metadata.description..'\n\nCollected At: '..streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
-        return exports.qbx_core:Notify(src, Lang:t('error.have_evidence_bag'), 'error')
+        return exports.qbx_core:Notify(src, locale('error.have_evidence_bag'), 'error')
     end
     if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
         TriggerClientEvent('evidence:client:RemoveBlooddrop', -1, bloodId)
@@ -441,7 +455,7 @@ RegisterNetEvent('evidence:server:AddFingerprintToInventory', function(fingerId,
     metadata.description = metadata.description..'\n\nCollected By: '..playerName
     metadata.description = metadata.description..'\n\nCollected At: '..streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
-        return exports.qbx_core:Notify(src, Lang:t('error.have_evidence_bag'), 'error')
+        return exports.qbx_core:Notify(src, locale('error.have_evidence_bag'), 'error')
     end
     if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
         TriggerClientEvent('evidence:client:RemoveFingerprint', -1, fingerId)
@@ -453,7 +467,7 @@ RegisterNetEvent('evidence:server:CreateCasing', function(weapon, serial, coords
     local casingId = generateId(casings)
     local serieNumber = exports.ox_inventory:GetCurrentWeapon(source).metadata.serial
     if not serieNumber then
-	serieNumber = serial
+    serieNumber = serial
     end
     TriggerClientEvent('evidence:client:AddCasing', -1, casingId, weapon, coords, serieNumber)
 end)
@@ -463,8 +477,8 @@ RegisterNetEvent('police:server:UpdateCurrentCops', function()
     local players = exports.qbx_core:GetQBPlayers()
     if updatingCops then return end
     updatingCops = true
-    for _, v in pairs(players) do
-        if IsLeoAndOnDuty(v) then
+    for i = 1, #players do
+        if IsLeoAndOnDuty(players[i]) then
             amount += 1
         end
     end
@@ -495,7 +509,7 @@ RegisterNetEvent('evidence:server:AddCasingToInventory', function(casingId, casi
     metadata.description = metadata.description..'\n\nCollected By: '..playerName
     metadata.description = metadata.description..'\n\nCollected At: '..streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
-        return exports.qbx_core:Notify(src, Lang:t('error.have_evidence_bag'), 'error')
+        return exports.qbx_core:Notify(src, locale('error.have_evidence_bag'), 'error')
     end
     if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
         TriggerClientEvent('evidence:client:RemoveCasing', -1, casingId)
@@ -517,7 +531,7 @@ end)
 
 RegisterNetEvent('police:server:SetTracker', function(targetId)
     local src = source
-    if isTargetTooFar(src, targetId, 2.5) then return end
+    if isTargetTooFar(src, targetId) then return end
 
     local target = exports.qbx_core:GetPlayer(targetId)
     if not exports.qbx_core:GetPlayer(src) or not target then return end
@@ -525,13 +539,13 @@ RegisterNetEvent('police:server:SetTracker', function(targetId)
     local trackerMeta = target.PlayerData.metadata.tracker
     if trackerMeta then
         target.Functions.SetMetaData('tracker', false)
-        exports.qbx_core:Notify(targetId, Lang:t('success.anklet_taken_off'), 'success')
-        exports.qbx_core:Notify(src, Lang:t('success.took_anklet_from', {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname}), 'success')
+        exports.qbx_core:Notify(targetId, locale('success.anklet_taken_off'), 'success')
+        exports.qbx_core:Notify(src, locale('success.took_anklet_from', target.PlayerData.charinfo.firstname, target.PlayerData.charinfo.lastname), 'success')
         TriggerClientEvent('police:client:SetTracker', targetId, false)
     else
         target.Functions.SetMetaData('tracker', true)
-        exports.qbx_core:Notify(targetId, Lang:t('success.put_anklet'), 'success')
-        exports.qbx_core:Notify(src, Lang:t('success.put_anklet_on', {firstname = target.PlayerData.charinfo.firstname, lastname = target.PlayerData.charinfo.lastname}), 'success')
+        exports.qbx_core:Notify(targetId, locale('success.put_anklet'), 'success')
+        exports.qbx_core:Notify(src, locale('success.put_anklet_on', target.PlayerData.charinfo.firstname, target.PlayerData.charinfo.lastname), 'success')
         TriggerClientEvent('police:client:SetTracker', targetId, true)
     end
 end)

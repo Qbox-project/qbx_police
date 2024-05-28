@@ -1,7 +1,4 @@
 local sharedConfig = require 'config.shared'
-GlobalState.spikeStrips = {}
-GlobalState.policeObjects = {}
-GlobalState.fixedCoords = {}
 
 ---Spawns object
 ---@param modelHash string
@@ -71,6 +68,13 @@ RegisterNetEvent('police:server:despawnObject', function(index)
     GlobalState.policeObjects = despawnObject(GlobalState.policeObjects, index)
 end)
 
+AddEventHandler('onResourceStart', function (resourceName)
+    if (GetCurrentResourceName() ~= resourceName) then return end
+    GlobalState.spikeStrips = {}
+    GlobalState.policeObjects = {}
+    GlobalState.fixedCoords = {}
+end)
+
 AddEventHandler('onResourceStop', function (resourceName)
     if (GetCurrentResourceName() ~= resourceName) then return end
     local spikeStrips = GlobalState.spikeStrips
@@ -84,4 +88,6 @@ AddEventHandler('onResourceStop', function (resourceName)
     end
 
     GlobalState.spikeStrips = nil
+    GlobalState.policeObjects = nil
+    GlobalState.fixedCoords = nil
 end)

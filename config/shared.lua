@@ -1,5 +1,6 @@
 return {
     maxSpikes = 5,
+    policePlatePrefix = 'LSPD',
     objects = {
         cone = {model = `prop_roadcone02a`, freeze = false},
         barrier = {model = `prop_barrier_work06a`, freeze = true},

@@ -30,11 +30,11 @@ end
 RegisterNetEvent('police:client:spawnPObj', function(item)
     if QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then return end
 
-    if cache.vehicle then return exports.qbx_core:Notify(Lang:t('error.in_vehicle'), 'error') end
+    if cache.vehicle then return exports.qbx_core:Notify(locale('error.in_vehicle'), 'error') end
 
     if lib.progressBar({
         duration = 2500,
-        label = Lang:t('progressbar.place_object'),
+        label = locale('progressbar.place_object'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -54,13 +54,13 @@ RegisterNetEvent('police:client:spawnPObj', function(item)
         local netid, error = lib.callback.await('police:server:spawnObject', false,
                                                 objectConfig.model, spawnCoords, GetEntityHeading(cache.ped))
 
-        if not netid then return exports.qbx_core:Notify(Lang:t(error), 'error') end
+        if not netid then return exports.qbx_core:Notify(locale(error), 'error') end
 
         local object = NetworkGetEntityFromNetworkId(netid)
         PlaceObjectOnGroundProperly(object)
         FreezeEntityPosition(object, objectConfig.freeze)
     else
-        exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
+        exports.qbx_core:Notify(locale('error.canceled'), 'error')
     end
 end)
 
@@ -69,7 +69,7 @@ RegisterNetEvent('police:client:deleteObject', function()
     if not objectId then return end
     if lib.progressBar({
         duration = 2500,
-        label = Lang:t('progressbar.remove_object'),
+        label = locale('progressbar.remove_object'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -85,7 +85,7 @@ RegisterNetEvent('police:client:deleteObject', function()
     }) then
         TriggerServerEvent('police:server:despawnObject', objectId)
     else
-        exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
+        exports.qbx_core:Notify(locale('error.canceled'), 'error')
     end
 end)
 
@@ -93,14 +93,14 @@ end)
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
     if QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then return end
     if #GlobalState.spikeStrips >= sharedConfig.maxSpikes then
-        return exports.qbx_core:Notify(Lang:t('error.no_spikestripe'), 'error')
+        return exports.qbx_core:Notify(locale('error.no_spikestripe'), 'error')
     end
 
-    if cache.vehicle then return exports.qbx_core:Notify(Lang:t('error.in_vehicle'), 'error') end
+    if cache.vehicle then return exports.qbx_core:Notify(locale('error.in_vehicle'), 'error') end
 
     if lib.progressBar({
         duration = 2500,
-        label = Lang:t('progressbar.place_object'),
+        label = locale('progressbar.place_object'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -119,7 +119,7 @@ RegisterNetEvent('police:client:SpawnSpikeStrip', function()
                                                 spawnCoords, GetEntityHeading(cache.ped))
 
         if not netid then
-            return exports.qbx_core:Notify(Lang:t(error), 'error')
+            return exports.qbx_core:Notify(locale(error), 'error')
         end
 
         lib.requestAnimDict('p_ld_stinger_s')
@@ -128,7 +128,7 @@ RegisterNetEvent('police:client:SpawnSpikeStrip', function()
         PlaceObjectOnGroundProperly(spike)
         RemoveAnimDict('p_ld_stinger_s')
     else
-        exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
+        exports.qbx_core:Notify(locale('error.canceled'), 'error')
     end
 
     RemoveAnimDict('amb@medic@standing@kneel@enter')
@@ -218,18 +218,18 @@ local function watchOutOfVehicle()
         silentWaitFor(not cache.value, 2000)
 
         while true do
-            if IsLoggedIn and QBX.PlayerData.job.type == 'leo' then
+            if LocalPlayer.state.isLoggedIn and QBX.PlayerData.job.type == 'leo' then
                 if QBX.PlayerData.job.onduty and closestSpike then
                     if getClosestObject(GlobalState.spikeStrips, GetEntityCoords(cache.ped).xyz, 4, true) then
                         local isOpen, text = lib.isTextUIOpen()
-                        if not isOpen or text ~= Lang:t('info.delete_spike') then
-                            lib.showTextUI(Lang:t('info.delete_spike'))
+                        if not isOpen or text ~= locale('info.delete_spike') then
+                            lib.showTextUI(locale('info.delete_spike'))
                         end
 
                         if IsControlJustPressed(0, 38) then
                             if lib.progressBar({
                                 duration = 2500,
-                                label = Lang:t('progressbar.remove_object'),
+                                label = locale('progressbar.remove_object'),
                                 useWhileDead = false,
                                 canCancel = true,
                                 disable = {
@@ -246,7 +246,7 @@ local function watchOutOfVehicle()
                                 TriggerServerEvent('police:server:despawnSpikeStrip', closestSpike)
                                 lib.hideTextUI()
                             else
-                                exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
+                                exports.qbx_core:Notify(locale('error.canceled'), 'error')
                             end
                         end
                     else
@@ -287,7 +287,7 @@ end)
 AddEventHandler('onResourceStop', function (resource)
     if resource ~= GetCurrentResourceName() then return end
     local isOpen, text = lib.isTextUIOpen()
-    if isOpen and text == Lang:t('info.delete_spike') then
+    if isOpen and text == locale('info.delete_spike') then
         lib.hideTextUI()
     end
 end)
