@@ -7,9 +7,9 @@ local speedCams = {}
 
 local function speedRange(speed)
     speed = math.ceil(speed)
-    for k, v in pairs(sharedConfig.speedFines) do
-        if speed < v.maxSpeed then
-            TriggerServerEvent('police:server:Radar', k)
+    for i = 1, #sharedConfig.speedFines do
+        if speed < sharedConfig.speedFines[i].maxSpeed then
+            TriggerServerEvent('police:server:Radar', i)
             TriggerServerEvent('InteractSound_SV:PlayOnSource', 'speedcamera', 0.25)
             break
         end
@@ -38,16 +38,16 @@ local function handleSpeedCam(speedCam, radar)
 end
 
 CreateThread(function()
-    for _, value in pairs(config.locations) do
-        speedCams[#speedCams + 1] = lib.points.new({
-            coords = value.coords.xyz,
+    for i = 1, #config.locations do
+        local point = lib.points.new({
+            coords = config.locations[i].coords.xyz,
             distance = 20.0,
-            speed = value.speedlimit,
+            speed = config.locations[i].speedlimit,
         })
-    end
-    for k, v in pairs(speedCams) do
-        function v:onEnter()
-            handleSpeedCam(self, k)
+
+        function point:onEnter()
+            handleSpeedCam(self, #speedCams + 1)
         end
+        speedCams[#speedCams + 1] = point
     end
 end)

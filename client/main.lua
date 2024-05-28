@@ -87,11 +87,8 @@ end)
 
 RegisterNetEvent('police:client:sendBillingMail', function(amount)
     SetTimeout(math.random(2500, 4000), function()
-        local gender = locale('info.mr')
-        if QBX.PlayerData.charinfo.gender == 1 then
-            gender = locale('info.mrs')
-        end
         local charinfo = QBX.PlayerData.charinfo
+        local gender = locale(charinfo.gender == 1 and 'info.mrs' or 'info.mr')
         TriggerServerEvent('qb-phone:server:sendNewMail', {
             sender = locale('email.sender'),
             subject = locale('email.subject'),
