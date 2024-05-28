@@ -47,39 +47,7 @@ local function escortActions()
 end
 
 local function handcuffActions()
-    DisableControlAction(0, 24, true) -- Attack
-    DisableControlAction(0, 257, true) -- Attack 2
-    DisableControlAction(0, 25, true) -- Aim
-    DisableControlAction(0, 263, true) -- Melee Attack 1
-
-    DisableControlAction(0, 45, true) -- Reload
-    DisableControlAction(0, 22, true) -- Jump
-    DisableControlAction(0, 44, true) -- Cover
-    DisableControlAction(0, 37, true) -- Select Weapon
-    DisableControlAction(0, 23, true) -- Also 'enter'?
-
-    DisableControlAction(0, 288, true) -- Disable phone
-    DisableControlAction(0, 289, true) -- Inventory
-    DisableControlAction(0, 170, true) -- Animations
-    DisableControlAction(0, 167, true) -- Job
-
-    DisableControlAction(0, 26, true) -- Disable looking behind
-    DisableControlAction(0, 73, true) -- Disable clearing animation
-    DisableControlAction(2, 199, true) -- Disable pause screen
-
-    DisableControlAction(0, 59, true) -- Disable steering in vehicle
-    DisableControlAction(0, 71, true) -- Disable driving forward in vehicle
-    DisableControlAction(0, 72, true) -- Disable reversing in vehicle
-
-    DisableControlAction(2, 36, true) -- Disable going stealth
-
-    DisableControlAction(0, 264, true) -- Disable melee
-    DisableControlAction(0, 257, true) -- Disable melee
-    DisableControlAction(0, 140, true) -- Disable melee
-    DisableControlAction(0, 141, true) -- Disable melee
-    DisableControlAction(0, 142, true) -- Disable melee
-    DisableControlAction(0, 143, true) -- Disable melee
-    DisableControlAction(0, 75, true)  -- Disable exit vehicle
+    lib.disableControls()
     DisableControlAction(27, 75, true) -- Disable exit vehicle
     EnableControlAction(0, 249, true) -- Added for talking while cuffed
     EnableControlAction(0, 46, true)  -- Added for talking while cuffed
@@ -103,6 +71,7 @@ local function handcuffedEscorted()
     end
     lib.requestAnimDict('mp_arresting')
     TaskPlayAnim(cache.ped, 'mp_arresting', 'idle', 8.0, -8, -1, cuffType, 0, false, false, false)
+    RemoveAnimDict('mp_arresting')
 
     return sleep
 end
@@ -273,8 +242,9 @@ RegisterNetEvent('police:client:CuffPlayerSoft', function()
         return exports.qbx_core:Notify(locale('error.vehicle_cuff'), 'error')
     end
 
-    TriggerServerEvent('police:server:CuffPlayer', playerId, true)
-    handCuffAnimation()
+    if lib.callback.await('police:server:CuffPlayer', false, playerId, true) then
+        handCuffAnimation()
+    end
 end)
 
 RegisterNetEvent('police:client:CuffPlayer', function()
@@ -292,14 +262,15 @@ RegisterNetEvent('police:client:CuffPlayer', function()
         return exports.qbx_core:Notify(locale('error.vehicle_cuff'), 'error')
     end
 
-    TriggerServerEvent('police:server:CuffPlayer', playerId, false)
-    handCuffAnimation()
+    if lib.callback.await('police:server:CuffPlayer', false, playerId, false) then
+        handCuffAnimation()
+    end
 end)
 
 RegisterNetEvent('police:client:GetEscorted', function(playerId)
-    if not QBX.PlayerData.metadata.isdead
-       and not QBX.PlayerData.metadata.ishandcuffed
-       and not QBX.PlayerData.metadata.inlaststand
+    if not(QBX.PlayerData.metadata.isdead
+        or QBX.PlayerData.metadata.ishandcuffed
+        or QBX.PlayerData.metadata.inlaststand)
     then return end
 
     if not IsEscorted then
@@ -322,7 +293,10 @@ RegisterNetEvent('police:client:DeEscort', function()
 end)
 
 RegisterNetEvent('police:client:GetKidnappedTarget', function(playerId)
-    if QBX.PlayerData.metadata.isdead or QBX.PlayerData.metadata.inlaststand or QBX.PlayerData.metadata.ishandcuffed then
+    if     QBX.PlayerData.metadata.isdead
+        or QBX.PlayerData.metadata.ishandcuffed
+        or QBX.PlayerData.metadata.inlaststand
+    then
         if not IsEscorted then
             IsEscorted = true
             local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
@@ -379,7 +353,74 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
 end)
 
 CreateThread(function()
+    local hasDisabledControls = false
     while true do
-        Wait(handcuffedEscorted())
+        local sleep = handcuffedEscorted()
+        if sleep > 0 and hasDisabledControls then --if sleep is greater than 0, activates controls
+            lib.disableControls:Remove(
+                21,  -- Sprint
+                24,  -- Attack
+                257, -- Attack 2
+                25,  -- Aim
+                263, -- Melee Attack 1
+                45,  -- Reload
+                22,  -- Jump
+                44,  -- Cover
+                37,  -- Select Weapon
+                23,  -- Also 'enter'?
+                288, -- Disable phone
+                289, -- Inventory
+                170, -- Animations
+                167, -- Job
+                26,  -- Disable looking behind
+                73,  -- Disable clearing animation
+                199, -- Disable pause screen
+                59,  -- Disable steering in vehicle
+                71,  -- Disable driving forward in vehicle
+                72,  -- Disable reversing in vehicle
+                36,  -- Disable going stealth
+                264, -- Disable melee
+                257, -- Disable melee
+                140, -- Disable melee
+                141, -- Disable melee
+                142, -- Disable melee
+                143, -- Disable melee
+                75   -- Disable exit vehicle
+            )
+            hasDisabledControls = false
+        elseif sleep == 0 and not hasDisabledControls then
+            lib.disableControls:Add(
+                21,  -- Sprint
+                24,  -- Attack
+                257, -- Attack 2
+                25,  -- Aim
+                263, -- Melee Attack 1
+                45,  -- Reload
+                22,  -- Jump
+                44,  -- Cover
+                37,  -- Select Weapon
+                23,  -- Also 'enter'?
+                288, -- Disable phone
+                289, -- Inventory
+                170, -- Animations
+                167, -- Job
+                26,  -- Disable looking behind
+                73,  -- Disable clearing animation
+                199, -- Disable pause screen
+                59,  -- Disable steering in vehicle
+                71,  -- Disable driving forward in vehicle
+                72,  -- Disable reversing in vehicle
+                36,  -- Disable going stealth
+                264, -- Disable melee
+                257, -- Disable melee
+                140, -- Disable melee
+                141, -- Disable melee
+                142, -- Disable melee
+                143, -- Disable melee
+                75   -- Disable exit vehicle
+            )
+            hasDisabledControls = true
+        end
+        Wait(sleep)
     end
 end)

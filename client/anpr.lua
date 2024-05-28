@@ -45,9 +45,10 @@ CreateThread(function()
             speed = config.locations[i].speedlimit,
         })
 
-        function point:onEnter()
-            handleSpeedCam(self, #speedCams + 1)
-        end
         speedCams[#speedCams + 1] = point
+
+        function point:onEnter()
+            handleSpeedCam(self, #speedCams)
+        end
     end
 end)

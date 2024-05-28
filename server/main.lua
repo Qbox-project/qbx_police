@@ -199,8 +199,7 @@ local function isTargetTooFar(src, targetSrc, maxDistance)
     end
 end
 
-RegisterNetEvent('police:server:CuffPlayer', function(cuffedSrc, isSoftcuff)
-    local src = source
+lib.callback.register('police:server:CuffPlayer', function(src, cuffedSrc, isSoftcuff)
     if isTargetTooFar(src, cuffedSrc) then return end
 
     local player = exports.qbx_core:GetPlayer(src)
@@ -209,6 +208,8 @@ RegisterNetEvent('police:server:CuffPlayer', function(cuffedSrc, isSoftcuff)
     if not cuffedPlayer or not player.Functions.GetItemByName('handcuffs') then return end
 
     TriggerClientEvent('police:client:GetCuffed', cuffedPlayer.PlayerData.source, player.PlayerData.source, isSoftcuff)
+
+    return true
 end)
 
 RegisterNetEvent('police:server:EscortPlayer', function(escortSrc)
