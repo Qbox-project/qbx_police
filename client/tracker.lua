@@ -2,8 +2,7 @@ RegisterNetEvent('police:client:CheckDistance', function()
     local coords = GetEntityCoords(cache.ped)
     local player = lib.getClosestPlayer(coords, 2.5, false)
     if not player then
-        exports.qbx_core:Notify(locale('error.none_nearby'), 'error')
-        return
+        return exports.qbx_core:Notify(locale('error.none_nearby'), 'error')
     end
     local playerId = GetPlayerServerId(player)
     TriggerServerEvent('police:server:SetTracker', playerId)

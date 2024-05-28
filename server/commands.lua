@@ -51,8 +51,7 @@ lib.addCommand('grantlicense', {
     if not searchedPlayer then return end
     local licenseTable = searchedPlayer.PlayerData.metadata.licences
     if licenseTable[args.license] then
-        exports.qbx_core:Notify(source, locale('error.license_already'), 'error')
-        return
+        return exports.qbx_core:Notify(source, locale('error.license_already'), 'error')
     end
     licenseTable[args.license] = true
     searchedPlayer.Functions.SetMetaData('licences', licenseTable)
@@ -86,8 +85,7 @@ lib.addCommand('revokelicense',{
     if not searchedPlayer then return end
     local licenseTable = searchedPlayer.PlayerData.metadata.licences
     if not licenseTable[args.license] then
-        exports.qbx_core:Notify(source, locale('error.error_license'), 'error')
-        return
+        return exports.qbx_core:Notify(source, locale('error.error_license'), 'error')
     end
     licenseTable[args.license] = false
     searchedPlayer.Functions.SetMetaData('licences', licenseTable)

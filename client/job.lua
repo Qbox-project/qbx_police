@@ -235,8 +235,7 @@ local function scanFingerprint()
     if not inFingerprint then return end
     local playerId = lib.getClosestPlayer(GetEntityCoords(cache.ped), 2.5, false)
     if not playerId then
-        exports.qbx_core:Notify(locale('error.none_nearby'), 'error')
-        return
+        return exports.qbx_core:Notify(locale('error.none_nearby'), 'error')
     end
     TriggerServerEvent('police:server:showFingerprint', GetPlayerServerId(playerId))
 end
