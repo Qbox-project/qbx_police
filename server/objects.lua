@@ -21,7 +21,7 @@ local function spawnObject(objects, modelHash, coords, zOffset, isFixed)
         objects[#objects+1] = netid
         if isFixed then
             local coordsState = GlobalState.fixedCoords
-            coordsState[netid] = GetEntityCoords(object).xyz
+            coordsState[netid] = GetEntityCoords(object)
             GlobalState.fixedCoords = coordsState
         end
 

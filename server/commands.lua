@@ -393,11 +393,11 @@ lib.addCommand('911p', {
     local ped = GetPlayerPed(source)
     local coords = GetEntityCoords(ped)
     local players = exports.qbx_core:GetQBPlayers()
-    for _, v in pairs(players) do
-        if IsLeoAndOnDuty(v) then
+    for i = 1, #players do
+        if IsLeoAndOnDuty(players[i]) then
             local alertData = {title = locale('commands.emergency_call'), coords = {x = coords.x, y = coords.y, z = coords.z}, description = message}
-            TriggerClientEvent('qb-phone:client:addPoliceAlert', v.PlayerData.source, alertData)
-            TriggerClientEvent('police:client:policeAlert', v.PlayerData.source, coords, message)
+            TriggerClientEvent('qb-phone:client:addPoliceAlert', players[i].PlayerData.source, alertData)
+            TriggerClientEvent('police:client:policeAlert', players[i].PlayerData.source, coords, message)
         end
     end
 end)

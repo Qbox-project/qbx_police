@@ -40,7 +40,7 @@ end
 CreateThread(function()
     for i = 1, #config.locations do
         local point = lib.points.new({
-            coords = config.locations[i].coords.xyz,
+            coords = config.locations[i].coords,
             distance = 20.0,
             speed = config.locations[i].speedlimit,
         })

@@ -103,9 +103,9 @@ RegisterNetEvent('police:client:UpdateBlips', function(players)
     if job and (job.type == 'leo' or job.type == 'ems') and job.onduty then
         removeBlips()
         if players then
-            for _, data in pairs(players) do
-                local id = GetPlayerFromServerId(data.source)
-                CreateDutyBlips(id, data.label, data.job, data.location)
+            for i = 1, #players do
+                local id = GetPlayerFromServerId(players[i].source)
+                CreateDutyBlips(id, players[i].label, players[i].job, players[i].location)
             end
         end
     end
@@ -167,7 +167,8 @@ RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
 end)
 
 CreateThread(function()
-    for _, station in pairs(config.locations.stations) do
+    for i = 1, #config.locations.stations do
+        local station = config.locations.stations[i]
         local blip = AddBlipForCoord(station.coords.x, station.coords.y, station.coords.z)
         SetBlipSprite(blip, 60)
         SetBlipAsShortRange(blip, true)

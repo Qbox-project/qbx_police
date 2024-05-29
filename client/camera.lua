@@ -118,23 +118,23 @@ end)
 
 RegisterNetEvent('police:client:DisableAllCameras', function()
     if GetInvokingResource() then return end
-    for k in pairs(config.cameras) do
-        config.cameras[k].isOnline = false
+    for i = 1, #config.cameras do
+        config.cameras[i].isOnline = false
     end
 end)
 
 RegisterNetEvent('police:client:EnableAllCameras', function()
     if GetInvokingResource() then return end
-    for k in pairs(config.cameras) do
-        config.cameras[k].isOnline = true
+    for i = 1, #config.cameras do
+        config.cameras[i].isOnline = true
     end
 end)
 
 RegisterNetEvent('police:client:SetCamera', function(key, isOnline)
     if GetInvokingResource() then return end
     if type(key) == 'table' and table.type(key) == 'array' then
-        for _, v in pairs(key) do
-            config.cameras[v].isOnline = isOnline
+        for i = 1, #key do
+            config.cameras[key[i]].isOnline = isOnline
         end
     elseif type(key) == 'number' then
         config.cameras[key].isOnline = isOnline

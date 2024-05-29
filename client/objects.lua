@@ -1,8 +1,8 @@
 local sharedConfig = require 'config.shared'
 
 local function getClosestObject(objects, position, maxDistance, isFixed)
-    local minDistance, currentIndex
     if #objects == 0 then return end
+    local minDistance, currentIndex
 
     for i = 1, #objects do
         local coords
@@ -10,7 +10,7 @@ local function getClosestObject(objects, position, maxDistance, isFixed)
             coords = GlobalState.fixedCoords[objects[i]]
         else
             local object = NetworkGetEntityFromNetworkId(objects[i])
-            coords = GetEntityCoords(object).xyz
+            coords = GetEntityCoords(object)
         end
 
         local distance = #(position - coords)
@@ -50,7 +50,7 @@ RegisterNetEvent('police:client:spawnPObj', function(item)
     }) then
         local objectConfig = sharedConfig.objects[item]
         local forward = GetEntityForwardVector(cache.ped)
-        local spawnCoords = GetEntityCoords(cache.ped).xyz + forward * 0.5
+        local spawnCoords = GetEntityCoords(cache.ped) + forward * 0.5
         local netid, error = lib.callback.await('police:server:spawnObject', false,
                                                 objectConfig.model, spawnCoords, GetEntityHeading(cache.ped))
 
@@ -65,7 +65,7 @@ RegisterNetEvent('police:client:spawnPObj', function(item)
 end)
 
 RegisterNetEvent('police:client:deleteObject', function()
-    local objectId = getClosestObject(GlobalState.policeObjects, GetEntityCoords(cache.ped).xyz , 5.0)
+    local objectId = getClosestObject(GlobalState.policeObjects, GetEntityCoords(cache.ped) , 5.0)
     if not objectId then return end
     if lib.progressBar({
         duration = 2500,
@@ -135,13 +135,16 @@ RegisterNetEvent('police:client:SpawnSpikeStrip', function()
 end)
 
 ---Check https://github.com/overextended/ox_lib/blob/master/imports/waitFor/shared.lua
----Yields the current thread until a non-nil value.
+---Yields the current thread until a non-nil value is returned by the function.
 ---@generic T
----@param value T?
+---@param cb fun(): T?
 ---@param timeout? number | false Value out after `~x` ms. Defaults to 1000, unless set to `false`.
+---@return T
 ---@async
-local function silentWaitFor(value, timeout)
-    if value then return value end
+local function silentWaitFor(cb, timeout)
+    local value = cb()
+
+    if value ~= nil then return value end
 
     if timeout or timeout == nil then
         if type(timeout) ~= 'number' then timeout = 1000 end
@@ -150,13 +153,13 @@ local function silentWaitFor(value, timeout)
     local start = timeout and GetGameTimer()
 
     while value == nil do
-        Wait(0)
-
         local elapsed = timeout and GetGameTimer() - start
-
         if elapsed and elapsed > timeout then
-            return value
+            return nil
         end
+
+        Wait(0)
+        value = cb()
     end
 
     return value
@@ -174,7 +177,7 @@ local WHEEL_NAMES = {
 local closestSpike
 CreateThread(function()
     while true do
-        closestSpike = getClosestObject(GlobalState.spikeStrips, GetEntityCoords(cache.ped).xyz, 30, true)
+        closestSpike = getClosestObject(GlobalState.spikeStrips, GetEntityCoords(cache.ped), 30, true)
         Wait(500)
     end
 end)
@@ -187,7 +190,7 @@ local function watchInVehicle(vehicle)
             if w ~= -1 then wheels[#wheels + 1] = { wheel = w, index = i - 1 } end
         end
 
-        silentWaitFor(cache.value, 2000)
+        silentWaitFor(function() return cache.value end, 2000)
 
         while cache.vehicle do
             if closestSpike then
@@ -215,12 +218,12 @@ end
 
 local function watchOutOfVehicle()
     CreateThread(function ()
-        silentWaitFor(not cache.value, 2000)
+        silentWaitFor(function() return cache.value and nil or false end, 2000)
 
         while true do
             if LocalPlayer.state.isLoggedIn and QBX.PlayerData.job.type == 'leo' then
                 if QBX.PlayerData.job.onduty and closestSpike then
-                    if getClosestObject(GlobalState.spikeStrips, GetEntityCoords(cache.ped).xyz, 4, true) then
+                    if getClosestObject(GlobalState.spikeStrips, GetEntityCoords(cache.ped), 4, true) then
                         local isOpen, text = lib.isTextUIOpen()
                         if not isOpen or text ~= locale('info.delete_spike') then
                             lib.showTextUI(locale('info.delete_spike'))
