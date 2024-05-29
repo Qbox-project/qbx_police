@@ -1,5 +1,17 @@
 local sharedConfig = require 'config.shared'
 
+local function checkIsSpikeObject(spikeStrips, fixedCoords, position, maxDistance)
+    if #spikeStrips == 0 then return end
+    for i = 1, #spikeStrips do
+        local coords = fixedCoords[spikeStrips[i]]
+
+        local distance = #(position - coords)
+        if distance < maxDistance then
+            return true
+        end
+    end
+end
+
 local function getClosestObject(objects, position, maxDistance, isFixed)
     if #objects == 0 then return end
     local minDistance, currentIndex
@@ -174,16 +186,19 @@ local WHEEL_NAMES = {
     'wheel_rr',
 }
 
-local closestSpike
+local isSpike
 CreateThread(function()
     while true do
-        closestSpike = getClosestObject(GlobalState.spikeStrips, GetEntityCoords(cache.ped), 30, true)
+        isSpike = checkIsSpikeObject(GlobalState.spikeStrips, GlobalState.fixedCoords, GetEntityCoords(cache.ped), 30)
         Wait(500)
     end
 end)
 
+local isWatchInVehicleBusy
 local function watchInVehicle(vehicle)
     CreateThread(function ()
+        if isWatchInVehicleBusy then return end
+        isWatchInVehicleBusy = true
         local wheels = {}
         for i = 1, #WHEEL_NAMES do
             local w = GetEntityBoneIndexByName(vehicle, WHEEL_NAMES[i])
@@ -193,12 +208,14 @@ local function watchInVehicle(vehicle)
         silentWaitFor(function() return cache.value end, 2000)
 
         while cache.vehicle do
-            if closestSpike then
+            local spikeStrips = GlobalState.spikeStrips
+            local fixedCoords = GlobalState.fixedCoords
+            if isSpike then
                 for i = 1, #wheels do
                     if wheels[i].wheel then
                         local wheelPosition = GetWorldPositionOfEntityBone(cache.vehicle, wheels[i].wheel)
 
-                        if getClosestObject(GlobalState.spikeStrips, wheelPosition, 1.8, true) then
+                        if checkIsSpikeObject(spikeStrips, fixedCoords, wheelPosition, 1.8) then
                             local index = wheels[i].index
                             if not IsVehicleTyreBurst(cache.vehicle, index, true)
                                 or IsVehicleTyreBurst(cache.vehicle, index, false)
@@ -213,6 +230,7 @@ local function watchInVehicle(vehicle)
                 Wait(250)
             end
         end
+        isWatchInVehicleBusy = nil
     end)
 end
 
@@ -220,68 +238,103 @@ local function watchOutOfVehicle()
     CreateThread(function ()
         silentWaitFor(function() return cache.value and nil or false end, 2000)
 
-        while true do
-            if LocalPlayer.state.isLoggedIn and QBX.PlayerData.job.type == 'leo' then
-                if QBX.PlayerData.job.onduty and closestSpike then
-                    if getClosestObject(GlobalState.spikeStrips, GetEntityCoords(cache.ped), 4, true) then
-                        local isOpen, text = lib.isTextUIOpen()
-                        if not isOpen or text ~= locale('info.delete_spike') then
-                            lib.showTextUI(locale('info.delete_spike'))
-                        end
+        while not cache.vehicle and LocalPlayer.state.isLoggedIn and QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty do
+            local isOpen, text = lib.isTextUIOpen()
 
-                        if IsControlJustPressed(0, 38) then
-                            if lib.progressBar({
-                                duration = 2500,
-                                label = locale('progressbar.remove_object'),
-                                useWhileDead = false,
-                                canCancel = true,
-                                disable = {
-                                    car = true,
-                                    move = true,
-                                    combat = true,
-                                    mouse = false
-                                },
-                                anim = {
-                                    dict = 'weapons@first_person@aim_rng@generic@projectile@thermal_charge@',
-                                    clip = 'plant_floor'
-                                }
-                            }) then
-                                TriggerServerEvent('police:server:despawnSpikeStrip', closestSpike)
-                                lib.hideTextUI()
-                            else
-                                exports.qbx_core:Notify(locale('error.canceled'), 'error')
-                            end
-                        end
-                    else
-                        lib.hideTextUI()
-                    end
-                    Wait(0)
-                else
-                    Wait(500)
+            if isSpike and checkIsSpikeObject(GlobalState.spikeStrips, GlobalState.fixedCoords, GetEntityCoords(cache.ped), 3) then
+                if not isOpen or text ~= locale('info.delete_spike') then
+                    lib.showTextUI(locale('info.delete_spike'))
                 end
             else
-                Wait(5000)
+                if isOpen and text == locale('info.delete_spike') then
+                    lib.hideTextUI()
+                end
             end
 
-            if cache.vehicle then
-                return lib.hideTextUI()
-            end
+            Wait(500)
+        end
+
+        local isOpen, text = lib.isTextUIOpen()
+        if isOpen and text == locale('info.delete_spike') then
+            lib.hideTextUI()
         end
     end)
 end
 
+local keybind
+
+local function onPressed()
+    if cache.vehicle then return end
+    keybind:disable(true)
+    local spike = getClosestObject(GlobalState.spikeStrips, GetEntityCoords(cache.ped), 4, true)
+    if spike ~= nil then
+        if lib.progressBar({
+            duration = 2500,
+            label = locale('progressbar.remove_object'),
+            useWhileDead = false,
+            canCancel = true,
+            disable = {
+                car = true,
+                move = true,
+                combat = true,
+                mouse = false
+            },
+            anim = {
+                dict = 'weapons@first_person@aim_rng@generic@projectile@thermal_charge@',
+                clip = 'plant_floor'
+            }
+        }) then
+            TriggerServerEvent('police:server:despawnSpikeStrip', spike)
+            lib.hideTextUI()
+        else
+            exports.qbx_core:Notify(locale('error.canceled'), 'error')
+        end
+    end
+    keybind:disable(false)
+end
+
+keybind = lib.addKeybind({
+    name = 'despawnSpikeStrip',
+    description = locale('info.delete_spike'),
+    defaultKey = 'E',
+    secondaryMapper = 'PAD_DIGITALBUTTONANY',
+    secondaryKey = 'LRIGHT_INDEX',
+    onPressed = onPressed
+})
+
+local function toggleJobFunctions(isWorkingLeo)
+    if isWorkingLeo then
+        keybind:disable(false)
+
+        if not cache.vehicle then
+            watchOutOfVehicle()
+        end
+    else
+        keybind:disable(true)
+    end
+
+    if cache.vehicle then
+        watchInVehicle(cache.vehicle)
+    end
+end
+
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(job)
+    toggleJobFunctions(LocalPlayer.state.isLoggedIn and job.type == 'leo' and job.onduty)
+end)
+
+RegisterNetEvent('QBCore:Client:SetDuty', function(onDuty)
+    local job = QBX.PlayerData.job
+    toggleJobFunctions(LocalPlayer.state.isLoggedIn and job.type == 'leo' and onDuty)
+end)
+
+AddStateBagChangeHandler('isLoggedIn', ('player:%s'):format(cache.serverId), function(_, _, isLoggedIn)
+    local job = QBX.PlayerData.job
+    toggleJobFunctions(isLoggedIn and job.type == 'leo' and job.onduty)
+end)
+
 lib.onCache('vehicle', function(vehicle)
     if vehicle then
         watchInVehicle(vehicle)
-    else
-        watchOutOfVehicle()
-    end
-end)
-
-AddEventHandler('onResourceStart', function(resource)
-    if resource ~= GetCurrentResourceName() then return end
-    if cache.vehicle then
-        watchInVehicle(cache.vehicle)
     else
         watchOutOfVehicle()
     end
