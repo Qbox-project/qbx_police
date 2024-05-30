@@ -150,7 +150,7 @@ end)
 ---Yields the current thread until a non-nil value is returned by the function.
 ---@generic T
 ---@param cb fun(): T?
----@param timeout? number | false Value out after `~x` ms. Defaults to 1000, unless set to `false`.
+---@param timeout? number | false Nil out after `~x` ms. Defaults to 1000, unless set to `false`.
 ---@return T
 ---@async
 local function silentWaitFor(cb, timeout)
