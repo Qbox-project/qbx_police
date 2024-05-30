@@ -99,15 +99,15 @@ end)
 
 RegisterNetEvent('police:client:sendBillingMail', function(amount)
     SetTimeout(math.random(2500, 4000), function()
-        local gender = Lang:t('info.mr')
+        local gender = locale('info.mr')
         if QBX.PlayerData.charinfo.gender == 1 then
-            gender = Lang:t('info.mrs')
+            gender = locale('info.mrs')
         end
         local charinfo = QBX.PlayerData.charinfo
         TriggerServerEvent('qb-phone:server:sendNewMail', {
-            sender = Lang:t('email.sender'),
-            subject = Lang:t('email.subject'),
-            message = Lang:t('email.message', {value = gender, value2 = charinfo.lastname, value3 = amount}),
+            sender = locale('email.sender'),
+            subject = locale('email.subject'),
+            message = locale('email.message', gender, charinfo.lastname, amount),
             button = {}
         })
     end)
@@ -143,7 +143,7 @@ RegisterNetEvent('police:client:policeAlert', function(coords, text, camId)
     local transG = 250
     local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
     local blip2 = AddBlipForCoord(coords.x, coords.y, coords.z)
-    local blipText = Lang:t('info.blip_text', {value = text})
+    local blipText = locale('info.blip_text', text)
     SetBlipSprite(blip, 60)
     SetBlipSprite(blip2, 161)
     SetBlipColour(blip, 1)
@@ -181,8 +181,8 @@ RegisterNetEvent('police:client:SendToJail', function(time)
 end)
 
 RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
-    TriggerServerEvent('police:server:policeAlert', Lang:t('info.officer_down', {lastname = QBX.PlayerData.charinfo.lastname, callsign = QBX.PlayerData.metadata.callsign}))
-    TriggerServerEvent('hospital:server:ambulanceAlert', Lang:t('info.officer_down', {lastname = QBX.PlayerData.charinfo.lastname, callsign = QBX.PlayerData.metadata.callsign}))
+    TriggerServerEvent('police:server:policeAlert', locale('info.officer_down', QBX.PlayerData.charinfo.lastname, QBX.PlayerData.metadata.callsign))
+    TriggerServerEvent('hospital:server:ambulanceAlert', locale('info.officer_down', QBX.PlayerData.charinfo.lastname, QBX.PlayerData.metadata.callsign))
 end)
 
 CreateThread(function()

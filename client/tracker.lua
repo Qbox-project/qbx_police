@@ -2,8 +2,7 @@ RegisterNetEvent('police:client:CheckDistance', function()
     local coords = GetEntityCoords(cache.ped)
     local player = lib.getClosestPlayer(coords, 2.5, false)
     if not player then
-        exports.qbx_core:Notify(Lang:t('error.none_nearby'), 'error')
-        return
+        return exports.qbx_core:Notify(locale('error.none_nearby'), 'error')
     end
     local playerId = GetPlayerServerId(player)
     TriggerServerEvent('police:server:SetTracker', playerId)
@@ -42,7 +41,7 @@ RegisterNetEvent('police:client:TrackerMessage', function(msg, coords)
     SetBlipAlpha(blip, transG)
     SetBlipScale(blip, 1.0)
     BeginTextCommandSetBlipName('STRING')
-    AddTextComponentString(Lang:t('info.ankle_location'))
+    AddTextComponentString(locale('info.ankle_location'))
     EndTextCommandSetBlipName(blip)
     while transG ~= 0 do
         Wait(180 * 4)

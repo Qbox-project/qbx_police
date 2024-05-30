@@ -10,7 +10,7 @@ local function checkLeoAndOnDuty(player, minGrade)
         player = exports.qbx_core:GetPlayer(player)
     end
     if not IsLeoAndOnDuty(player, minGrade) then
-        exports.qbx_core:Notify(player.PlayerData.source, Lang:t('error.on_duty_police_only'), 'error')
+        exports.qbx_core:Notify(player.PlayerData.source, locale('error.on_duty_police_only'), 'error')
         return false
     end
     return true
@@ -22,90 +22,84 @@ local function dnaHash(s)
     end)
 end
 
-lib.addCommand('spikestrip', {help = Lang:t('commands.place_spike')}, function(source)
+lib.addCommand('spikestrip', {help = locale('commands.place_spike')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('police:client:SpawnSpikeStrip', source)
 end)
 
 lib.addCommand('grantlicense', {
-    help = Lang:t('commands.license_grant'),
+    help = locale('commands.license_grant'),
     params = {
         {
             name = 'id',
             type = 'playerId',
-            help = Lang:t('info.player_id')
+            help = locale('info.player_id')
         },
         {
             name = 'license',
             type = 'string',
-            help = Lang:t('info.license_type')
+            help = locale('info.license_type')
         }
     },
  }, function(source, args)
     if not checkLeoAndOnDuty(source, config.licenseRank) then
-        exports.qbx_core:Notify(source, Lang:t('error.error_rank_license'), 'error')
-        return
+        return exports.qbx_core:Notify(source, locale('error.error_rank_license'), 'error')
     end
     if not config.validLicenses[args.license] then
-        exports.qbx_core:Notify(source, Lang:t('info.license_type'), 'error')
-        return
+        return exports.qbx_core:Notify(source, locale('info.license_type'), 'error')
     end
     local searchedPlayer = exports.qbx_core:GetPlayer(args.id)
     if not searchedPlayer then return end
     local licenseTable = searchedPlayer.PlayerData.metadata.licences
     if licenseTable[args.license] then
-        exports.qbx_core:Notify(source, Lang:t('error.license_already'), 'error')
-        return
+        return exports.qbx_core:Notify(source, locale('error.license_already'), 'error')
     end
     licenseTable[args.license] = true
     searchedPlayer.Functions.SetMetaData('licences', licenseTable)
-    exports.qbx_core:Notify(searchedPlayer.PlayerData.source, Lang:t('success.granted_license'), 'success')
-    exports.qbx_core:Notify(source, Lang:t('success.grant_license'), 'success')
+    exports.qbx_core:Notify(searchedPlayer.PlayerData.source, locale('success.granted_license'), 'success')
+    exports.qbx_core:Notify(source, locale('success.grant_license'), 'success')
 end)
 
 lib.addCommand('revokelicense',{
-    help = Lang:t('commands.license_revoke'),
+    help = locale('commands.license_revoke'),
     params = {
         {
             name = 'id',
             type = 'playerId',
-            help = Lang:t('info.player_id')
+            help = locale('info.player_id')
         },
         {
             name = 'license',
             type = 'string',
-            help = Lang:t('info.license_type')
+            help = locale('info.license_type')
         }
     },
 }, function(source, args)
     if not checkLeoAndOnDuty(source, config.licenseRank) then
-        exports.qbx_core:Notify(source, Lang:t('error.rank_revoke'), 'error')
-        return
+        return exports.qbx_core:Notify(source, locale('error.rank_revoke'), 'error')
     end
     if not config.validLicenses[args.license] then
-        exports.qbx_core:Notify(source, Lang:t('error.error_license'), 'error')
-        return
+        return exports.qbx_core:Notify(source, locale('error.error_license'), 'error')
     end
     local searchedPlayer = exports.qbx_core:GetPlayer(args.id)
     if not searchedPlayer then return end
     local licenseTable = searchedPlayer.PlayerData.metadata.licences
     if not licenseTable[args.license] then
-        exports.qbx_core:Notify(source, Lang:t('error.error_license'), 'error')
-        return
+        return exports.qbx_core:Notify(source, locale('error.error_license'), 'error')
     end
     licenseTable[args.license] = false
     searchedPlayer.Functions.SetMetaData('licences', licenseTable)
-    exports.qbx_core:Notify(searchedPlayer.PlayerData.source, Lang:t('error.revoked_license'), 'error')
-    exports.qbx_core:Notify(source, Lang:t('success.revoke_license'), 'success')
+    exports.qbx_core:Notify(searchedPlayer.PlayerData.source, locale('error.revoked_license'), 'error')
+    exports.qbx_core:Notify(source, locale('success.revoke_license'), 'success')
 end)
 
 lib.addCommand('pobject', {
-    help = Lang:t('commands.place_object'),
+    help = locale('commands.place_object'),
     params = {
         {
             name = 'type',
             type = 'string',
-            help = Lang:t('info.poobject_object')
+            help = locale('info.poobject_object')
         }
     },
  }, function(source, args)
@@ -122,48 +116,44 @@ lib.addCommand('pobject', {
     end
 end)
 
-lib.addCommand('cuff', {help = Lang:t('commands.cuff_player')}, function(source)
+lib.addCommand('cuff', {help = locale('commands.cuff_player')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('police:client:CuffPlayer', source)
 end)
 
-lib.addCommand('escort', {help = Lang:t('commands.escort')}, function(source)
+lib.addCommand('escort', {help = locale('commands.escort')}, function(source)
     TriggerClientEvent('police:client:EscortPlayer', source)
 end)
 
 lib.addCommand('callsign', {
-    help = Lang:t('commands.callsign'),
-    params = {
-        {
-            name = 'callsign',
-            type = 'string',
-            help = Lang:t('info.callsign_name')
-        }
-    },
+    help = locale('commands.callsign'),
+    params = {{
+        name = 'callsign',
+        type = 'string',
+        help = locale('info.callsign_name')
+    }},
  }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     player.Functions.SetMetaData('callsign', args.callsign)
 end)
 
-lib.addCommand('clearcasings', {help = Lang:t('commands.clear_casign')}, function(source)
+lib.addCommand('clearcasings', {help = locale('commands.clear_casign')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('evidence:client:ClearCasingsInArea', source)
 end)
 
-lib.addCommand('jail', {help = Lang:t('commands.jail_player')}, function(source)
+lib.addCommand('jail', {help = locale('commands.jail_player')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('police:client:JailPlayer', source)
 end)
 
 lib.addCommand('unjail', {
-    help = Lang:t('commands.unjail_player'),
-    params = {
-        {
-            name = 'id',
-            type = 'playerId',
-            help = Lang:t('info.player_id')
-        }
-    }
+    help = locale('commands.unjail_player'),
+    params = {{
+        name = 'id',
+        type = 'playerId',
+        help = locale('info.player_id')
+    }}
 }, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
     if GetResourceState('qbx_prison') == 'started' then
@@ -173,47 +163,45 @@ lib.addCommand('unjail', {
     end
 end)
 
-lib.addCommand('clearblood', {help = Lang:t('commands.clearblood')}, function(source)
+lib.addCommand('clearblood', {help = locale('commands.clearblood')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('evidence:client:ClearBlooddropsInArea', source)
 end)
 
-lib.addCommand('seizecash', {help = Lang:t('commands.seizecash')}, function(source)
+lib.addCommand('seizecash', {help = locale('commands.seizecash')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('police:client:SeizeCash', source)
 end)
 
-lib.addCommand('sc', {help = Lang:t('commands.softcuff')}, function(source)
+lib.addCommand('sc', {help = locale('commands.softcuff')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('police:client:CuffPlayerSoft', source)
 end)
 
 lib.addCommand('cam', {
-    help = Lang:t('commands.camera'),
-    params = {
-        {
-            name = 'camid',
-            type = 'number',
-            help = Lang:t('info.camera_id_help')
-        }
-    },
+    help = locale('commands.camera'),
+    params = {{
+        name = 'camid',
+        type = 'number',
+        help = locale('info.camera_id_help')
+    }},
  }, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('police:client:ActiveCamera', source, args.camid)
 end)
 
 lib.addCommand('flagplate', {
-    help = Lang:t('commands.flagplate'),
+    help = locale('commands.flagplate'),
     params = {
         {
             name = 'plate',
             type = 'string',
-            help = Lang:t('info.plate_number')
+            help = locale('info.plate_number')
         },
         {
             name = 'reason',
             type = 'string',
-            help = Lang:t('info.flag_reason'),
+            help = locale('info.flag_reason'),
             optional = true
         }
     },
@@ -227,132 +215,122 @@ lib.addCommand('flagplate', {
         isflagged = true,
         reason = table.concat(reason, ' ')
     }
-    exports.qbx_core:Notify(source, Lang:t('info.vehicle_flagged', {vehicle = args[1]:upper(), reason = table.concat(reason, ' ')}), 'inform')
+    exports.qbx_core:Notify(source, locale('info.vehicle_flagged', args[1]:upper(), table.concat(reason, ' ')), 'inform')
 end)
 
 lib.addCommand('unflagplate', {
-    help = Lang:t('commands.unflagplate'),
-    params = {
-        {
-            name = 'plate',
-            type = 'string',
-            help = Lang:t('info.plate_number')
-        }
-    },
+    help = locale('commands.unflagplate'),
+    params = {{
+        name = 'plate',
+        type = 'string',
+        help = locale('info.plate_number')
+    }},
 }, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
     if not Plates or not Plates[args.plate:upper()] then
-        return exports.qbx_core:Notify(source, Lang:t('error.vehicle_not_flag'), 'error')
+        return exports.qbx_core:Notify(source, locale('error.vehicle_not_flag'), 'error')
     end
 
     if not Plates[args.plate:upper()].isflagged then
-        return exports.qbx_core:Notify(source, Lang:t('error.vehicle_not_flag'), 'error')
+        return exports.qbx_core:Notify(source, locale('error.vehicle_not_flag'), 'error')
     end
 
     Plates[args.plate:upper()].isflagged = false
-    exports.qbx_core:Notify(source, Lang:t('info.unflag_vehicle', {vehicle = args.plate:upper()}), 'inform')
+    exports.qbx_core:Notify(source, locale('info.unflag_vehicle', args.plate:upper()), 'inform')
 end)
 
 lib.addCommand('plateinfo', {
-    help = Lang:t('commands.plateinfo'),
-    params = {
-        {
-            name = 'plate',
-            type = 'string',
-            help = Lang:t('info.plate_number')
-        }
-    },
+    help = locale('commands.plateinfo'),
+    params = {{
+        name = 'plate',
+        type = 'string',
+        help = locale('info.plate_number')
+    }},
 }, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
     if not Plates or Plates[args.plate:upper()] then
-        return exports.qbx_core:Notify(source, Lang:t('error.vehicle_not_flag'), 'error')
+        return exports.qbx_core:Notify(source, locale('error.vehicle_not_flag'), 'error')
     end
     if Plates[args.plate:upper()].isflagged then
-        exports.qbx_core:Notify(source, Lang:t('success.vehicle_flagged', {plate = args.plate:upper(), reason = Plates[args.plate:upper()].reason}), 'success')
+        exports.qbx_core:Notify(source, locale('success.vehicle_flagged', args.plate:upper(), Plates[args.plate:upper()].reason), 'success')
     else
-        exports.qbx_core:Notify(source, Lang:t('error.vehicle_not_flag'), 'error')
+        exports.qbx_core:Notify(source, locale('error.vehicle_not_flag'), 'error')
     end
 end)
 
 lib.addCommand('depot', {
-    help = Lang:t('commands.depot'),
-    params = {
-        {
-            name = 'price',
-            type = 'number',
-            help = Lang:t('info.impound_price')
-        }
-    },
+    help = locale('commands.depot'),
+    params = {{
+        name = 'price',
+        type = 'number',
+        help = locale('info.impound_price')
+    }},
 }, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('police:client:ImpoundVehicle', source, false, args.price)
 end)
 
-lib.addCommand('impound', {help = Lang:t('commands.impound')}, function(source)
+lib.addCommand('impound', {help = locale('commands.impound')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('police:client:ImpoundVehicle', source, true)
 end)
 
 lib.addCommand('paytow', {
-    help = Lang:t('commands.paytow'),
-    params = {
-        {
-            name = 'id',
-            type = 'playerId',
-            help = Lang:t('info.player_id')
-        }
-    },
+    help = locale('commands.paytow'),
+    params = {{
+        name = 'id',
+        type = 'playerId',
+        help = locale('info.player_id')
+    }},
 }, function(source, args)
     if not checkLeoAndOnDuty(source) then return end
     local otherPlayer = exports.qbx_core:GetPlayer(args.id)
     if not otherPlayer then return end
     if not config.towJobs[otherPlayer.PlayerData.job.name] then
-        return exports.qbx_core:Notify(source, Lang:t('error.not_towdriver'), 'error')
+        return exports.qbx_core:Notify(source, locale('error.not_towdriver'), 'error')
     end
 
     otherPlayer.Functions.AddMoney('bank', config.towPay, 'police-tow-paid')
-    exports.qbx_core:Notify(otherPlayer.PlayerData.source, Lang:t('success.tow_paid'), 'success')
-    exports.qbx_core:Notify(source, Lang:t('info.tow_driver_paid'), 'inform')
+    exports.qbx_core:Notify(otherPlayer.PlayerData.source, locale('success.tow_paid'), 'success')
+    exports.qbx_core:Notify(source, locale('info.tow_driver_paid'), 'inform')
 end)
 
 lib.addCommand('paylawyer', {
-    help = Lang:t('commands.paylawyer'),
-    params = {
-        {
-            name = 'id',
-            type = 'playerId',
-            help = Lang:t('info.player_id')
-        }
-    },
+    help = locale('commands.paylawyer'),
+    params = {{
+        name = 'id',
+        type = 'playerId',
+        help = locale('info.player_id')
+    }},
  }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     if player.PlayerData.job.type ~= 'leo' and player.PlayerData.job.name ~= 'judge' then
-        return exports.qbx_core:Notify(source, Lang:t('error.on_duty_police_only'), 'error')
+        return exports.qbx_core:Notify(source, locale('error.on_duty_police_only'), 'error')
     end
 
     local otherPlayer = exports.qbx_core:GetPlayer(args.id)
     if not otherPlayer then return end
     if not config.lawyerJobs[otherPlayer.PlayerData.job.name] then
-        return exports.qbx_core:Notify(source, Lang:t('error.not_lawyer'), 'error')
+        return exports.qbx_core:Notify(source, locale('error.not_lawyer'), 'error')
     end
 
     otherPlayer.Functions.AddMoney('bank', config.lawyerPay, 'police-lawyer-paid')
-    exports.qbx_core:Notify(otherPlayer.PlayerData.source, Lang:t('success.tow_paid'), 'success')
-    exports.qbx_core:Notify(source, Lang:t('info.paid_lawyer'), 'inform')
+    exports.qbx_core:Notify(otherPlayer.PlayerData.source, locale('success.tow_paid'), 'success')
+    exports.qbx_core:Notify(source, locale('info.paid_lawyer'), 'inform')
 end)
 
-lib.addCommand('anklet', {help = Lang:t('commands.anklet')}, function(source)
+lib.addCommand('anklet', {help = locale('commands.anklet')}, function(source)
     if not checkLeoAndOnDuty(source) then return end
     TriggerClientEvent('police:client:CheckDistance', source)
 end)
 
 lib.addCommand('ankletlocation', {
-    help = Lang:t('commands.ankletlocation'),
+    help = locale('commands.ankletlocation'),
     params = {
         {
             name = 'cid',
             type = 'string',
-            help = Lang:t('info.citizen_id')
+            help = locale('info.citizen_id')
         }
     },
 }, function(source, args)
@@ -360,31 +338,29 @@ lib.addCommand('ankletlocation', {
     local target = exports.qbx_core:GetPlayerByCitizenId(args.cid)
     if not target then return end
     if not target.PlayerData.metadata.tracker then
-        return exports.qbx_core:Notify(source, Lang:t('error.no_anklet'), 'error')
+        return exports.qbx_core:Notify(source, locale('error.no_anklet'), 'error')
     end
     TriggerClientEvent('police:client:SendTrackerLocation', target.PlayerData.source, source)
 end)
 
 lib.addCommand('takedna', {
-    help = Lang:t('commands.takedna'),
-    params = {
-        {
-            name = 'id',
-            type = 'playerId',
-            help = Lang:t('info.player_id')
-        }
-    },
+    help = locale('commands.takedna'),
+    params = {{
+        name = 'id',
+        type = 'playerId',
+        help = locale('info.player_id')
+    }},
 }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     local otherPlayer = exports.qbx_core:GetPlayer(args.id)
 
     if not checkLeoAndOnDuty(player) then return end
     if not player.Functions.RemoveItem('empty_evidence_bag', 1) then
-        return exports.qbx_core:Notify(source, Lang:t('error.have_evidence_bag'), 'error')
+        return exports.qbx_core:Notify(source, locale('error.have_evidence_bag'), 'error')
     end
 
     local info = {
-        label = Lang:t('info.dna_sample'),
+        label = locale('info.dna_sample'),
         type = 'dna',
         dnalabel = dnaHash(otherPlayer.PlayerData.citizenid),
         description = dnaHash(otherPlayer.PlayerData.citizenid)
@@ -393,23 +369,21 @@ lib.addCommand('takedna', {
 end)
 
 lib.addCommand('911p', {
-    help = Lang:t('commands.police_report'),
-    params = {
-        {
-            name = 'message',
-            type = 'string',
-            help = Lang:t('commands.message_sent')
-        }
-    },
+    help = locale('commands.police_report'),
+    params = {{
+        name = 'message',
+        type = 'string',
+        help = locale('commands.message_sent')
+    }},
 }, function(source, args)
     local message
-	if args.message then message = table.concat(args, ' ') else message = Lang:t('commands.civilian_call') end
+	if args.message then message = table.concat(args, ' ') else message = locale('commands.civilian_call') end
     local ped = GetPlayerPed(source)
     local coords = GetEntityCoords(ped)
     local players = exports.qbx_core:GetQBPlayers()
     for _, v in pairs(players) do
         if IsLeoAndOnDuty(v) then
-            local alertData = {title = Lang:t('commands.emergency_call'), coords = {x = coords.x, y = coords.y, z = coords.z}, description = message}
+            local alertData = {title = locale('commands.emergency_call'), coords = {x = coords.x, y = coords.y, z = coords.z}, description = message}
             TriggerClientEvent('qb-phone:client:addPoliceAlert', v.PlayerData.source, alertData)
             TriggerClientEvent('police:client:policeAlert', v.PlayerData.source, coords, message)
         end

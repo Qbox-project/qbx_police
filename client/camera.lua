@@ -28,7 +28,7 @@ local function createInstructionalScaleform(scaleform)
     PushScaleformMovieFunctionParameterInt(1)
     ScaleformMovieMethodAddParamPlayerNameString(GetControlInstructionalButton(1, 194, true))
     BeginTextCommandScaleformString('STRING')
-    AddTextComponentScaleform(Lang:t('info.close_camera'))
+    AddTextComponentScaleform(locale('info.close_camera'))
     EndTextCommandScaleformString()
     PopScaleformMovieFunctionVoid()
 
@@ -112,7 +112,7 @@ RegisterNetEvent('police:client:ActiveCamera', function(camId)
         })
         DoScreenFadeIn(250)
     else
-        exports.qbx_core:Notify(Lang:t('error.no_camera'), 'error')
+        exports.qbx_core:Notify(locale('error.no_camera'), 'error')
     end
 end)
 

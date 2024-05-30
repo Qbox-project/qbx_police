@@ -48,7 +48,7 @@ end
 RegisterNetEvent('police:client:spawnPObj', function(item)
     if lib.progressBar({
         duration = 2500,
-        label = Lang:t('progressbar.place_object'),
+        label = locale('progressbar.place_object'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -64,7 +64,7 @@ RegisterNetEvent('police:client:spawnPObj', function(item)
     }) then
         TriggerServerEvent('police:server:spawnObject', item)
     else
-        exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
+        exports.qbx_core:Notify(locale('error.canceled'), 'error')
     end
 end)
 
@@ -73,7 +73,7 @@ RegisterNetEvent('police:client:deleteObject', function()
     if dist < 5.0 then
         if lib.progressBar({
             duration = 2500,
-            label = Lang:t('progressbar.remove_object'),
+            label = locale('progressbar.remove_object'),
             useWhileDead = false,
             canCancel = true,
             disable = {
@@ -89,7 +89,7 @@ RegisterNetEvent('police:client:deleteObject', function()
         }) then
             TriggerServerEvent('police:server:deleteObject', objectId)
         else
-            exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
+            exports.qbx_core:Notify(locale('error.canceled'), 'error')
         end
     end
 end)
@@ -119,8 +119,7 @@ end)
 ---Spawn a spike strip.
 RegisterNetEvent('police:client:SpawnSpikeStrip', function()
     if #spawnedSpikes >= config.maxSpikes or QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then
-        exports.qbx_core:Notify(Lang:t('error.no_spikestripe'), 'error')
-        return
+        return exports.qbx_core:Notify(locale('error.no_spikestripe'), 'error')
     end
 
     local spawnCoords = GetOffsetFromEntityInWorldCoords(cache.ped, 0.0, 2.0, 0.0)
@@ -193,7 +192,7 @@ CreateThread(function()
                     if not cache.vehicle then
                         if QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty then
                             sleep = 0
-                            lib.showTextUI(Lang:t('info.delete_spike'))
+                            lib.showTextUI(locale('info.delete_spike'))
                             if IsControlJustPressed(0, 38) then
                                 NetworkRegisterEntityAsNetworked(spawnedSpikes[closestSpike].object)
                                 NetworkRequestControlOfEntity(spawnedSpikes[closestSpike].object)
