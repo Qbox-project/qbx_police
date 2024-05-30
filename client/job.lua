@@ -103,8 +103,9 @@ local function takeOutVehicle(vehicleInfo)
     if not inGarage then return end
     local coords = sharedConfig.locations.vehicle[currentGarage]
     if not coords then return end
-
-    local plate = Lang:t('info.police_plate')..tostring(math.random(1000, 9999))
+    local pattern = ''
+    for _ = 8 - #sharedConfig.policePlatePrefix, #sharedConfig.policePlatePrefix do pattern = pattern..'1' end
+    local plate = sharedConfig.policePlatePrefix..lib.string.random(pattern):upper()
     local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicleInfo, coords, plate, true)
 
     local veh = lib.waitFor(function()
@@ -113,10 +114,8 @@ local function takeOutVehicle(vehicleInfo)
         end
     end)
 
-    if veh == 0 then
-        exports.qbx_core:Notify('Something went wrong spawning the vehicle', 'error')
-        return
-    end
+    assert(veh ~= 0, 'Something went wrong spawning the vehicle')
+
     setCarItemsInfo()
     SetEntityHeading(veh, coords.w)
     SetVehicleFuelLevel(veh, 100.0)
