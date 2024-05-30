@@ -1,5 +1,6 @@
 local config = require 'config.client'
 local isEscorting = false
+local cuffType = 1
 
 exports('IsHandcuffed', function()
     return QBX.PlayerData.metadata.ishandcuffed
@@ -91,8 +92,8 @@ local function handcuffedEscorted()
     local sleep = 1000
     local anim = {{dict = 'mp_arresting', anim = 'idle'}, {dict = 'mp_arrest_paired', anim = 'crook_p2_back_right'}}
 
-    if not IsLoggedIn then return sleep end
-    if isEscorted then
+    if not LocalPlayer.state.isLoggedIn then return sleep end
+    if IsEscorted then
         sleep = 0
         escortActions()
     end
@@ -115,7 +116,7 @@ RegisterNetEvent('police:client:SetOutVehicle', function()
 end)
 
 RegisterNetEvent('police:client:PutInVehicle', function()
-    if not QBX.PlayerData.metadata.ishandcuffed and not isEscorted then return end
+    if not QBX.PlayerData.metadata.ishandcuffed and not IsEscorted then return end
 
     local coords = GetEntityCoords(cache.ped)
     local vehicle = lib.getClosestVehicle(coords)
@@ -123,8 +124,8 @@ RegisterNetEvent('police:client:PutInVehicle', function()
 
     for i = GetVehicleMaxNumberOfPassengers(vehicle), 0, -1 do
         if IsVehicleSeatFree(vehicle, i) then
-            isEscorted = false
-            TriggerEvent('hospital:client:isEscorted', isEscorted)
+            IsEscorted = false
+            TriggerEvent('hospital:client:isEscorted', IsEscorted)
             ClearPedTasks(cache.ped)
             DetachEntity(cache.ped, true, false)
             Wait(100)
@@ -166,9 +167,13 @@ RegisterNetEvent('police:client:RobPlayer', function()
     local player, playerPed  = getClosestPlayer()
     if not player then return end
     local playerId = GetPlayerServerId(player)
-    if not (IsEntityPlayingAnim(playerPed, 'missminuteman_1ig_2', 'handsup_base', 3) or IsEntityPlayingAnim(playerPed, 'mp_arresting', 'idle', 3) or isTargetDead(playerId)) then
+    if not (IsEntityPlayingAnim(playerPed, 'missminuteman_1ig_2', 'handsup_base', 3)
+        or IsEntityPlayingAnim(playerPed, 'mp_arresting', 'idle', 3)
+        or isTargetDead(playerId))
+    then
         return exports.qbx_core:Notify(locale('error.no_rob'), 'error')
     end
+
     if lib.progressCircle({
         duration = math.random(5000, 7000),
         position = 'bottom',
@@ -235,7 +240,7 @@ local function triggerIfHandsFree(eventName)
     local player = getClosestPlayer()
     if not player then return end
     local playerId = GetPlayerServerId(player)
-    if QBX.PlayerData.metadata.ishandcuffed or isEscorted then return end
+    if QBX.PlayerData.metadata.ishandcuffed or IsEscorted then return end
     TriggerServerEvent(eventName, playerId)
 end
 
@@ -255,7 +260,7 @@ RegisterNetEvent('police:client:KidnapPlayer', function()
     local player = getClosestPlayer()
     if not player then return end
     local playerId = GetPlayerServerId(player)
-    if IsPedInAnyVehicle(GetPlayerPed(player), false) or QBX.PlayerData.metadata.ishandcuffed or isEscorted then return end
+    if IsPedInAnyVehicle(GetPlayerPed(player), false) or QBX.PlayerData.metadata.ishandcuffed or IsEscorted then return end
     TriggerServerEvent('police:server:KidnapPlayer', playerId)
 end)
 
@@ -289,39 +294,42 @@ end)
 RegisterNetEvent('police:client:GetEscorted', function(playerId)
     if not QBX.PlayerData.metadata.isdead and not QBX.PlayerData.metadata.ishandcuffed and not QBX.PlayerData.metadata.inlaststand then return end
 
-    if not isEscorted then
-        isEscorted = true
+    if not IsEscorted then
+        IsEscorted = true
         local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
         local offset = GetOffsetFromEntityInWorldCoords(dragger, 0.0, 0.45, 0.0)
         SetEntityCoords(cache.ped, offset.x, offset.y, offset.z, true, false, false, false)
         AttachEntityToEntity(cache.ped, dragger, 11816, 0.45, 0.45, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
     else
-        isEscorted = false
+        IsEscorted = false
         DetachEntity(cache.ped, true, false)
     end
-    TriggerEvent('hospital:client:isEscorted', isEscorted)
+    TriggerEvent('hospital:client:isEscorted', IsEscorted)
 end)
 
 RegisterNetEvent('police:client:DeEscort', function()
-    isEscorted = false
-    TriggerEvent('hospital:client:isEscorted', isEscorted)
+    IsEscorted = false
+    TriggerEvent('hospital:client:isEscorted', IsEscorted)
     DetachEntity(cache.ped, true, false)
 end)
 
 RegisterNetEvent('police:client:GetKidnappedTarget', function(playerId)
-    if QBX.PlayerData.metadata.isdead or QBX.PlayerData.metadata.inlaststand or QBX.PlayerData.metadata.ishandcuffed then
-        if not isEscorted then
-            isEscorted = true
+    if     QBX.PlayerData.metadata.isdead
+        or QBX.PlayerData.metadata.ishandcuffed
+        or QBX.PlayerData.metadata.inlaststand
+    then
+        if not IsEscorted then
+            IsEscorted = true
             local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
             lib.requestAnimDict('nm')
             AttachEntityToEntity(cache.ped, dragger, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 0.0, false, false, false, false, 2, false)
             TaskPlayAnim(cache.ped, 'nm', 'firemans_carry', 8.0, -8.0, 100000, 33, 0, false, false, false)
         else
-            isEscorted = false
+            IsEscorted = false
             DetachEntity(cache.ped, true, false)
             ClearPedTasksImmediately(cache.ped)
         end
-        TriggerEvent('hospital:client:isEscorted', isEscorted)
+        TriggerEvent('hospital:client:isEscorted', IsEscorted)
     end
 end)
 
@@ -355,8 +363,8 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
         end
         getCuffedAnimation(playerId)
     else
-        isEscorted = false
-        TriggerEvent('hospital:client:isEscorted', isEscorted)
+        IsEscorted = false
+        TriggerEvent('hospital:client:isEscorted', IsEscorted)
         DetachEntity(cache.ped, true, false)
         TriggerServerEvent('police:server:SetHandcuffStatus', false)
         ClearPedTasksImmediately(cache.ped)

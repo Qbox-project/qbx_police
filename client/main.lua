@@ -1,6 +1,5 @@
 local config = require 'config.shared'
-cuffType = 1
-isEscorted = false
+IsEscorted = false
 IsLoggedIn = LocalPlayer.state.isLoggedIn
 local dutyBlips = {}
 
@@ -74,7 +73,7 @@ end)
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     TriggerServerEvent('police:server:SetHandcuffStatus', false)
     TriggerServerEvent('police:server:UpdateCurrentCops')
-    isEscorted = false
+    IsEscorted = false
     ClearPedTasks(cache.ped)
     DetachEntity(cache.ped, true, false)
     if dutyBlips then
@@ -174,7 +173,7 @@ end)
 
 RegisterNetEvent('police:client:SendToJail', function(time)
     TriggerServerEvent('police:server:SetHandcuffStatus', false)
-    isEscorted = false
+    IsEscorted = false
     ClearPedTasks(cache.ped)
     DetachEntity(cache.ped, true, false)
     TriggerEvent('prison:client:Enter', time)

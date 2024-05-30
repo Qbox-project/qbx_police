@@ -377,7 +377,7 @@ lib.addCommand('911p', {
     }},
 }, function(source, args)
     local message
-	if args.message then message = table.concat(args, ' ') else message = locale('commands.civilian_call') end
+    if args.message then message = table.concat(args, ' ') else message = locale('commands.civilian_call') end
     local ped = GetPlayerPed(source)
     local coords = GetEntityCoords(ped)
     local players = exports.qbx_core:GetQBPlayers()

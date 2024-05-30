@@ -166,7 +166,7 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
 end)
 
 local function updateStatus()
-    if not IsLoggedIn then return end
+    if not LocalPlayer.state.isLoggedIn then return end
     if currentStatusList and next(currentStatusList) then
         for k in pairs(currentStatusList) do
             if currentStatusList[k].time > 0 then
@@ -295,7 +295,7 @@ CreateThread(function()
 end)
 
 local function canDiscoverEvidence()
-    return IsLoggedIn
+    return LocalPlayer.state.isLoggedIn
     and QBX.PlayerData.job.type == 'leo'
     and QBX.PlayerData.job.onduty
     and IsPlayerFreeAiming(cache.playerId)
