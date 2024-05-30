@@ -189,7 +189,9 @@ local WHEEL_NAMES = {
 local isSpike
 CreateThread(function()
     while true do
-        isSpike = checkIsSpikeObject(GlobalState.spikeStrips, GlobalState.fixedCoords, GetEntityCoords(cache.ped), 30)
+        if LocalPlayer.state.isLoggedIn then
+            isSpike = checkIsSpikeObject(GlobalState.spikeStrips, GlobalState.fixedCoords, GetEntityCoords(cache.ped), 30)
+        end
         Wait(500)
     end
 end)
@@ -312,10 +314,6 @@ local function toggleJobFunctions(isWorkingLeo)
     else
         keybind:disable(true)
     end
-
-    if cache.vehicle then
-        watchInVehicle(cache.vehicle)
-    end
 end
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(job)
@@ -330,6 +328,10 @@ end)
 AddStateBagChangeHandler('isLoggedIn', ('player:%s'):format(cache.serverId), function(_, _, isLoggedIn)
     local job = QBX.PlayerData.job
     toggleJobFunctions(isLoggedIn and job.type == 'leo' and job.onduty)
+
+    if cache.vehicle then
+        watchInVehicle(cache.vehicle)
+    end
 end)
 
 lib.onCache('vehicle', function(vehicle)

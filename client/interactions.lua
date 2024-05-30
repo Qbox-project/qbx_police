@@ -33,6 +33,7 @@ local function getCuffedAnimation(playerId)
     SetEntityHeading(cache.ped, heading)
     TaskPlayAnim(cache.ped, 'mp_arrest_paired', 'crook_p2_back_right', 3.0, 3.0, -1, 32, 0, false, false, false)
     Wait(2500)
+    RemoveAnimDict('mp_arrest_paired')
 end
 
 local function escortActions()
@@ -352,73 +353,46 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
     end
 end)
 
+local DISABLED_CONTROLS = {
+    21,  -- Sprint
+    24,  -- Attack
+    257, -- Attack 2
+    25,  -- Aim
+    263, -- Melee Attack 1
+    45,  -- Reload
+    22,  -- Jump
+    44,  -- Cover
+    37,  -- Select Weapon
+    23,  -- Also 'enter'?
+    288, -- Disable phone
+    289, -- Inventory
+    170, -- Animations
+    167, -- Job
+    26,  -- Disable looking behind
+    73,  -- Disable clearing animation
+    199, -- Disable pause screen
+    59,  -- Disable steering in vehicle
+    71,  -- Disable driving forward in vehicle
+    72,  -- Disable reversing in vehicle
+    36,  -- Disable going stealth
+    264, -- Disable melee
+    257, -- Disable melee
+    140, -- Disable melee
+    141, -- Disable melee
+    142, -- Disable melee
+    143, -- Disable melee
+    75   -- Disable exit vehicle
+}
+
 CreateThread(function()
     local hasDisabledControls = false
     while true do
         local sleep = handcuffedEscorted()
         if sleep > 0 and hasDisabledControls then --if sleep is greater than 0, activates controls
-            lib.disableControls:Remove(
-                21,  -- Sprint
-                24,  -- Attack
-                257, -- Attack 2
-                25,  -- Aim
-                263, -- Melee Attack 1
-                45,  -- Reload
-                22,  -- Jump
-                44,  -- Cover
-                37,  -- Select Weapon
-                23,  -- Also 'enter'?
-                288, -- Disable phone
-                289, -- Inventory
-                170, -- Animations
-                167, -- Job
-                26,  -- Disable looking behind
-                73,  -- Disable clearing animation
-                199, -- Disable pause screen
-                59,  -- Disable steering in vehicle
-                71,  -- Disable driving forward in vehicle
-                72,  -- Disable reversing in vehicle
-                36,  -- Disable going stealth
-                264, -- Disable melee
-                257, -- Disable melee
-                140, -- Disable melee
-                141, -- Disable melee
-                142, -- Disable melee
-                143, -- Disable melee
-                75   -- Disable exit vehicle
-            )
+            lib.disableControls:Remove(DISABLED_CONTROLS)
             hasDisabledControls = false
         elseif sleep == 0 and not hasDisabledControls then
-            lib.disableControls:Add(
-                21,  -- Sprint
-                24,  -- Attack
-                257, -- Attack 2
-                25,  -- Aim
-                263, -- Melee Attack 1
-                45,  -- Reload
-                22,  -- Jump
-                44,  -- Cover
-                37,  -- Select Weapon
-                23,  -- Also 'enter'?
-                288, -- Disable phone
-                289, -- Inventory
-                170, -- Animations
-                167, -- Job
-                26,  -- Disable looking behind
-                73,  -- Disable clearing animation
-                199, -- Disable pause screen
-                59,  -- Disable steering in vehicle
-                71,  -- Disable driving forward in vehicle
-                72,  -- Disable reversing in vehicle
-                36,  -- Disable going stealth
-                264, -- Disable melee
-                257, -- Disable melee
-                140, -- Disable melee
-                141, -- Disable melee
-                142, -- Disable melee
-                143, -- Disable melee
-                75   -- Disable exit vehicle
-            )
+            lib.disableControls:Add(DISABLED_CONTROLS)
             hasDisabledControls = true
         end
         Wait(sleep)
