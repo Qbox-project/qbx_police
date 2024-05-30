@@ -1,7 +1,5 @@
 local config = require 'config.shared'
-cuffType = 1
-isEscorted = false
-IsLoggedIn = LocalPlayer.state.isLoggedIn
+IsEscorted = false
 local dutyBlips = {}
 
 local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
@@ -35,6 +33,13 @@ local function CreateDutyBlips(playerId, playerLabel, playerJob, playerLocation)
     end
 end
 
+local function removeBlips()
+    for i = 1, #dutyBlips do
+        RemoveBlip(dutyBlips[i])
+    end
+    dutyBlips = {}
+end
+
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     TriggerServerEvent('police:server:SetHandcuffStatus', false)
     TriggerServerEvent('police:server:UpdateCurrentCops')
@@ -59,51 +64,31 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 
     TriggerEvent('qb-clothing:client:loadOutfit', trackerClothingData)
 
-    if QBX.PlayerData.job and QBX.PlayerData.job.type ~= 'leo' then
-        if dutyBlips then
-            for _, v in pairs(dutyBlips) do
-                RemoveBlip(v)
-            end
-        end
-        dutyBlips = {}
+    local job = QBX.PlayerData.job
+    if not job or job.type ~= 'leo' and job.type ~= 'ems' then
+        removeBlips()
     end
-
-    IsLoggedIn = true
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
     TriggerServerEvent('police:server:SetHandcuffStatus', false)
     TriggerServerEvent('police:server:UpdateCurrentCops')
-    isEscorted = false
+    IsEscorted = false
     ClearPedTasks(cache.ped)
     DetachEntity(cache.ped, true, false)
-    if dutyBlips then
-        for _, v in pairs(dutyBlips) do
-            RemoveBlip(v)
-        end
-        dutyBlips = {}
-    end
-    IsLoggedIn = false
+    removeBlips()
 end)
 
-RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
-    if JobInfo.type ~= 'leo' then
-        if dutyBlips then
-            for _, v in pairs(dutyBlips) do
-                RemoveBlip(v)
-            end
-        end
-        dutyBlips = {}
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(job)
+    if job.type ~= 'leo' and job.type ~= 'ems' then
+        removeBlips()
     end
 end)
 
 RegisterNetEvent('police:client:sendBillingMail', function(amount)
     SetTimeout(math.random(2500, 4000), function()
-        local gender = locale('info.mr')
-        if QBX.PlayerData.charinfo.gender == 1 then
-            gender = locale('info.mrs')
-        end
         local charinfo = QBX.PlayerData.charinfo
+        local gender = locale(charinfo.gender == 1 and 'info.mrs' or 'info.mr')
         TriggerServerEvent('qb-phone:server:sendNewMail', {
             sender = locale('email.sender'),
             subject = locale('email.subject'),
@@ -114,17 +99,13 @@ RegisterNetEvent('police:client:sendBillingMail', function(amount)
 end)
 
 RegisterNetEvent('police:client:UpdateBlips', function(players)
-    if QBX.PlayerData.job and (QBX.PlayerData.job.type == 'leo' or QBX.PlayerData.job.type == 'ems') and QBX.PlayerData.job.onduty then
-        if dutyBlips then
-            for _, v in pairs(dutyBlips) do
-                RemoveBlip(v)
-            end
-        end
-        dutyBlips = {}
+    local job = QBX.PlayerData.job
+    if job and (job.type == 'leo' or job.type == 'ems') and job.onduty then
+        removeBlips()
         if players then
-            for _, data in pairs(players) do
-                local id = GetPlayerFromServerId(data.source)
-                CreateDutyBlips(id, data.label, data.job, data.location)
+            for i = 1, #players do
+                local id = GetPlayerFromServerId(players[i].source)
+                CreateDutyBlips(id, players[i].label, players[i].job, players[i].location)
             end
         end
     end
@@ -174,7 +155,7 @@ end)
 
 RegisterNetEvent('police:client:SendToJail', function(time)
     TriggerServerEvent('police:server:SetHandcuffStatus', false)
-    isEscorted = false
+    IsEscorted = false
     ClearPedTasks(cache.ped)
     DetachEntity(cache.ped, true, false)
     TriggerEvent('prison:client:Enter', time)
@@ -186,13 +167,14 @@ RegisterNetEvent('police:client:SendPoliceEmergencyAlert', function()
 end)
 
 CreateThread(function()
-    for _, station in pairs(config.locations.stations) do
+    for i = 1, #config.locations.stations do
+        local station = config.locations.stations[i]
         local blip = AddBlipForCoord(station.coords.x, station.coords.y, station.coords.z)
         SetBlipSprite(blip, 60)
         SetBlipAsShortRange(blip, true)
         SetBlipScale(blip, 0.8)
         SetBlipColour(blip, 29)
-        
+
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentString(station.label)
         EndTextCommandSetBlipName(blip)
