@@ -146,37 +146,6 @@ RegisterNetEvent('police:client:SpawnSpikeStrip', function()
     RemoveAnimDict('amb@medic@standing@kneel@enter')
 end)
 
----Check https://github.com/overextended/ox_lib/blob/master/imports/waitFor/shared.lua
----Yields the current thread until a non-nil value is returned by the function.
----@generic T
----@param cb fun(): T?
----@param timeout? number | false Nil out after `~x` ms. Defaults to 1000, unless set to `false`.
----@return T
----@async
-local function silentWaitFor(cb, timeout)
-    local value = cb()
-
-    if value ~= nil then return value end
-
-    if timeout or timeout == nil then
-        if type(timeout) ~= 'number' then timeout = 1000 end
-    end
-
-    local start = timeout and GetGameTimer()
-
-    while value == nil do
-        local elapsed = timeout and GetGameTimer() - start
-        if elapsed and elapsed > timeout then
-            return nil
-        end
-
-        Wait(0)
-        value = cb()
-    end
-
-    return value
-end
-
 local WHEEL_NAMES = {
     'wheel_lf',
     'wheel_rf',
@@ -207,7 +176,7 @@ local function watchInVehicle(vehicle)
             if w ~= -1 then wheels[#wheels + 1] = { wheel = w, index = i - 1 } end
         end
 
-        silentWaitFor(function() return cache.value end, 2000)
+        pcall(lib.waitFor(function() return cache.value end, '', 2000))
 
         while cache.vehicle do
             local spikeStrips = GlobalState.spikeStrips
@@ -238,7 +207,7 @@ end
 
 local function watchOutOfVehicle()
     CreateThread(function ()
-        silentWaitFor(function() return cache.value and nil or false end, 2000)
+        pcall(lib.waitFor(function() return cache.value and nil or false end, '', 2000))
 
         while not cache.vehicle and LocalPlayer.state.isLoggedIn and QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty do
             local isOpen, text = lib.isTextUIOpen()
