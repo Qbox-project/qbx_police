@@ -166,7 +166,7 @@ CreateThread(function()
 end)
 
 local isWatchInVehicleBusy
-local function watchInVehicle(vehicle)
+local function burstTireCloseToSpike(vehicle)
     CreateThread(function ()
         if isWatchInVehicleBusy then return end
         isWatchInVehicleBusy = true
@@ -205,7 +205,7 @@ local function watchInVehicle(vehicle)
     end)
 end
 
-local function watchOutOfVehicle()
+local function displayInfoCloseToSpike()
     CreateThread(function ()
         pcall(lib.waitFor(function() return cache.value and nil or false end, '', 2000))
 
@@ -278,7 +278,7 @@ local function toggleJobFunctions(isWorkingLeo)
         keybind:disable(false)
 
         if not cache.vehicle then
-            watchOutOfVehicle()
+            displayInfoCloseToSpike()
         end
     else
         keybind:disable(true)
@@ -299,15 +299,15 @@ AddStateBagChangeHandler('isLoggedIn', ('player:%s'):format(cache.serverId), fun
     toggleJobFunctions(isLoggedIn and job and job.type == 'leo' and job.onduty)
 
     if cache.vehicle then
-        watchInVehicle(cache.vehicle)
+        burstTireCloseToSpike(cache.vehicle)
     end
 end)
 
 lib.onCache('vehicle', function(vehicle)
     if vehicle then
-        watchInVehicle(vehicle)
+        burstTireCloseToSpike(vehicle)
     else
-        watchOutOfVehicle()
+        displayInfoCloseToSpike()
     end
 end)
 
