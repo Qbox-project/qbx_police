@@ -9,19 +9,19 @@ local currentFingerprint = 0
 local shotAmount = 0
 
 local statusList = {
-    fight = Lang:t('evidence.red_hands'),
-    widepupils = Lang:t('evidence.wide_pupils'),
-    redeyes = Lang:t('evidence.red_eyes'),
-    weedsmell = Lang:t('evidence.weed_smell'),
-    gunpowder = Lang:t('evidence.gunpowder'),
-    chemicals = Lang:t('evidence.chemicals'),
-    heavybreath = Lang:t('evidence.heavy_breathing'),
-    sweat = Lang:t('evidence.sweat'),
-    handbleed = Lang:t('evidence.handbleed'),
-    confused = Lang:t('evidence.confused'),
-    alcohol = Lang:t('evidence.alcohol'),
-    heavyalcohol = Lang:t('evidence.heavy_alcohol'),
-    agitated = Lang:t('evidence.agitated'),
+    fight = locale('evidence.red_hands'),
+    widepupils = locale('evidence.wide_pupils'),
+    redeyes = locale('evidence.red_eyes'),
+    weedsmell = locale('evidence.weed_smell'),
+    gunpowder = locale('evidence.gunpowder'),
+    chemicals = locale('evidence.chemicals'),
+    heavybreath = locale('evidence.heavy_breathing'),
+    sweat = locale('evidence.sweat'),
+    handbleed = locale('evidence.handbleed'),
+    confused = locale('evidence.confused'),
+    alcohol = locale('evidence.alcohol'),
+    heavyalcohol = locale('evidence.heavy_alcohol'),
+    agitated = locale('evidence.agitated'),
 }
 
 local ignoredWeapons = {
@@ -95,7 +95,7 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
     if lib.progressCircle({
         duration = 5000,
         position = 'bottom',
-        label = Lang:t('progressbar.blood_clear'),
+        label = locale('progressbar.blood_clear'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -113,17 +113,17 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
                 end
             end
             TriggerServerEvent('evidence:server:ClearBlooddrops', bloodDropList)
-            exports.qbx_core:Notify(Lang:t('success.blood_clear'), 'success')
+            exports.qbx_core:Notify(locale('success.blood_clear'), 'success')
         end
     else
-        exports.qbx_core:Notify(Lang:t('error.blood_not_cleared'), 'error')
+        exports.qbx_core:Notify(locale('error.blood_not_cleared'), 'error')
     end
 end)
 
 RegisterNetEvent('evidence:client:AddCasing', function(casingId, weapon, coords, serie)
     casings[casingId] = {
         type = weapon,
-        serie = serie and serie or Lang:t('evidence.serial_not_visible'),
+        serie = serie and serie or locale('evidence.serial_not_visible'),
         coords = vec3(coords.x, coords.y, coords.z - 0.9)
     }
 end)
@@ -140,7 +140,7 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
     if lib.progressCircle({
         duration = 5000,
         position = 'bottom',
-        label = Lang:t('progressbar.bullet_casing'),
+        label = locale('progressbar.bullet_casing'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -158,10 +158,10 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
                 end
             end
             TriggerServerEvent('evidence:server:ClearCasings', casingList)
-            exports.qbx_core:Notify(Lang:t('success.bullet_casing_removed'), 'success')
+            exports.qbx_core:Notify(locale('success.bullet_casing_removed'), 'success')
         end
     else
-        exports.qbx_core:Notify(Lang:t('error.bullet_casing_not_removed'), 'error')
+        exports.qbx_core:Notify(locale('error.bullet_casing_not_removed'), 'error')
     end
 end)
 
@@ -251,9 +251,9 @@ CreateThread(function()
             drawEvidenceIfInRange({
                 evidenceId = currentCasing,
                 coords = casings[currentCasing].coords,
-                text = Lang:t('info.bullet_casing', {value = casings[currentCasing].type}),
+                text = locale('info.bullet_casing', casings[currentCasing].type),
                 metadata = {
-                    type = Lang:t('info.casing'),
+                    type = locale('info.casing'),
                     street = getStreetLabel(casings[currentCasing].coords),
                     ammolabel = config.ammoLabels[exports.qbx_core:GetWeapons()[casings[currentCasing].type].ammotype],
                     ammotype = casings[currentCasing].type,
@@ -267,9 +267,9 @@ CreateThread(function()
             drawEvidenceIfInRange({
                 evidenceId = currentBloodDrop,
                 coords = bloodDrops[currentBloodDrop].coords,
-                text = Lang:t('info.blood_text', {value = dnaHash(bloodDrops[currentBloodDrop].citizenid)}),
+                text = locale('info.blood_text', dnaHash(bloodDrops[currentBloodDrop].citizenid)),
                 metadata = {
-                    type = Lang:t('info.blood'),
+                    type = locale('info.blood'),
                     street = getStreetLabel(bloodDrops[currentBloodDrop].coords),
                     dnalabel = dnaHash(bloodDrops[currentBloodDrop].citizenid),
                     bloodtype = bloodDrops[currentBloodDrop].bloodtype
@@ -282,9 +282,9 @@ CreateThread(function()
             drawEvidenceIfInRange({
                 evidenceId = currentFingerprint,
                 coords = fingerprints[currentFingerprint].coords,
-                text = Lang:t('info.fingerprint_text'),
+                text = locale('info.fingerprint_text'),
                 metadata = {
-                    type = Lang:t('info.fingerprint'),
+                    type = locale('info.fingerprint'),
                     street = getStreetLabel(fingerprints[currentFingerprint].coords),
                     fingerprint = fingerprints[currentFingerprint].fingerprint
                 },

@@ -154,7 +154,7 @@ local function openGarageMenu()
 
     lib.registerContext({
         id = 'vehicleMenu',
-        title = Lang:t('menu.garage_title'),
+        title = locale('menu.garage_title'),
         options = options,
     })
     lib.showContext('vehicleMenu')
@@ -164,7 +164,7 @@ local function openImpoundMenu()
     local options = {}
     local result = lib.callback.await('police:GetImpoundedVehicles', false)
     if not result then
-        exports.qbx_core:Notify(Lang:t('error.no_impound'), 'error')
+        exports.qbx_core:Notify(locale('error.no_impound'), 'error')
     else
         local vehicles = exports.qbx_core:GetVehiclesByName()
         for _, v in pairs(result) do
@@ -187,7 +187,7 @@ local function openImpoundMenu()
 
     lib.registerContext({
         id = 'impoundMenu',
-        title = Lang:t('menu.impound'),
+        title = locale('menu.impound'),
         options = options
     })
     lib.showContext('impoundMenu')
@@ -195,14 +195,14 @@ end
 
 ---TODO: global evidence lockers instead of location specific
 local function openEvidenceLockerSelectInput(currentEvidence)
-    local input = lib.inputDialog(Lang:t('info.evidence_stash', {value = currentEvidence}), {Lang:t('info.slot')})
+    local input = lib.inputDialog(locale('info.evidence_stash', currentEvidence), {locale('info.slot')})
     if not input then return end
     local slotNumber = tonumber(input[1])
-    TriggerServerEvent('inventory:server:OpenInventory', 'stash', Lang:t('info.current_evidence', {value = currentEvidence, value2 = slotNumber}), {
+    TriggerServerEvent('inventory:server:OpenInventory', 'stash', locale('info.current_evidence', currentEvidence, slotNumber), {
         maxweight = 4000000,
         slots = 500,
     })
-    TriggerEvent('inventory:client:SetCurrentStash', Lang:t('info.current_evidence', {value = currentEvidence, value2 = slotNumber}))
+    TriggerEvent('inventory:client:SetCurrentStash', locale('info.current_evidence', currentEvidence, slotNumber))
 end
 
 local function openEvidenceMenu()
@@ -237,8 +237,7 @@ local function scanFingerprint()
     if not inFingerprint then return end
     local playerId = lib.getClosestPlayer(GetEntityCoords(cache.ped), 2.5, false)
     if not playerId then
-        exports.qbx_core:Notify(Lang:t('error.none_nearby'), 'error')
-        return
+        return exports.qbx_core:Notify(locale('error.none_nearby'), 'error')
     end
     TriggerServerEvent('police:server:showFingerprint', GetPlayerServerId(playerId))
 end
@@ -372,7 +371,7 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
     if lib.progressCircle({
         duration = 5000,
         position = 'bottom',
-        label = Lang:t('progressbar.impound'),
+        label = locale('progressbar.impound'),
         useWhileDead = false,
         canCancel = true,
         disable = {
@@ -405,11 +404,11 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
         local plate = qbx.getVehiclePlate(vehicle)
         TriggerServerEvent('police:server:Impound', plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
         DeleteVehicle(vehicle)
-        exports.qbx_core:Notify(Lang:t('success.impounded'), 'success')
+        exports.qbx_core:Notify(locale('success.impounded'), 'success')
         ClearPedTasks(cache.ped)
     else
         ClearPedTasks(cache.ped)
-        exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
+        exports.qbx_core:Notify(locale('error.canceled'), 'error')
     end
 end)
 
@@ -418,8 +417,7 @@ RegisterNetEvent('police:client:CheckStatus', function()
 
     local playerId = lib.getClosestPlayer(GetEntityCoords(cache.ped), 5.0, false)
     if not playerId then
-        exports.qbx_core:Notify(Lang:t('error.none_nearby'), 'error')
-        return
+        return exports.qbx_core:Notify(locale('error.none_nearby'), 'error')
     end
     local result = lib.callback.await('police:GetPlayerStatus', false, playerId)
     if not result then return end
@@ -443,7 +441,7 @@ if config.useTarget then
                 options = {
                     {
 			distance = 1.5,
-                        label = Lang:t('info.onoff_duty'),
+                        label = locale('info.onoff_duty'),
                         icon = 'fa-solid fa-sign-in-alt',
                         onSelect = ToggleDuty,
                         groups = 'police'
@@ -462,9 +460,9 @@ else
             onEnter = function()
                 inPrompt = true
                 if not QBX.PlayerData.job.onduty then
-                    lib.showTextUI(Lang:t('info.on_duty'))
+                    lib.showTextUI(locale('info.on_duty'))
                 else
-                    lib.showTextUI(Lang:t('info.off_duty'))
+                    lib.showTextUI(locale('info.off_duty'))
                 end
                 uiPrompt('duty')
             end,
@@ -489,7 +487,7 @@ CreateThread(function()
                 inTrash = true
                 inPrompt = true
                 if QBX.PlayerData.job.onduty then
-                    lib.showTextUI(Lang:t('info.trash_enter'))
+                    lib.showTextUI(locale('info.trash_enter'))
                     uiPrompt('trash', i)
                 end
             end,
@@ -512,7 +510,7 @@ CreateThread(function()
                 inFingerprint = true
                 inPrompt = true
                 if QBX.PlayerData.job.onduty then
-                    lib.showTextUI(Lang:t('info.scan_fingerprint'))
+                    lib.showTextUI(locale('info.scan_fingerprint'))
                     uiPrompt('fingerprint')
                 end
             end,
@@ -537,9 +535,9 @@ CreateThread(function()
                 if QBX.PlayerData.job.onduty then
                     uiPrompt('heli')
                     if cache.vehicle then
-                        lib.showTextUI(Lang:t('info.store_heli'))
+                        lib.showTextUI(locale('info.store_heli'))
                     else
-                        lib.showTextUI(Lang:t('info.take_heli'))
+                        lib.showTextUI(locale('info.take_heli'))
                     end
                 end
             end,
@@ -564,10 +562,10 @@ CreateThread(function()
                 currentGarage = k
                 if QBX.PlayerData.job.onduty then
                     if cache.vehicle then
-                        lib.showTextUI(Lang:t('info.impound_veh'))
+                        lib.showTextUI(locale('info.impound_veh'))
                         uiPrompt('impound')
                     else
-                        lib.showTextUI(Lang:t('menu.pol_impound'))
+                        lib.showTextUI(locale('menu.pol_impound'))
                         uiPrompt('impound')
                     end
                 end
@@ -594,7 +592,7 @@ CreateThread(function()
                     inPrompt = true
                     currentGarage = k
                     if cache.vehicle then
-                        lib.showTextUI(Lang:t('info.store_veh'))
+                        lib.showTextUI(locale('info.store_veh'))
                     else
                         lib.showTextUI('[E] - Vehicle Garage')
                     end
