@@ -322,12 +322,12 @@ end)
 
 RegisterNetEvent('QBCore:Client:SetDuty', function(onDuty)
     local job = QBX.PlayerData.job
-    toggleJobFunctions(LocalPlayer.state.isLoggedIn and job.type == 'leo' and onDuty)
+    toggleJobFunctions(LocalPlayer.state.isLoggedIn and job and job.type == 'leo' and onDuty)
 end)
 
 AddStateBagChangeHandler('isLoggedIn', ('player:%s'):format(cache.serverId), function(_, _, isLoggedIn)
     local job = QBX.PlayerData.job
-    toggleJobFunctions(isLoggedIn and job.type == 'leo' and job.onduty)
+    toggleJobFunctions(isLoggedIn and job and job.type == 'leo' and job.onduty)
 
     if cache.vehicle then
         watchInVehicle(cache.vehicle)
