@@ -104,7 +104,9 @@ local function takeOutVehicle(vehicleInfo)
     local coords = sharedConfig.locations.vehicle[currentGarage]
     if not coords then return end
     local pattern = ''
-    for _ = 8 - #sharedConfig.policePlatePrefix, #sharedConfig.policePlatePrefix do pattern = pattern..'1' end
+    for _ = 8 - #sharedConfig.policePlatePrefix, #sharedConfig.policePlatePrefix do
+        pattern = pattern..'1'
+    end
     local plate = sharedConfig.policePlatePrefix..lib.string.random(pattern):upper()
     local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicleInfo, coords, plate, true)
 
