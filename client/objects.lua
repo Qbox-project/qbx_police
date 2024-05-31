@@ -151,8 +151,8 @@ CreateThread(function()
 end)
 
 AddEventHandler('ox_lib:cache:vehicle', function()
-	CreateThread(function()
-		while cache.vehicle do
+    CreateThread(function()
+        while cache.vehicle do
             if closestSpike then
                 local tires = {
                     {bone = 'wheel_lf', index = 0},
@@ -176,9 +176,9 @@ AddEventHandler('ox_lib:cache:vehicle', function()
                     end
                 end
             end
-			Wait(100)
-		end
-	end)
+            Wait(100)
+        end
+    end)
 end)
 
 CreateThread(function()
