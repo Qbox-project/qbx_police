@@ -104,7 +104,7 @@ local function takeOutVehicle(vehicleInfo)
     local coords = sharedConfig.locations.vehicle[currentGarage]
     if not coords then return end
     local pattern = ''
-    for _ = 8 - #sharedConfig.policePlatePrefix, #sharedConfig.policePlatePrefix do
+    for _ = 1, 8 - #sharedConfig.policePlatePrefix do
         pattern = pattern..'1'
     end
     local plate = sharedConfig.policePlatePrefix..lib.string.random(pattern):upper()
@@ -114,7 +114,7 @@ local function takeOutVehicle(vehicleInfo)
         if NetworkDoesEntityExistWithNetworkId(netId) then
             return NetToVeh(netId)
         end
-    end)
+    end, nil, sharedConfig.timeout)
 
     assert(veh ~= 0, 'Something went wrong spawning the vehicle')
 
@@ -220,12 +220,11 @@ local function spawnHelicopter()
     local plyCoords = GetEntityCoords(cache.ped)
     local coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
     local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, config.policeHelicopter, coords, 'ZULU'..lib.string.random('1111'), true)
-    local timeout = 100
-    while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
-        Wait(10)
-        timeout -= 1
-    end
-    local heli = NetToVeh(netId)
+    local heli = lib.waitFor(function()
+        if NetworkDoesEntityExistWithNetworkId(netId) then
+            return NetToVeh(netId)
+        end
+    end, nil, sharedConfig.timeout)
     SetVehicleLivery(heli , 0)
     SetVehicleMod(heli, 0, 48, false)
     SetEntityHeading(heli, coords.w)

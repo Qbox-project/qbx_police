@@ -102,13 +102,19 @@ lib.callback.register('police:GetImpoundedVehicles', function()
     return FetchImpoundedVehicles()
 end)
 
-lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate, vehId)
-    local netId, veh = qbx.spawnVehicle({model = model, spawnSource = coords, warp = source})
+lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate, giveKeys, vehId)
+    local netId, veh = qbx.spawnVehicle({
+        model = model,
+        spawnSource = coords,
+        warp = GetPlayerPed(source)
+    })
+
     if not netId or netId == 0 or not veh or veh == 0 then return end
 
-    if vehId then Entity(veh).state.vehicleid = vehId end
     SetVehicleNumberPlateText(veh, plate)
-    exports.qbx_vehiclekeys:GiveKeys(source, plate)
+    if giveKeys == true then exports.qbx_vehiclekeys:GiveKeys(source, plate) end
+
+    if vehId then Entity(veh).state.vehicleid = vehId end
     return netId
 end)
 

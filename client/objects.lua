@@ -176,7 +176,7 @@ local function burstTireCloseToSpike(vehicle)
             if w ~= -1 then wheels[#wheels + 1] = { wheel = w, index = i - 1 } end
         end
 
-        pcall(lib.waitFor(function() return cache.value end, '', 2000))
+        pcall(lib.waitFor(function() return cache.value end, nil, sharedConfig.timeout))
 
         while cache.vehicle do
             local spikeStrips = GlobalState.spikeStrips
@@ -207,7 +207,7 @@ end
 
 local function displayInfoCloseToSpike()
     CreateThread(function ()
-        pcall(lib.waitFor(function() return cache.value and nil or false end, '', 2000))
+        pcall(lib.waitFor(function() return cache.value and nil or false end, nil, sharedConfig.timeout))
 
         while not cache.vehicle and LocalPlayer.state.isLoggedIn and QBX.PlayerData.job.type == 'leo' and QBX.PlayerData.job.onduty do
             local isOpen, text = lib.isTextUIOpen()

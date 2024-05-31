@@ -14,7 +14,7 @@ local function spawnObject(objects, modelHash, coords, zOffset, isFixed)
 
     local exists = lib.waitFor(function ()
         if DoesEntityExist(object) then return true end
-    end, ('Failed to spawn prop %s'):format(modelHash), 2000)
+    end, ('Failed to spawn prop %s'):format(modelHash), sharedConfig.timeout)
 
     if exists then
         local netid = NetworkGetNetworkIdFromEntity(object)

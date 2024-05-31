@@ -1,4 +1,5 @@
 return {
+    timeout = 10000,
     maxSpikes = 5,
     policePlatePrefix = 'LSPD',
     objects = {
