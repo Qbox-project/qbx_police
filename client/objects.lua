@@ -166,14 +166,16 @@ CreateThread(function()
 end)
 
 local isWatchInVehicleBusy
-local function burstTireCloseToSpike(vehicle)
+local function burstTyreOnSpikeCollision(vehicle)
     CreateThread(function ()
         if isWatchInVehicleBusy then return end
         isWatchInVehicleBusy = true
         local wheels = {}
         for i = 1, #WHEEL_NAMES do
             local w = GetEntityBoneIndexByName(vehicle, WHEEL_NAMES[i])
-            if w ~= -1 then wheels[#wheels + 1] = { wheel = w, index = i - 1 } end
+            if w ~= -1 then
+                wheels[#wheels + 1] = { wheel = w, index = i - 1 }
+            end
         end
 
         pcall(lib.waitFor(function() return cache.value end, nil, sharedConfig.timeout))
@@ -299,13 +301,13 @@ AddStateBagChangeHandler('isLoggedIn', ('player:%s'):format(cache.serverId), fun
     toggleJobFunctions(isLoggedIn and job and job.type == 'leo' and job.onduty)
 
     if cache.vehicle then
-        burstTireCloseToSpike(cache.vehicle)
+        burstTyreOnSpikeCollision(cache.vehicle)
     end
 end)
 
 lib.onCache('vehicle', function(vehicle)
     if vehicle then
-        burstTireCloseToSpike(vehicle)
+        burstTyreOnSpikeCollision(vehicle)
     else
         displayInfoCloseToSpike()
     end
