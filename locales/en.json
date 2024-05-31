@@ -43,7 +43,8 @@
         "put_anklet_on": "You put on an ankle tracker on %s %s",
         "vehicle_flagged": "Vehicle %s has been flagged for %s",
         "impound_vehicle_removed": "Vehicle taken out of impound!",
-        "impounded": "Vehicle impounded"
+        "impounded": "Vehicle impounded",
+        "escapedcuff": "You slipped out of the cuffs!"
     },
     "info": {
         "mr": "Mr.",
