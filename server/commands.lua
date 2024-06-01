@@ -2,18 +2,12 @@ local config = require 'config.server'
 local sharedConfig = require 'config.shared'
 
 ---if player is not leo or not on duty, notifies them
----@param player number|Player
+---@param player Player
 ---@param minGrade? integer
----@return boolean
+---@return boolean?
 local function checkLeoAndOnDuty(player, minGrade)
-    if type(player) == 'number' then
-        player = exports.qbx_core:GetPlayer(player)
-    end
-    if not IsLeoAndOnDuty(player, minGrade) then
-        exports.qbx_core:Notify(player.PlayerData.source, locale('error.on_duty_police_only'), 'error')
-        return false
-    end
-    return true
+    if IsLeoAndOnDuty(player, minGrade) then return true end
+    exports.qbx_core:Notify(player.PlayerData.source, locale('error.on_duty_police_only'), 'error')
 end
 
 local function dnaHash(s)
@@ -23,7 +17,8 @@ local function dnaHash(s)
 end
 
 lib.addCommand('spikestrip', {help = locale('commands.place_spike')}, function(source)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('police:client:SpawnSpikeStrip', source)
 end)
 
@@ -42,12 +37,16 @@ lib.addCommand('grantlicense', {
         }
     },
  }, function(source, args)
-    if not checkLeoAndOnDuty(source, config.licenseRank) then
+    local player = exports.qbx_core:GetPlayer(source)
+
+    if not checkLeoAndOnDuty(player, config.licenseRank) then
         return exports.qbx_core:Notify(source, locale('error.error_rank_license'), 'error')
     end
+
     if not config.validLicenses[args.license] then
         return exports.qbx_core:Notify(source, locale('info.license_type'), 'error')
     end
+
     local searchedPlayer = exports.qbx_core:GetPlayer(args.id)
     if not searchedPlayer then return end
     local licenseTable = searchedPlayer.PlayerData.metadata.licences
@@ -75,7 +74,8 @@ lib.addCommand('revokelicense',{
         }
     },
 }, function(source, args)
-    if not checkLeoAndOnDuty(source, config.licenseRank) then
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player, config.licenseRank) then
         return exports.qbx_core:Notify(source, locale('error.rank_revoke'), 'error')
     end
     if not config.validLicenses[args.license] then
@@ -104,20 +104,19 @@ lib.addCommand('pobject', {
     },
  }, function(source, args)
     local type = args.type:lower()
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
 
     if type == 'delete' then
         TriggerClientEvent('police:client:deleteObject', source)
-        return
-    end
-
-    if sharedConfig.objects[type] then
+    elseif sharedConfig.objects[type] then
         TriggerClientEvent('police:client:spawnPObj', source, type)
     end
 end)
 
 lib.addCommand('cuff', {help = locale('commands.cuff_player')}, function(source)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('police:client:CuffPlayer', source)
 end)
 
@@ -129,7 +128,7 @@ lib.addCommand('callsign', {
     help = locale('commands.callsign'),
     params = {{
         name = 'callsign',
-        type = 'string',
+        type = 'number',
         help = locale('info.callsign_name')
     }},
  }, function(source, args)
@@ -138,12 +137,14 @@ lib.addCommand('callsign', {
 end)
 
 lib.addCommand('clearcasings', {help = locale('commands.clear_casign')}, function(source)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('evidence:client:ClearCasingsInArea', source)
 end)
 
 lib.addCommand('jail', {help = locale('commands.jail_player')}, function(source)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('police:client:JailPlayer', source)
 end)
 
@@ -155,7 +156,8 @@ lib.addCommand('unjail', {
         help = locale('info.player_id')
     }}
 }, function(source, args)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     if GetResourceState('qbx_prison') == 'started' then
         exports.qbx_prison:ReleasePlayer(args.id)
     else
@@ -164,17 +166,20 @@ lib.addCommand('unjail', {
 end)
 
 lib.addCommand('clearblood', {help = locale('commands.clearblood')}, function(source)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('evidence:client:ClearBlooddropsInArea', source)
 end)
 
 lib.addCommand('seizecash', {help = locale('commands.seizecash')}, function(source)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('police:client:SeizeCash', source)
 end)
 
 lib.addCommand('sc', {help = locale('commands.softcuff')}, function(source)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('police:client:CuffPlayerSoft', source)
 end)
 
@@ -186,7 +191,8 @@ lib.addCommand('cam', {
         help = locale('info.camera_id_help')
     }},
  }, function(source, args)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('police:client:ActiveCamera', source, args.camid)
 end)
 
@@ -206,7 +212,8 @@ lib.addCommand('flagplate', {
         }
     },
  }, function(source, args)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     local reason = {}
     for i = 2, #args, 1 do
         reason[#reason+1] = args[i]
@@ -226,7 +233,8 @@ lib.addCommand('unflagplate', {
         help = locale('info.plate_number')
     }},
 }, function(source, args)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     if not Plates or not Plates[args.plate:upper()] then
         return exports.qbx_core:Notify(source, locale('error.vehicle_not_flag'), 'error')
     end
@@ -247,7 +255,8 @@ lib.addCommand('plateinfo', {
         help = locale('info.plate_number')
     }},
 }, function(source, args)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     if not Plates or Plates[args.plate:upper()] then
         return exports.qbx_core:Notify(source, locale('error.vehicle_not_flag'), 'error')
     end
@@ -266,12 +275,14 @@ lib.addCommand('depot', {
         help = locale('info.impound_price')
     }},
 }, function(source, args)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('police:client:ImpoundVehicle', source, false, args.price)
 end)
 
 lib.addCommand('impound', {help = locale('commands.impound')}, function(source)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('police:client:ImpoundVehicle', source, true)
 end)
 
@@ -283,7 +294,8 @@ lib.addCommand('paytow', {
         help = locale('info.player_id')
     }},
 }, function(source, args)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     local otherPlayer = exports.qbx_core:GetPlayer(args.id)
     if not otherPlayer then return end
     if not config.towJobs[otherPlayer.PlayerData.job.name] then
@@ -320,21 +332,21 @@ lib.addCommand('paylawyer', {
 end)
 
 lib.addCommand('anklet', {help = locale('commands.anklet')}, function(source)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     TriggerClientEvent('police:client:CheckDistance', source)
 end)
 
 lib.addCommand('ankletlocation', {
     help = locale('commands.ankletlocation'),
-    params = {
-        {
-            name = 'cid',
-            type = 'string',
-            help = locale('info.citizen_id')
-        }
-    },
+    params = {{
+        name = 'cid',
+        type = 'string',
+        help = locale('info.citizen_id')
+    }},
 }, function(source, args)
-    if not checkLeoAndOnDuty(source) then return end
+    local player = exports.qbx_core:GetPlayer(source)
+    if not checkLeoAndOnDuty(player) then return end
     local target = exports.qbx_core:GetPlayerByCitizenId(args.cid)
     if not target then return end
     if not target.PlayerData.metadata.tracker then
@@ -381,11 +393,11 @@ lib.addCommand('911p', {
     local ped = GetPlayerPed(source)
     local coords = GetEntityCoords(ped)
     local players = exports.qbx_core:GetQBPlayers()
-    for _, v in pairs(players) do
-        if IsLeoAndOnDuty(v) then
+    for i = 1, #players do
+        if IsLeoAndOnDuty(players[i]) then
             local alertData = {title = locale('commands.emergency_call'), coords = {x = coords.x, y = coords.y, z = coords.z}, description = message}
-            TriggerClientEvent('qb-phone:client:addPoliceAlert', v.PlayerData.source, alertData)
-            TriggerClientEvent('police:client:policeAlert', v.PlayerData.source, coords, message)
+            TriggerClientEvent('qb-phone:client:addPoliceAlert', players[i].PlayerData.source, alertData)
+            TriggerClientEvent('police:client:policeAlert', players[i].PlayerData.source, coords, message)
         end
     end
 end)

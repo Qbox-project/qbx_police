@@ -2,7 +2,6 @@ return {
     useTarget = false,
     polyDebug = false,
 
-    maxSpikes = 5,
     handcuffItems = 'handcuffs',
     policeHelicopter = 'polmav',
 

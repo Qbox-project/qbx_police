@@ -1,4 +1,6 @@
 return {
+    timeout = 10000,
+    maxSpikes = 5,
     policePlatePrefix = 'LSPD',
     objects = {
         cone = {model = `prop_roadcone02a`, freeze = false},

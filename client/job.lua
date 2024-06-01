@@ -83,7 +83,7 @@ local function takeOutImpound(vehicle)
     local coords = sharedConfig.locations.impound[currentGarage]
     if not coords then return end
 
-    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicle.vehicle, coords, vehicle.plate)
+    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicle.vehicle, coords, vehicle.plate, vehicle.id)
 
     local veh = lib.waitFor(function()
         if NetworkDoesEntityExistWithNetworkId(netId) then
@@ -104,7 +104,7 @@ local function takeOutVehicle(vehicleInfo)
     local coords = sharedConfig.locations.vehicle[currentGarage]
     if not coords then return end
     local pattern = ''
-    for _ = 8 - #sharedConfig.policePlatePrefix, #sharedConfig.policePlatePrefix do
+    for _ = 1, 8 - #sharedConfig.policePlatePrefix do
         pattern = pattern..'1'
     end
     local plate = sharedConfig.policePlatePrefix..lib.string.random(pattern):upper()
@@ -114,7 +114,7 @@ local function takeOutVehicle(vehicleInfo)
         if NetworkDoesEntityExistWithNetworkId(netId) then
             return NetToVeh(netId)
         end
-    end)
+    end, nil, sharedConfig.timeout)
 
     assert(veh ~= 0, 'Something went wrong spawning the vehicle')
 
@@ -132,27 +132,25 @@ local function takeOutVehicle(vehicleInfo)
     SetVehicleEngineOn(veh, true, true, false)
 end
 
+local function addGarageMenuItems(destinationOptions, sourceOptions)
+    for veh, label in pairs(sourceOptions) do
+        destinationOptions[#destinationOptions + 1] = {
+            title = label,
+            onSelect = function()
+                takeOutVehicle(veh)
+            end,
+        }
+    end
+
+    return destinationOptions
+end
+
 local function openGarageMenu()
     local authorizedVehicles = config.authorizedVehicles[QBX.PlayerData.job.grade.level]
     local options = {}
 
-    for veh, label in pairs(authorizedVehicles) do
-        options[#options + 1] = {
-            title = label,
-            onSelect = function()
-                takeOutVehicle(veh)
-            end,
-        }
-    end
-
-    for veh, label in pairs(config.whitelistedVehicles) do
-        options[#options + 1] = {
-            title = label,
-            onSelect = function()
-                takeOutVehicle(veh)
-            end,
-        }
-    end
+    options = addGarageMenuItems(options, authorizedVehicles)
+    options = addGarageMenuItems(options, config.whitelistedVehicles)
 
     lib.registerContext({
         id = 'vehicleMenu',
@@ -221,13 +219,12 @@ local function spawnHelicopter()
     if not inHelicopter then return end
     local plyCoords = GetEntityCoords(cache.ped)
     local coords = vec4(plyCoords.x, plyCoords.y, plyCoords.z, GetEntityHeading(cache.ped))
-    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, config.policeHelicopter, coords, 'ZULU'..tostring(math.random(1000, 9999)), true)
-    local timeout = 100
-    while not NetworkDoesEntityExistWithNetworkId(netId) and timeout > 0 do
-        Wait(10)
-        timeout -= 1
-    end
-    local heli = NetToVeh(netId)
+    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, config.policeHelicopter, coords, 'ZULU'..lib.string.random('1111'), true)
+    local heli = lib.waitFor(function()
+        if NetworkDoesEntityExistWithNetworkId(netId) then
+            return NetToVeh(netId)
+        end
+    end, nil, sharedConfig.timeout)
     SetVehicleLivery(heli , 0)
     SetVehicleMod(heli, 0, 48, false)
     SetEntityHeading(heli, coords.w)
@@ -362,13 +359,13 @@ end)
 RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
     local coords = GetEntityCoords(cache.ped)
     local vehicle = lib.getClosestVehicle(coords)
-    if not DoesEntityExist(vehicle) then return end
+    if not vehicle or not DoesEntityExist(vehicle) then return end
 
     local bodyDamage = math.ceil(GetVehicleBodyHealth(vehicle))
     local engineDamage = math.ceil(GetVehicleEngineHealth(vehicle))
     local totalFuel = GetVehicleFuelLevel(vehicle)
 
-    if #(GetEntityCoords(cache.ped) - GetEntityCoords(vehicle)) > 5.0 or cache.vehicle then return end
+    if cache.vehicle or #(GetEntityCoords(cache.ped) - GetEntityCoords(vehicle)) > 5.0 then return end
 
     if lib.progressCircle({
         duration = 5000,
@@ -391,14 +388,14 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
             {
                 model = `prop_notepad_01`,
                 bone = 18905,
-                pos = {x = 0.1, y = 0.02, z = 0.05},
-                rot = {x = 10.0, y = 0.0, z = 0.0}
+                pos = vec3(0.1, 0.02, 0.05),
+                rot = vec3(10.0, 0.0, 0.0)
             },
             {
                 model = 'prop_pencil_01',
                 bone = 58866,
-                pos = {x = 0.11, y = -0.02, z = 0.001},
-                rot = {x = -120.0, y = 0.0, z = 0.0}
+                pos = vec3(0.11, -0.02, 0.001),
+                rot = vec3(-120.0, 0.0, 0.0)
             }
         },
     })
@@ -407,11 +404,11 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
         TriggerServerEvent('police:server:Impound', plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
         DeleteVehicle(vehicle)
         exports.qbx_core:Notify(locale('success.impounded'), 'success')
-        ClearPedTasks(cache.ped)
     else
-        ClearPedTasks(cache.ped)
         exports.qbx_core:Notify(locale('error.canceled'), 'error')
     end
+
+    ClearPedTasks(cache.ped)
 end)
 
 RegisterNetEvent('police:client:CheckStatus', function()
@@ -458,12 +455,9 @@ else
             rotation = 0.0,
             debug = config.polyDebug,
             onEnter = function()
+                if QBX.PlayerData.job.type ~= 'leo' then return end
                 inPrompt = true
-                if not QBX.PlayerData.job.onduty then
-                    lib.showTextUI(locale('info.on_duty'))
-                else
-                    lib.showTextUI(locale('info.off_duty'))
-                end
+                lib.showTextUI(locale(QBX.PlayerData.job.onduty and 'info.off_duty' or 'info.on_duty'))
                 uiPrompt('duty')
             end,
             onExit = function()
@@ -477,19 +471,17 @@ end
 CreateThread(function()
     -- Police Trash
     for i = 1, #sharedConfig.locations.trash do
-        local v = sharedConfig.locations.trash[i]
         lib.zones.box({
-            coords = v,
+            coords = sharedConfig.locations.trash[i],
             size = vec3(2, 2, 2),
             rotation = 0.0,
             debug = config.polyDebug,
             onEnter = function()
+                if QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then return end
                 inTrash = true
                 inPrompt = true
-                if QBX.PlayerData.job.onduty then
-                    lib.showTextUI(locale('info.trash_enter'))
-                    uiPrompt('trash', i)
-                end
+                lib.showTextUI(locale('info.trash_enter'))
+                uiPrompt('trash', i)
             end,
             onExit = function()
                 inTrash = false
@@ -500,19 +492,18 @@ CreateThread(function()
     end
 
     -- Fingerprints
-    for _, v in pairs(sharedConfig.locations.fingerprint) do
+    for i = 1, #sharedConfig.locations.fingerprint do
         lib.zones.box({
-            coords = v,
+            coords = sharedConfig.locations.fingerprint[i],
             size = vec3(2, 2, 2),
             rotation = 0.0,
             debug = config.polyDebug,
             onEnter = function()
+                if QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then return end
                 inFingerprint = true
                 inPrompt = true
-                if QBX.PlayerData.job.onduty then
-                    lib.showTextUI(locale('info.scan_fingerprint'))
-                    uiPrompt('fingerprint')
-                end
+                lib.showTextUI(locale('info.scan_fingerprint'))
+                uiPrompt('fingerprint')
             end,
             onExit = function()
                 inFingerprint = false
@@ -523,23 +514,18 @@ CreateThread(function()
     end
 
     -- Helicopter
-    for _, v in pairs(sharedConfig.locations.helicopter) do
+    for i = 1, #sharedConfig.locations.helicopter do
         lib.zones.box({
-            coords = v,
+            coords = sharedConfig.locations.helicopter[i],
             size = vec3(4, 4, 4),
             rotation = 0.0,
             debug = config.polyDebug,
             onEnter = function()
+                if QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then return end
                 inHelicopter = true
                 inPrompt = true
-                if QBX.PlayerData.job.onduty then
-                    uiPrompt('heli')
-                    if cache.vehicle then
-                        lib.showTextUI(locale('info.store_heli'))
-                    else
-                        lib.showTextUI(locale('info.take_heli'))
-                    end
-                end
+                uiPrompt('heli')
+                lib.showTextUI(locale(cache.vehicle and 'info.store_heli' or 'info.take_heli'))
             end,
             onExit = function()
                 inHelicopter = false
@@ -550,25 +536,19 @@ CreateThread(function()
     end
 
     -- Police Impound
-    for k, v in pairs(sharedConfig.locations.impound) do
+    for i = 1, #sharedConfig.locations.impound do
         lib.zones.box({
-            coords = v,
+            coords = sharedConfig.locations.impound[i],
             size = vec3(2, 2, 2),
             rotation = 0.0,
             debug = config.polyDebug,
             onEnter = function()
+                if QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then return end
                 inImpound = true
                 inPrompt = true
-                currentGarage = k
-                if QBX.PlayerData.job.onduty then
-                    if cache.vehicle then
-                        lib.showTextUI(locale('info.impound_veh'))
-                        uiPrompt('impound')
-                    else
-                        lib.showTextUI(locale('menu.pol_impound'))
-                        uiPrompt('impound')
-                    end
-                end
+                currentGarage = i
+                lib.showTextUI(locale(cache.vehicle and 'info.impound_veh' or 'menu.pol_impound'))
+                uiPrompt('impound')
             end,
             onExit = function()
                 inImpound = false
@@ -580,24 +560,19 @@ CreateThread(function()
     end
 
     -- Police Garage
-    for k, v in pairs(sharedConfig.locations.vehicle) do
+    for i = 1, #sharedConfig.locations.vehicle do
         lib.zones.box({
-            coords = v,
+            coords = sharedConfig.locations.vehicle[i],
             size = vec3(2, 2, 2),
             rotation = 0.0,
             debug = config.polyDebug,
             onEnter = function()
-                if QBX.PlayerData.job.onduty and QBX.PlayerData.job.type == 'leo' then
-                    inGarage = true
-                    inPrompt = true
-                    currentGarage = k
-                    if cache.vehicle then
-                        lib.showTextUI(locale('info.store_veh'))
-                    else
-                        lib.showTextUI('[E] - Vehicle Garage')
-                    end
-                    uiPrompt('garage')
-                end
+                if QBX.PlayerData.job.type ~= 'leo' or not QBX.PlayerData.job.onduty then return end
+                inGarage = true
+                inPrompt = true
+                currentGarage = i
+                lib.showTextUI(locale(cache.vehicle and 'info.store_veh' or 'info.grab_veh'))
+                uiPrompt('garage')
             end,
             onExit = function()
                 inGarage = false
