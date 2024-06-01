@@ -6,9 +6,9 @@ return {
     handcuffItems = 'handcuffs',
     policeHelicopter = 'polmav',
 
-    SkillCheck = true,
-    SkillCheckDifficulty = { "medium", "hard", "medium" },
-    SkillCheckInputs = { "w", "a", "s", "d" },
+    breakCuffs = true,
+    breakCuffsDifficulty = { "medium", "hard", "medium" },
+    breakCuffsKeys = { "w", "a", "s", "d" },
 
     securityCameras = {
         hideRadar = false,
