@@ -366,8 +366,7 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
                     TriggerServerEvent('police:server:SetHandcuffStatus', false) 
                     exports.qbx_core:Notify(locale('success.escapedcuff'), 'success')
                 else
-                    cuffType = 48
-                    exports.qbx_core:Notify(locale('info.cuffed_walk'), 'success') 
+                    return
                 end      
             else    
                 cuffType = 48
