@@ -181,7 +181,7 @@
         "police_report": "Relatório Policial",
         "message_sent": "Mensagem a ser enviada",
         "civilian_call": "Chamada Civil",
-        "emergency_call": "Nova Chamada 112"
+        "emergency_call": "Nova Chamada 911"
     },
     "progressbar": {
         "blood_clear": "Limpando Sangue...",
