@@ -360,7 +360,7 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
         else
             getCuffedAnimation(playerId)
             if config.SkillCheck == true then
-                local SkillCheckSuccess = lib.skillCheck(config.SkillCheckDifficulty, config.SkillCheckInputs)
+                local isSuccess = lib.skillCheck(config.SkillCheckDifficulty, config.SkillCheckInputs)
                 if skillchecksuccess == true then
                     ClearPedTasksImmediately(cache.ped)
                     TriggerServerEvent('police:server:SetHandcuffStatus', false) 
