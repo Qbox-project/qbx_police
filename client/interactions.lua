@@ -358,14 +358,12 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
             cuffType = 16
             exports.qbx_core:Notify(locale('info.cuff'), 'success')
         else
-            getCuffedAnimation(playerId)
             if config.SkillCheck == true then
                 local isSuccess = lib.skillCheck(config.SkillCheckDifficulty, config.SkillCheckInputs)
                 if isSuccess then
+                    TriggerServerEvent('police:server:SetHandcuffStatus', false)
                     ClearPedTasksImmediately(cache.ped)
-                    TriggerServerEvent('police:server:SetHandcuffStatus', false) 
                     exports.qbx_core:Notify(locale('success.escapedcuff'), 'success')
-                else
                     return
                 end      
             else    
@@ -373,6 +371,7 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
                 exports.qbx_core:Notify(locale('info.cuffed_walk'), 'success')
             end
         end
+        getCuffedAnimation(playerId)
     else
         IsEscorted = false
         TriggerEvent('hospital:client:isEscorted', IsEscorted)
