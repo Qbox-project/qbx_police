@@ -361,7 +361,7 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
             getCuffedAnimation(playerId)
             if config.SkillCheck == true then
                 local isSuccess = lib.skillCheck(config.SkillCheckDifficulty, config.SkillCheckInputs)
-                if skillchecksuccess == true then
+                if isSuccess then
                     ClearPedTasksImmediately(cache.ped)
                     TriggerServerEvent('police:server:SetHandcuffStatus', false) 
                     exports.qbx_core:Notify(locale('success.escapedcuff'), 'success')
