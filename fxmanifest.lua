@@ -1,7 +1,8 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'qbx_policejob'
+name 'qbx_policejob'
+description 'Police system for Qbox'
 repository 'https://github.com/Qbox-project/qbx_policejob'
 version '1.0.0'
 
@@ -14,14 +15,11 @@ shared_scripts {
 
 client_scripts {
     '@qbx_core/modules/playerdata.lua',
-    'config/client.lua',
     'client/*.lua'
 }
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
-    '@qbx_vehiclekeys/server/functions.lua',
-    'config/server.lua',
     'server/*.lua'
 }
 
@@ -33,6 +31,7 @@ files {
     'html/script.js',
     'html/fingerprint.png',
     'html/main.css',
+    'config/client.lua',
     'config/shared.lua',
     'locales/*.json'
 }
