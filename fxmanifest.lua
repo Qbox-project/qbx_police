@@ -20,7 +20,6 @@ client_scripts {
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
-    '@qbx_vehiclekeys/server/functions.lua',
     'config/server.lua',
     'server/*.lua'
 }
