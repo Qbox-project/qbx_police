@@ -102,11 +102,12 @@ lib.callback.register('police:GetImpoundedVehicles', function()
     return FetchImpoundedVehicles()
 end)
 
-lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate, giveKeys, vehId)
+lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate, giveKeys, vehId, vehProps)
     local netId, veh = qbx.spawnVehicle({
         model = model,
         spawnSource = coords,
-        warp = GetPlayerPed(source)
+        warp = GetPlayerPed(source),
+        props = vehProps
     })
 
     if not netId or netId == 0 or not veh or veh == 0 then return end
