@@ -83,7 +83,8 @@ local function takeOutImpound(vehicle)
     local coords = sharedConfig.locations.impound[currentGarage]
     if not coords then return end
 
-    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicle.vehicle, coords, vehicle.plate, vehicle.id)
+    local properties = lib.callback.await('qb-garage:server:GetVehicleProperties', false, vehicle.plate)
+    local netId = lib.callback.await('qbx_policejob:server:spawnVehicle', false, vehicle.vehicle, coords, vehicle.plate, vehicle.id, properties)
 
     local veh = lib.waitFor(function()
         if NetworkDoesEntityExistWithNetworkId(netId) then
@@ -91,8 +92,6 @@ local function takeOutImpound(vehicle)
         end
     end)
 
-    local properties = lib.callback.await('qb-garage:server:GetVehicleProperties', false, vehicle.plate)
-    lib.setVehicleProperties(veh, properties)
     SetVehicleFuelLevel(veh, vehicle.fuel)
     doCarDamage(veh, vehicle)
     TriggerServerEvent('police:server:TakeOutImpound', vehicle.plate, currentGarage)
