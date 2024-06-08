@@ -102,8 +102,16 @@ lib.callback.register('police:GetImpoundedVehicles', function()
     return FetchImpoundedVehicles()
 end)
 
+lib.callback.register('qbx_policejob:server:spawnVehicle', function(source, model, coords, plate, giveKeys, vehId)
     local player = exports.qbx_core:GetPlayer(source)
     if player.PlayerData.job.type ~= 'leo' then return end
+
+    local vehProps = {}
+    if exports.qbx_vehicles:DoesEntityPlateExist(plate) then
+        local vehicle = exports.qbx_vehicles:FetchEntitiesByPlate(plate)
+        vehProps = vehicle.mods
+    end
+
     local netId, veh = qbx.spawnVehicle({
         model = model,
         spawnSource = coords,
