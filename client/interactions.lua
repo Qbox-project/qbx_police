@@ -70,9 +70,7 @@ local function handcuffedEscorted()
     for i = 1, #anim do
         if IsEntityPlayingAnim(cache.ped, anim[i].dict, anim[i].anim, 3) then return sleep end
     end
-    lib.requestAnimDict('mp_arresting')
-    TaskPlayAnim(cache.ped, 'mp_arresting', 'idle', 8.0, -8, -1, cuffType, 0, false, false, false)
-    RemoveAnimDict('mp_arresting')
+    lib.playAnim(cache.ped, 'mp_arresting', 'idle', 8.0, -8, -1, cuffType, 0, false, false, false)
 
     return sleep
 end
@@ -301,9 +299,8 @@ RegisterNetEvent('police:client:GetKidnappedTarget', function(playerId)
         if not IsEscorted then
             IsEscorted = true
             local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
-            lib.requestAnimDict('nm')
+            lib.playAnim(cache.ped, 'nm', 'firemans_carry', 8.0, -8.0, 100000, 33, 0, false, false, false)
             AttachEntityToEntity(cache.ped, dragger, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 0.0, false, false, false, false, 2, false)
-            TaskPlayAnim(cache.ped, 'nm', 'firemans_carry', 8.0, -8.0, 100000, 33, 0, false, false, false)
         else
             IsEscorted = false
             DetachEntity(cache.ped, true, false)
@@ -315,8 +312,7 @@ end)
 
 RegisterNetEvent('police:client:GetKidnappedDragger', function()
     if not isEscorting then
-        lib.requestAnimDict('missfinale_c2mcs_1')
-        TaskPlayAnim(cache.ped, 'missfinale_c2mcs_1', 'fin_c2_mcs_1_camman', 8.0, -8.0, 100000, 49, 0, false, false, false)
+        lib.playAnim(cache.ped, 'missfinale_c2mcs_1', 'fin_c2_mcs_1_camman', 8.0, -8.0, 100000, 49, 0, false, false, false)
         isEscorting = true
     else
         ClearPedSecondaryTask(cache.ped)

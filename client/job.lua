@@ -341,8 +341,7 @@ end)
 RegisterNetEvent('police:client:CallAnim', function()
     local isCalling = true
     local callCount = 5
-    lib.requestAnimDict('cellphone@')
-    TaskPlayAnim(cache.ped, 'cellphone@', 'cellphone_call_listen_base', 3.0, -1, -1, 49, 0, false, false, false)
+    lib.playAnim(cache.ped, 'cellphone@', 'cellphone_call_listen_base', 3.0, -1, -1, 49, 0, false, false, false)
     Wait(1000)
     CreateThread(function()
         while isCalling do
