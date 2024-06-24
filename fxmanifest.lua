@@ -23,18 +23,5 @@ server_scripts {
     'server/*.lua'
 }
 
-ui_page 'html/index.html'
-
-files {
-    'html/index.html',
-    'html/vue.min.js',
-    'html/script.js',
-    'html/fingerprint.png',
-    'html/main.css',
-    'config/client.lua',
-    'config/shared.lua',
-    'locales/*.json'
-}
-
 lua54 'yes'
 use_experimental_fxv2_oal 'yes'
