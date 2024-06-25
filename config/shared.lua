@@ -7,6 +7,11 @@ return {
     ---@field scale? number scale of the blip. default is 0.8
     ---@field color? number color of the blip. default is 29
 
+    ---@class Management
+    ---@field coords vector3
+    ---@field groups table
+    ---@field radius? number radius of the zone. default is 1.5
+
     ---@class Duty
     ---@field coords vector3
     ---@field groups table
@@ -14,6 +19,7 @@ return {
 
     ---@class JobConfig
     ---@field blip Blip
+    ---@field management Management[]
     ---@field duty Duty[]
 
     ---@type table<string, JobConfig>
@@ -25,6 +31,13 @@ return {
                 sprite = 60,
                 scale = 0.8,
                 color = 29
+            },
+            management = {
+                {
+                    coords = vec3(447.04, -974.01, 30.44),
+                    radius = 1.5,
+                    groups = { police = 0 }
+                }
             },
             duty = {
                 {
