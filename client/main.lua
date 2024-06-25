@@ -41,11 +41,43 @@ local function createDuty(job, station)
     end
 end
 
+---@param job string
+---@param station table
+local function createManagement(job, station)
+    if not job or not station then return end
+
+    for i = 1, #station do
+        local location = station[i]
+
+        exports.ox_target:addSphereZone({
+            coords = location.coords,
+            radius = location.radius or 1.5,
+            debug = config.debugPoly,
+            options = {
+                {
+                    name = ('%sBossMenu'):format(job),
+                    icon = 'fa-solid fa-people-roof',
+                    label = 'Open Job Management',
+                    canInteract = function()
+                        return QBX.PlayerData.job.isboss and QBX.PlayerData.job.onduty
+                    end,
+                    onSelect = function()
+                        exports.qbx_management:OpenBossMenu('job')
+                    end,
+                    groups = location.groups,
+                    distance = 1.5,
+                },
+            }
+        })
+    end
+end
+
 CreateThread(function()
     Wait(150)
 
     for job, data in pairs(sharedConfig.departments) do
         createBlip(data.blip)
+        createManagement(job, data.management)
         createDuty(job, data.duty)
     end
 end)
