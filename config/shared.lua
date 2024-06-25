@@ -36,14 +36,14 @@ return {
                 {
                     coords = vec3(447.04, -974.01, 30.44),
                     radius = 1.5,
-                    groups = { police = 0 }
+                    groups = { 'police' }
                 }
             },
             duty = {
                 {
                     coords = vec3(440.085, -974.924, 30.689),
                     radius = 1.5,
-                    groups = { police = 0 }
+                    groups = { 'police' }
                 },
             },
         },
