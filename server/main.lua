@@ -20,8 +20,8 @@ end
 local function updateBlips()
     local dutyPlayers = {}
     local players = exports.qbx_core:GetQBPlayers()
-    for i = 1, #players do
-        local playerData = players[i].PlayerData
+    for _, player in pairs(players) do
+        local playerData = player.PlayerData
         local job = playerData.job
         if (job.type == 'leo' or job.type == 'ems') and job.onduty then
             local source = playerData.source
