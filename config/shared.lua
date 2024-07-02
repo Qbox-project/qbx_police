@@ -68,7 +68,7 @@ return {
                     spawn = vec4(-588.28, -419.13, 30.59, 270.21),
                     radius = 2.5,
                     catalogue = {
-                        { name = '', grade = 0 },
+                        { name = 'police', grade = 0 },
                         { name = 'police2', grade = 0 },
                         { name = 'police3', grade = 0 },
                         { name = 'police4', grade = 0 },
