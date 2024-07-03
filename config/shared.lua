@@ -17,10 +17,26 @@ return {
     ---@field groups table
     ---@field radius? number radius of the zone. default is 1.5
 
+    ---@class Garage
+    ---@field coords vector3
+    ---@field spawn vector4
+    ---@field radius number
+    ---@field catalogue table
+    ---@field groups table
+
+    ---@class Helipad
+    ---@field coords vector3
+    ---@field spawn vector4
+    ---@field radius number
+    ---@field catalogue table
+    ---@field groups table
+
     ---@class JobConfig
     ---@field blip Blip
     ---@field management Management[]
     ---@field duty Duty[]
+    ---@field garage Garage[]
+    ---@field helipad Helipad[]
 
     ---@type table<string, JobConfig>
     departments = {
@@ -46,6 +62,32 @@ return {
                     groups = { 'police' }
                 },
             },
+            garage = {
+                {
+                    coords = vec3(-586.17, -427.92, 31.16),
+                    spawn = vec4(-588.28, -419.13, 30.59, 270.21),
+                    radius = 2.5,
+                    catalogue = {
+                        { name = 'police', grade = 0 },
+                        { name = 'police2', grade = 0 },
+                        { name = 'police3', grade = 0 },
+                        { name = 'police4', grade = 0 },
+                        { name = 'polgauntlet', grade = 0 },
+                    },
+                    groups = { 'police' }
+                },
+            },
+            helipad = {
+                {
+                    coords = vec3(-595.85, -431.48, 51.38),
+                    spawn = vec4(-595.85, -431.48, 51.38, 2.56),
+                    radius = 2.5,
+                    catalogue = {
+                        { name = 'polmav', grade = 0 },
+                    },
+                    groups = { 'police' }
+                }
+            }
         },
     },
 }
