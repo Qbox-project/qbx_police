@@ -161,6 +161,128 @@ local function createHelipad(job, station)
     end
 end
 
+local function registerAliveRadial()
+    lib.registerRadial({
+        id = 'policeMenu',
+        items = {
+            {
+                icon = 'lock',
+                label = 'Cuff',
+                onSelect = function()
+                end,
+            },
+            {
+                icon = 'lock-open',
+                label = 'Uncuff',
+                onSelect = function()
+                end,
+            },
+            {
+                icon = 'magnifying-glass',
+                label = 'Search',
+                onSelect = function()
+                    exports.ox_inventory:openNearbyInventory()
+                end,
+            },
+            {
+                icon = 'heart-crack',
+                label = '10-99A',
+                onSelect = function()
+                end,
+            },
+            {
+                icon = 'heart-pulse',
+                label = '10-99B',
+                onSelect = function()
+                end,
+            },
+            {
+                icon = 'truck-fast',
+                label = 'Impound',
+                onSelect = function()
+                end,
+            },
+            {
+                icon = 'truck-ramp-box',
+                label = 'Confiscate',
+                onSelect = function()
+                end,
+            },
+        }
+    })
+end
+
+local function registerDeadRadial()
+    lib.registerRadial({
+        id = 'policeMenu',
+        items = {
+            {
+                icon = 'heart-crack',
+                label = '10-99A',
+                onSelect = function()
+                end,
+            },
+            {
+                icon = 'heart-pulse',
+                label = '10-99B',
+                onSelect = function()
+                end,
+            },
+        }
+    })
+end
+
+AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+    if QBX.PlayerData.job.type ~= 'leo' then return end
+
+    if QBX.PlayerData.metadata.isdead then
+        registerDeadRadial()
+    else
+        registerAliveRadial()
+    end
+
+    lib.addRadialItem({
+        id = 'leo',
+        icon = 'shield-halved',
+        label = 'Police',
+        menu = 'policeMenu'
+    })
+end)
+
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function()
+    lib.removeRadialItem('leo')
+
+    if QBX.PlayerData.job.type ~= 'leo' then return end
+
+    lib.addRadialItem({
+        id = 'leo',
+        icon = 'shield-halved',
+        label = 'Police',
+        menu = 'policeMenu'
+    })
+end)
+
+AddStateBagChangeHandler('DEATH_STATE_STATE_BAG', nil, function(bagName, _, dead)
+    local player = GetPlayerFromStateBagName(bagName)
+
+    if player ~= cache.playerId or QBX.PlayerData?.job?.type ~= 'leo' then return end
+
+    lib.removeRadialItem('leo')
+
+    if dead then
+        registerDeadRadial()
+    else
+        registerAliveRadial()
+    end
+
+    lib.addRadialItem({
+        id = 'leo',
+        icon = 'shield-halved',
+        label = 'Police',
+        menu = 'policeMenu'
+    })
+end)
+
 CreateThread(function()
     Wait(150)
 
