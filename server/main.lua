@@ -1,7 +1,7 @@
 ---@param source number
 ---@param model string
 ---@param spawn vector4
-lib.callback.register('s_police:server:spawnVehicle', function(source, model, spawn)
+lib.callback.register('qbx_police:server:spawnVehicle', function(source, model, spawn)
     local ped = GetPlayerPed(source)
     local netId, veh = qbx.spawnVehicle({
         spawnSource = spawn,
