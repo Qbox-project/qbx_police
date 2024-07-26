@@ -62,6 +62,22 @@ return {
                     groups = { 'police' }
                 },
             },
+            personalStash = {
+                {
+                    coords = vec3(453.075, -980.124, 30.889),
+                    radius = 1.5,
+                    slots = 200,
+                    weight = 10000000,
+                    groups = { 'police' }
+                },
+            },
+            evidence = {
+                {
+                    coords = vec3(442.1722, -996.067, 30.689),
+                    radius = 1.5,
+                    groups = { 'police' }
+                },
+            },
             garage = {
                 {
                     coords = vec3(-586.17, -427.92, 31.16),

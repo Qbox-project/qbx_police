@@ -75,6 +75,68 @@ end
 
 ---@param job string
 ---@param station table
+local function createPersonalStash(job, station)
+    if not job or not station then return end
+
+    for i = 1, #station do
+        local stash = station.personalStash[i]
+
+        exports.ox_target:addSphereZone({
+            coords = stash.coords,
+            radius = stash.radius,
+            debug = config.debugPoly,
+            options = {
+                {
+                    name = ('%s%sPersonalStash'):format(i, job),
+                    icon = 'fa-solid fa-box-archive',
+                    label = 'Open Personal Stash',
+                    canInteract = function()
+                        return QBX.PlayerData.job.onduty
+                    end,
+                    onSelect = function()
+                        exports.ox_inventory:openInventory('stash', ('%s%sPersonalStash'):format(i, QBX.PlayerData.job.name))
+                    end,
+                    groups = stash.groups,
+                    distance = 1.5,
+                },
+            }
+        })
+    end
+end
+
+---@param job string
+---@param station table
+local function createEvidence(job, station)
+    if not job or not station then return end
+
+    for i = 1, #station do
+        local evidence = station[i]
+
+        exports.ox_target:addSphereZone({
+            coords = evidence.coords,
+            radius = evidence.radius,
+            debug = config.debugPoly,
+            options = {
+                {
+                    name = ('%sEvidenceDrawers'):format(job),
+                    icon = 'fa-solid fa-box-archive',
+                    label = 'Open the Evidence Drawers',
+                    canInteract = function()
+                        return QBX.PlayerData.job.onduty
+                    end,
+                    onSelect = function()
+                        exports.ox_inventory:openInventory('policeevidence')
+                    end,
+                    groups = evidence.groups,
+                    distance = 1.5,
+                },
+            }
+        })
+    end
+end
+
+---@param job string
+---@param station table
 local function createGarage(job, station)
     if not job or not station then return end
 
@@ -288,8 +350,10 @@ CreateThread(function()
 
     for job, data in pairs(sharedConfig.departments) do
         createBlip(data.blip)
-        createManagement(job, data.management)
         createDuty(job, data.duty)
+        createManagement(job, data.management)
+        createPersonalStash(job, data.personalStash)
+        createEvidence(job, data.evidence)
         createGarage(job, data.garage)
         createHelipad(job, data.helipad)
     end
