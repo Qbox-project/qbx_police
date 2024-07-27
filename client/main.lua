@@ -80,6 +80,7 @@ local function createPersonalStash(job, station)
 
     for i = 1, #station do
         local stash = station.personalStash[i]
+        local stashName = ('%s%sPersonalStash'):format(i, QBX.PlayerData.job.name)
 
         exports.ox_target:addSphereZone({
             coords = stash.coords,
@@ -94,7 +95,7 @@ local function createPersonalStash(job, station)
                         return QBX.PlayerData.job.onduty
                     end,
                     onSelect = function()
-                        exports.ox_inventory:openInventory('stash', ('%s%sPersonalStash'):format(i, QBX.PlayerData.job.name))
+                        exports.ox_inventory:openInventory('stash', stashName)
                     end,
                     groups = stash.groups,
                     distance = 1.5,
