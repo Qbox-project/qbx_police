@@ -8,7 +8,7 @@ local function registerPersonalStash(job, personalStash)
     for i = 1, #personalStash do
         local stash = personalStash[i]
 
-        exports.ox_inventory:RegisterStash(('%s%sPersonalStash'):format(i, job), 'Personal Stash', stash.slots, stash.weight, true, stash.groups)
+        exports.ox_inventory:RegisterStash(('%s-%s-PersonalStash'):format(i, job), 'Personal Stash', stash.slots, stash.weight, true, stash.groups)
     end
 end
 
