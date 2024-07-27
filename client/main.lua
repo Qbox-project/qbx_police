@@ -30,7 +30,7 @@ local function createDuty(job, station)
             debug = config.debugPoly,
             options = {
                 {
-                    name = ('%sDuty'):format(job),
+                    name = ('%s-Duty'):format(job),
                     icon = 'fa-solid fa-clipboard-user',
                     label = 'Clock In/Out',
                     serverEvent = 'QBCore:ToggleDuty',
@@ -56,7 +56,7 @@ local function createManagement(job, station)
             debug = config.debugPoly,
             options = {
                 {
-                    name = ('%sBossMenu'):format(job),
+                    name = ('%s-BossMenu'):format(job),
                     icon = 'fa-solid fa-people-roof',
                     label = 'Open Job Management',
                     canInteract = function()
@@ -66,6 +66,69 @@ local function createManagement(job, station)
                         exports.qbx_management:OpenBossMenu('job')
                     end,
                     groups = location.groups,
+                    distance = 1.5,
+                },
+            }
+        })
+    end
+end
+
+---@param job string
+---@param station table
+local function createPersonalStash(job, station)
+    if not job or not station then return end
+
+    for i = 1, #station do
+        local stash = station.personalStash[i]
+        local stashName = ('%s-%s-PersonalStash'):format(i, QBX.PlayerData.job.name)
+
+        exports.ox_target:addSphereZone({
+            coords = stash.coords,
+            radius = stash.radius,
+            debug = config.debugPoly,
+            options = {
+                {
+                    name = stashName,
+                    icon = 'fa-solid fa-box-archive',
+                    label = 'Open Personal Stash',
+                    canInteract = function()
+                        return QBX.PlayerData.job.onduty
+                    end,
+                    onSelect = function()
+                        exports.ox_inventory:openInventory('stash', stashName)
+                    end,
+                    groups = stash.groups,
+                    distance = 1.5,
+                },
+            }
+        })
+    end
+end
+
+---@param job string
+---@param station table
+local function createEvidence(job, station)
+    if not job or not station then return end
+
+    for i = 1, #station do
+        local evidence = station[i]
+
+        exports.ox_target:addSphereZone({
+            coords = evidence.coords,
+            radius = evidence.radius,
+            debug = config.debugPoly,
+            options = {
+                {
+                    name = ('%s-EvidenceDrawers'):format(job),
+                    icon = 'fa-solid fa-box-archive',
+                    label = 'Open the Evidence Drawers',
+                    canInteract = function()
+                        return QBX.PlayerData.job.onduty
+                    end,
+                    onSelect = function()
+                        exports.ox_inventory:openInventory('policeevidence')
+                    end,
+                    groups = evidence.groups,
                     distance = 1.5,
                 },
             }
@@ -87,7 +150,7 @@ local function createGarage(job, station)
             debug = config.debugPoly,
             options = {
                 {
-                    name = ('%sGarage'):format(job),
+                    name = ('%s-Garage'):format(job),
                     icon = 'fa-solid fa-warehouse',
                     label = 'Open Garage',
                     canInteract = function()
@@ -100,7 +163,7 @@ local function createGarage(job, station)
                     distance = 1.5,
                 },
                 {
-                    name = ('%sGarageStore'):format(job),
+                    name = ('%s-GarageStore'):format(job),
                     icon = 'fa-solid fa-square-parking',
                     label = 'Store Vehicle',
                     canInteract = function()
@@ -131,7 +194,7 @@ local function createHelipad(job, station)
             debug = config.debugPoly,
             options = {
                 {
-                    name = ('%sHelipad'):format(job),
+                    name = ('%s-Helipad'):format(job),
                     icon = 'fa-solid fa-helicopter-symbol',
                     label = 'Open Helipad',
                     canInteract = function()
@@ -144,7 +207,7 @@ local function createHelipad(job, station)
                     distance = 1.5,
                 },
                 {
-                    name = ('%sHelipadStore'):format(job),
+                    name = ('%s-HelipadStore'):format(job),
                     icon = 'fa-solid fa-square-parking',
                     label = 'Store Helicopter',
                     canInteract = function()
@@ -288,8 +351,10 @@ CreateThread(function()
 
     for job, data in pairs(sharedConfig.departments) do
         createBlip(data.blip)
-        createManagement(job, data.management)
         createDuty(job, data.duty)
+        createManagement(job, data.management)
+        createPersonalStash(job, data.personalStash)
+        createEvidence(job, data.evidence)
         createGarage(job, data.garage)
         createHelipad(job, data.helipad)
     end
