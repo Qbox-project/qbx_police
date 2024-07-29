@@ -17,6 +17,18 @@ return {
     ---@field groups table
     ---@field radius? number radius of the zone. default is 1.5
 
+    ---@class PersonalStash
+    ---@field coords vector3
+    ---@field radius number
+    ---@field slots number
+    ---@field weight number
+    ---@field groups table
+
+    ---@class Evidence
+    ---@field coords vector3
+    ---@field radius number
+    ---@field groups table
+
     ---@class Garage
     ---@field coords vector3
     ---@field spawn vector4
@@ -35,6 +47,8 @@ return {
     ---@field blip Blip
     ---@field management Management[]
     ---@field duty Duty[]
+    ---@field personalStash PersonalStash[]
+    ---@field evidence Evidence[]
     ---@field garage Garage[]
     ---@field helipad Helipad[]
 

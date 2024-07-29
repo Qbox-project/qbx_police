@@ -12,7 +12,7 @@ local function createBlip(station)
     SetBlipScale(blip, station.scale or 0.8)
     SetBlipColour(blip, station.color or 29)
     BeginTextCommandSetBlipName('STRING')
-    AddTextComponentSubstringPlayerName(station.label or 'Police Station')
+    AddTextComponentSubstringPlayerName(station.label or locale('blip'))
     EndTextCommandSetBlipName(blip)
 end
 
@@ -32,7 +32,7 @@ local function createDuty(job, station)
                 {
                     name = ('%s-Duty'):format(job),
                     icon = 'fa-solid fa-clipboard-user',
-                    label = 'Clock In/Out',
+                    label = locale('target.duty'),
                     serverEvent = 'QBCore:ToggleDuty',
                     groups = location.groups,
                     distance = 1.5,
@@ -58,7 +58,7 @@ local function createManagement(job, station)
                 {
                     name = ('%s-BossMenu'):format(job),
                     icon = 'fa-solid fa-people-roof',
-                    label = 'Open Job Management',
+                    label = locale('target.boss_menu'),
                     canInteract = function()
                         return QBX.PlayerData.job.isboss and QBX.PlayerData.job.onduty
                     end,
@@ -90,7 +90,7 @@ local function createPersonalStash(job, station)
                 {
                     name = stashName,
                     icon = 'fa-solid fa-box-archive',
-                    label = 'Open Personal Stash',
+                    label = locale('target.personal_stash'),
                     canInteract = function()
                         return QBX.PlayerData.job.onduty
                     end,
@@ -121,7 +121,7 @@ local function createEvidence(job, station)
                 {
                     name = ('%s-EvidenceDrawers'):format(job),
                     icon = 'fa-solid fa-box-archive',
-                    label = 'Open the Evidence Drawers',
+                    label = locale('target.evidence_drawers'),
                     canInteract = function()
                         return QBX.PlayerData.job.onduty
                     end,
@@ -152,7 +152,7 @@ local function createGarage(job, station)
                 {
                     name = ('%s-Garage'):format(job),
                     icon = 'fa-solid fa-warehouse',
-                    label = 'Open Garage',
+                    label = locale('target.garage'),
                     canInteract = function()
                         return not cache.vehicle and QBX.PlayerData.job.onduty
                     end,
@@ -165,7 +165,7 @@ local function createGarage(job, station)
                 {
                     name = ('%s-GarageStore'):format(job),
                     icon = 'fa-solid fa-square-parking',
-                    label = 'Store Vehicle',
+                    label = locale('target.store_vehicle'),
                     canInteract = function()
                         return cache.vehicle and QBX.PlayerData.job.onduty
                     end,
@@ -196,7 +196,7 @@ local function createHelipad(job, station)
                 {
                     name = ('%s-Helipad'):format(job),
                     icon = 'fa-solid fa-helicopter-symbol',
-                    label = 'Open Helipad',
+                    label = locale('target.helipad'),
                     canInteract = function()
                         return not cache.vehicle and QBX.PlayerData.job.onduty
                     end,
@@ -209,7 +209,7 @@ local function createHelipad(job, station)
                 {
                     name = ('%s-HelipadStore'):format(job),
                     icon = 'fa-solid fa-square-parking',
-                    label = 'Store Helicopter',
+                    label = locale('target.store_helicopter'),
                     canInteract = function()
                         return cache.vehicle and QBX.PlayerData.job.onduty
                     end,
@@ -230,44 +230,44 @@ local function registerAliveRadial()
         items = {
             {
                 icon = 'lock',
-                label = 'Cuff',
+                label = locale('radial.cuff'),
                 onSelect = function()
                 end,
             },
             {
                 icon = 'lock-open',
-                label = 'Uncuff',
+                label = locale('radial.uncuff'),
                 onSelect = function()
                 end,
             },
             {
                 icon = 'magnifying-glass',
-                label = 'Search',
+                label = locale('radial.search'),
                 onSelect = function()
                     exports.ox_inventory:openNearbyInventory()
                 end,
             },
             {
                 icon = 'heart-crack',
-                label = '10-99A',
+                label = locale('radial.officer_down_urgent'),
                 onSelect = function()
                 end,
             },
             {
                 icon = 'heart-pulse',
-                label = '10-99B',
+                label = locale('radial.officer_down'),
                 onSelect = function()
                 end,
             },
             {
                 icon = 'truck-fast',
-                label = 'Impound',
+                label = locale('radial.impound'),
                 onSelect = function()
                 end,
             },
             {
                 icon = 'truck-ramp-box',
-                label = 'Confiscate',
+                label = locale('radial.confiscate'),
                 onSelect = function()
                 end,
             },
@@ -281,13 +281,13 @@ local function registerDeadRadial()
         items = {
             {
                 icon = 'heart-crack',
-                label = '10-99A',
+                label = locale('radial.officer_down_urgent'),
                 onSelect = function()
                 end,
             },
             {
                 icon = 'heart-pulse',
-                label = '10-99B',
+                label = locale('radial.officer_down'),
                 onSelect = function()
                 end,
             },
@@ -307,7 +307,7 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     lib.addRadialItem({
         id = 'leo',
         icon = 'shield-halved',
-        label = 'Police',
+        label = locale('radial.label'),
         menu = 'policeMenu'
     })
 end)
@@ -320,7 +320,7 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function()
     lib.addRadialItem({
         id = 'leo',
         icon = 'shield-halved',
-        label = 'Police',
+        label = locale('radial.label'),
         menu = 'policeMenu'
     })
 end)
@@ -341,7 +341,7 @@ AddStateBagChangeHandler('DEATH_STATE_STATE_BAG', nil, function(bagName, _, dead
     lib.addRadialItem({
         id = 'leo',
         icon = 'shield-halved',
-        label = 'Police',
+        label = locale('radial.label'),
         menu = 'policeMenu'
     })
 end)
