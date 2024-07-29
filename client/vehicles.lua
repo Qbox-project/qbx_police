@@ -9,7 +9,7 @@ end
 ---@param spawn vector4
 local function takeOut(vehicle, spawn)
     if cache.vehicle then
-        exports.qbx_core:Notify('You\'re already in a vehicle...', 'error')
+        exports.qbx_core:Notify(locale('notify.in_vehicle'), 'error')
         return
     end
 
@@ -19,7 +19,7 @@ local function takeOut(vehicle, spawn)
         if NetworkDoesEntityExistWithNetworkId(netId) then
             return NetToVeh(netId)
         end
-    end, 'Something went wrong while attempting to spawn the police vehicle...')
+    end, locale('vehicles.something_wrong'))
 end
 
 ---@param garage table
@@ -42,7 +42,7 @@ local function openGarage(garage)
 
     lib.registerContext({
         id = 'garageMenu',
-        title = 'PD Garage',
+        title = locale('vehicles.garage_title'),
         options = options
     })
 
@@ -68,13 +68,13 @@ local function openHelipad(helipad)
     end
 
     if #options == 0 then
-        exports.qbx_core:Notify('You\'re not the appropriate grade to pilot a helicopter yet...', 'error')
+        exports.qbx_core:Notify(locale('vehicles.not_helipad_grade'), 'error')
         return
     end
 
     lib.registerContext({
         id = 'helipadMenu',
-        title = 'PD Helipad',
+        title = locale('vehicles.heipad_title'),
         options = options
     })
 

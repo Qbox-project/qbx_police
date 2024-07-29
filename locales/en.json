@@ -1,1 +1,51 @@
-{}
+{
+    "blip": "Police Station",
+    "targets": {
+        "duty": "Clock In/Out",
+        "boss_menu": "Open Job Management",
+        "personal_stash": "Open Personal Stash",
+        "evidence_drawers": "Open Evidence Drawers",
+        "garage": "Open Garage",
+        "store_vehicle": "Store Vehicle",
+        "helipad": "Open Helipad",
+        "store_helicopter": "Store Helicopter"
+    },
+    "radial": {
+        "label": "Police",
+        "cuff": "Cuff",
+        "uncuff": "Uncuff",
+        "search": "Search",
+        "officer_down": "10-99A",
+        "officer_down_urgent": "10-99B",
+        "impound": "Impound",
+        "confiscate": "Confiscate"
+    },
+    "notify": {
+        "in_vehicle": "You're already in a vehicle...",
+        "not_around": "It looks like that person is not around right now..."
+    },
+    "vehicles": {
+        "garage_title": "PD Garage",
+        "helipad_title": "PD Helipad",
+        "not_helipad_grade": "You're not the appropriate grade to pilot a helicopter yet...",
+        "something_wrong": "Something went wrong while attempting to spawn the police vehicle..."
+    },
+    "commands": {
+        "callsign": {
+            "help": "Give yourself a callsign",
+            "params": {
+                "callsign": "Your new callsign (A-101, A101, 101)"
+            }
+        },
+        "fine": {
+            "help": "Fine somebody",
+            "params": {
+                "target": "ID of the Individual",
+                "amount": "Amount you wish to fine"
+            },
+            "issuer": "Fined by the City of Los Santos",
+            "issued": "Fine issued",
+            "fined": "You have been fined $%s"
+        }
+    }
+}

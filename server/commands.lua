@@ -1,10 +1,10 @@
 lib.addCommand('callsign', {
-    help = 'Give yourself a callsign',
+    help = locale('commands.callsign.help'),
     params = {
         {
             name = 'callsign',
-            type = 'number',
-            help = locale('info.callsign_name')
+            type = 'string',
+            help = locale('commands.callsign.params.callsign'),
         }
     },
 }, function(source, args)
@@ -16,17 +16,17 @@ lib.addCommand('callsign', {
 end)
 
 lib.addCommand('fine', {
-    help = 'Fine somebody',
+    help = locale('commands.fine.help'),
     params = {
         {
             name = 'target',
             type = 'playerId',
-            help = 'ID of the Individual'
+            help = locale('commands.fine.params.target'),
         },
         {
             name = 'amount',
             type = 'number',
-            help = 'Amount you wish to fine',
+            help = locale('commands.fine.params.amount'),
         },
     }
 }, function(source, args)
@@ -37,12 +37,12 @@ lib.addCommand('fine', {
     local target = exports.qbx_core:GetPlayer(args.target)
 
     if not target then
-        exports.qbx_core:Notify(source, 'It does not look like that person is around right now...', 'error')
+        exports.qbx_core:Notify(source, locale('notify.not_around'), 'error')
         return
     end
 
-    target.Functions.RemoveMoney('bank', args.amount, 'Fined by the City of Los Santos')
+    target.Functions.RemoveMoney('bank', args.amount, locale('commands.fine.issuer'))
 
-    exports.qbx_core:Notify(source, 'Fine issued', 'success')
-    exports.qbx_core:Notify(target, 'You have been fined $' .. args.amount, 'error')
+    exports.qbx_core:Notify(source, locale('commands.fine.issued'), 'success')
+    exports.qbx_core:Notify(target, locale('commands.fine.fined', args.amount), 'error')
 end)
