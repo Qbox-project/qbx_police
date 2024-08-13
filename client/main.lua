@@ -32,7 +32,7 @@ local function createDuty(job, station)
                 {
                     name = ('%s-Duty'):format(job),
                     icon = 'fa-solid fa-clipboard-user',
-                    label = locale('target.duty'),
+                    label = locale('targets.duty'),
                     serverEvent = 'QBCore:ToggleDuty',
                     groups = location.groups,
                     distance = 1.5,
@@ -58,7 +58,7 @@ local function createManagement(job, station)
                 {
                     name = ('%s-BossMenu'):format(job),
                     icon = 'fa-solid fa-people-roof',
-                    label = locale('target.boss_menu'),
+                    label = locale('targets.boss_menu'),
                     canInteract = function()
                         return QBX.PlayerData.job.isboss and QBX.PlayerData.job.onduty
                     end,
@@ -79,8 +79,6 @@ local function createPersonalStash(job, station)
     if not job or not station then return end
 
     for i = 1, #station do
-        local stash = station.personalStash[i]
-        local stashName = ('%s-%s-PersonalStash'):format(i, QBX.PlayerData.job.name)
 
         exports.ox_target:addSphereZone({
             coords = stash.coords,
