@@ -7,8 +7,9 @@ local function registerPersonalStash(job, personalStash)
 
     for i = 1, #personalStash do
         local stash = personalStash[i]
+        local stashName = ('%s-%s-PersonalStash'):format(i, job)
 
-        exports.ox_inventory:RegisterStash(('%s-%s-PersonalStash'):format(i, job), 'Personal Stash', stash.slots, stash.weight, true, stash.groups)
+        exports.ox_inventory:RegisterStash(stashName, 'Personal Stash', stash.slots, stash.weight, true, stash.groups)
     end
 end
 
@@ -32,10 +33,10 @@ lib.callback.register('qbx_police:server:spawnVehicle', function(source, model, 
     return netId
 end)
 
-AddEventHandler('onResourceStart', function(resource)
+AddEventHandler('onServerResourceStart', function(resource)
     if resource ~= cache.resource then return end
 
-    for name, data in pairs(sharedConfig.departments) do
-        registerPersonalStash(name, data.personalStash)
+    for job, data in pairs(sharedConfig.departments) do
+        registerPersonalStash(job, data.personalStash)
     end
 end)

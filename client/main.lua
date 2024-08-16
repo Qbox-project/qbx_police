@@ -32,7 +32,7 @@ local function createDuty(job, station)
                 {
                     name = ('%s-Duty'):format(job),
                     icon = 'fa-solid fa-clipboard-user',
-                    label = locale('target.duty'),
+                    label = locale('targets.duty'),
                     serverEvent = 'QBCore:ToggleDuty',
                     groups = location.groups,
                     distance = 1.5,
@@ -58,7 +58,7 @@ local function createManagement(job, station)
                 {
                     name = ('%s-BossMenu'):format(job),
                     icon = 'fa-solid fa-people-roof',
-                    label = locale('target.boss_menu'),
+                    label = locale('targets.boss_menu'),
                     canInteract = function()
                         return QBX.PlayerData.job.isboss and QBX.PlayerData.job.onduty
                     end,
@@ -79,8 +79,8 @@ local function createPersonalStash(job, station)
     if not job or not station then return end
 
     for i = 1, #station do
-        local stash = station.personalStash[i]
-        local stashName = ('%s-%s-PersonalStash'):format(i, QBX.PlayerData.job.name)
+        local stash = station[i]
+        local stashName = ('%s-%s-PersonalStash'):format(i, job)
 
         exports.ox_target:addSphereZone({
             coords = stash.coords,
@@ -90,7 +90,7 @@ local function createPersonalStash(job, station)
                 {
                     name = stashName,
                     icon = 'fa-solid fa-box-archive',
-                    label = locale('target.personal_stash'),
+                    label = locale('targets.personal_stash'),
                     canInteract = function()
                         return QBX.PlayerData.job.onduty
                     end,
@@ -121,7 +121,7 @@ local function createEvidence(job, station)
                 {
                     name = ('%s-EvidenceDrawers'):format(job),
                     icon = 'fa-solid fa-box-archive',
-                    label = locale('target.evidence_drawers'),
+                    label = locale('targets.evidence_drawers'),
                     canInteract = function()
                         return QBX.PlayerData.job.onduty
                     end,
@@ -152,7 +152,7 @@ local function createGarage(job, station)
                 {
                     name = ('%s-Garage'):format(job),
                     icon = 'fa-solid fa-warehouse',
-                    label = locale('target.garage'),
+                    label = locale('targets.garage'),
                     canInteract = function()
                         return not cache.vehicle and QBX.PlayerData.job.onduty
                     end,
@@ -165,7 +165,7 @@ local function createGarage(job, station)
                 {
                     name = ('%s-GarageStore'):format(job),
                     icon = 'fa-solid fa-square-parking',
-                    label = locale('target.store_vehicle'),
+                    label = locale('targets.store_vehicle'),
                     canInteract = function()
                         return cache.vehicle and QBX.PlayerData.job.onduty
                     end,
@@ -196,7 +196,7 @@ local function createHelipad(job, station)
                 {
                     name = ('%s-Helipad'):format(job),
                     icon = 'fa-solid fa-helicopter-symbol',
-                    label = locale('target.helipad'),
+                    label = locale('targets.helipad'),
                     canInteract = function()
                         return not cache.vehicle and QBX.PlayerData.job.onduty
                     end,
@@ -209,7 +209,7 @@ local function createHelipad(job, station)
                 {
                     name = ('%s-HelipadStore'):format(job),
                     icon = 'fa-solid fa-square-parking',
-                    label = locale('target.store_helicopter'),
+                    label = locale('targets.store_helicopter'),
                     canInteract = function()
                         return cache.vehicle and QBX.PlayerData.job.onduty
                     end,
