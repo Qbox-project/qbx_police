@@ -17,28 +17,16 @@ end
 
 ---@param playerId number
 local function removeOfficer(playerId)
-    activeOfficers[playerId] = nil
-
     triggerOfficerEvent('qbx_police:client:removeOfficer', playerId)
+
+    activeOfficers[playerId] = nil
 end
 
 ---@param playerId number
 local function addOfficer(playerId)
     local player = exports.qbx_core:GetPlayer(playerId)
 
-    if player then
-        print('passed player check: '..playerId)
-    else
-        print('player not found')
-    end
-
-    print(player.PlayerData.charinfo.firstname..' '..player.PlayerData.charinfo.lastname)
-    print(player.PlayerData.job.name)
-    print(player.PlayerData.job.type)
-
     if not player or player.PlayerData.job.type ~= 'leo' then return end
-
-    print('passed player and job type check')
 
     activeOfficers[playerId] = {
         firstName = player.PlayerData.charinfo.firstname,
@@ -96,24 +84,27 @@ RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function()
     addOfficer(source)
 end)
 
-AddEventHandler('qbx_core:server:onGroupUpdate', function(source, groupName, groupGrade)
+AddEventHandler('QBCore:Server:OnJobUpdate', function(source, job)
     local officer = getOfficer(source)
-    print('onGroupUpdate init')
-    print(('source: %s | groupName: %s | groupGrade: %s'):format(source, groupName, groupGrade or 'no grade'))
 
     if officer then
-        print('found officer')
-        if officer.group == groupName then
-            activeOfficers[source].grade = groupGrade
-            print('updated grade: ' .. groupGrade)
+        if officer.group == job.name then
+            activeOfficers[source].grade = job.grade.label
             return
         else
-            removeOfficer(source)
-            print('removed officer')
+            local playerJob = exports.qbx_core:GetJob(job.name)
+
+            if playerJob.type ~= 'leo' then
+                removeOfficer(source)
+                return
+            end
+
+            activeOfficers[source].group = job.name
+            activeOfficers[source].grade = job.grade.label
+            return
         end
     end
 
-    print('no officer found. added officer: ' .. source)
     addOfficer(source)
 end)
 
