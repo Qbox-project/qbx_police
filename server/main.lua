@@ -1,7 +1,6 @@
 local config = require 'config.server'
 local sharedConfig = require 'config.shared'
 local activeOfficers = {}
-local officersArray = {}
 
 ---@param name string
 ---@param data any
@@ -128,6 +127,8 @@ AddEventHandler('QBCore:Server:SetDuty', function(source, onDuty)
 end)
 
 SetInterval(function()
+    local officersArray = {}
+
     for i, officer in pairs(activeOfficers) do
         local coords = GetEntityCoords(GetPlayerPed(officer.playerId))
 
