@@ -109,6 +109,10 @@ AddEventHandler('QBCore:Server:OnJobUpdate', function(source, job)
 end)
 
 AddEventHandler('QBCore:Server:SetDuty', function(source, onDuty)
+    local player = exports.qbx_core:GetPlayer(source)
+
+    if player?.PlayerData.job.type ~= 'leo' then return end
+
     if not onDuty then
         removeOfficer(source)
         return
