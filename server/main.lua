@@ -120,12 +120,12 @@ end)
 SetInterval(function()
     local officersArray = {}
 
-    for i, officer in pairs(activeOfficers) do
+    for playerId, officer in pairs(activeOfficers) do
         local coords = GetEntityCoords(GetPlayerPed(officer.playerId))
 
         officer.position = coords
 
-        officersArray[i] = officer
+        officersArray[playerId] = officer
     end
 
     triggerOfficerEvent('qbx_police:client:updatePositions', officersArray)
