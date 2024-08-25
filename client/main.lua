@@ -373,6 +373,7 @@ RegisterNetEvent('qbx_police:client:updatePositions', function(officers)
     end
 end)
 
+---@param playerId number
 local function removeOfficer(playerId)
     local blip = officerBlips[playerId]
 
