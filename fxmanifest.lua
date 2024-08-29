@@ -1,9 +1,9 @@
 fx_version 'cerulean'
 game 'gta5'
 
-name 'qbx_policejob'
+name 'qbx_police'
 description 'Police system for Qbox'
-repository 'https://github.com/Qbox-project/qbx_policejob'
+repository 'https://github.com/Qbox-project/qbx_police'
 version '1.0.0'
 
 ox_lib 'locale'
