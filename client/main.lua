@@ -115,7 +115,7 @@ local function createPersonalStash(job, department)
 
     for i = 1, #department do
         local stash = department[i]
-        local stashName = ('%s-%s-PersonalStash'):format(i, job)
+        local stashId = ('%s-PersonalStash'):format(job)
 
         exports.ox_target:addSphereZone({
             coords = stash.coords,
@@ -123,14 +123,14 @@ local function createPersonalStash(job, department)
             debug = config.debugPoly,
             options = {
                 {
-                    name = stashName,
+                    name = stashId,
                     icon = 'fa-solid fa-box-archive',
                     label = locale('targets.personal_stash'),
                     canInteract = function()
                         return QBX.PlayerData.job.onduty
                     end,
                     onSelect = function()
-                        exports.ox_inventory:openInventory('stash', stashName)
+                        exports.ox_inventory:openInventory('stash', stashId)
                     end,
                     groups = stash.groups,
                     distance = 1.5,

@@ -32,6 +32,7 @@
 ---@field radius? number radius of the zone. default is 1.5
 
 ---@class PersonalStashData
+---@field label string
 ---@field coords vector3
 ---@field groups table
 ---@field radius? number radius of the zone. default is 1.5

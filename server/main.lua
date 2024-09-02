@@ -7,9 +7,9 @@ local function registerPersonalStash(job, department)
 
     for i = 1, #department do
         local stash = department[i]
-        local stashName = ('%s-%s-PersonalStash'):format(i, job)
+        local stashId = ('%s-PersonalStash'):format(job)
 
-        exports.ox_inventory:RegisterStash(stashName, 'Personal Stash', stash.slots or 100, stash.weight or 100000, true, stash.groups)
+        exports.ox_inventory:RegisterStash(stashId, stash.label, stash.slots or 100, stash.weight or 100000, true, stash.groups, stash.coords)
     end
 end
 

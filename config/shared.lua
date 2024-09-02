@@ -58,11 +58,12 @@ return {
             },
             personalStash = {
                 {
+                    label = 'Personal Stash',
                     coords = vec3(453.075, -980.124, 30.889),
                     radius = 1.5,
                     slots = 100,
                     weight = 100000,
-                    groups = { 'police' }
+                    groups = { police = 0 }
                 },
             },
             evidence = {
