@@ -1,58 +1,6 @@
 return {
 
-    ---@class Blip
-    ---@field coords vector3
-    ---@field label? string label of the blip. default is 'Police Station'
-    ---@field sprite? number sprite of the blip. default is 60
-    ---@field scale? number scale of the blip. default is 0.8
-    ---@field color? number color of the blip. default is 29
-
-    ---@class Management
-    ---@field coords vector3
-    ---@field groups table
-    ---@field radius? number radius of the zone. default is 1.5
-
-    ---@class Duty
-    ---@field coords vector3
-    ---@field groups table
-    ---@field radius? number radius of the zone. default is 1.5
-
-    ---@class PersonalStash
-    ---@field coords vector3
-    ---@field radius number
-    ---@field slots number
-    ---@field weight number
-    ---@field groups table
-
-    ---@class Evidence
-    ---@field coords vector3
-    ---@field radius number
-    ---@field groups table
-
-    ---@class Garage
-    ---@field coords vector3
-    ---@field spawn vector4
-    ---@field radius number
-    ---@field catalogue table
-    ---@field groups table
-
-    ---@class Helipad
-    ---@field coords vector3
-    ---@field spawn vector4
-    ---@field radius number
-    ---@field catalogue table
-    ---@field groups table
-
-    ---@class JobConfig
-    ---@field blip Blip
-    ---@field management Management[]
-    ---@field duty Duty[]
-    ---@field personalStash PersonalStash[]
-    ---@field evidence Evidence[]
-    ---@field garage Garage[]
-    ---@field helipad Helipad[]
-
-    ---@type table<string, JobConfig>
+    ---@type table<string, DepartmentData>
     departments = {
         police = { -- Los Santos Police Department
             blip = {
@@ -80,8 +28,8 @@ return {
                 {
                     coords = vec3(453.075, -980.124, 30.889),
                     radius = 1.5,
-                    slots = 200,
-                    weight = 10000000,
+                    slots = 100,
+                    weight = 100000,
                     groups = { 'police' }
                 },
             },
