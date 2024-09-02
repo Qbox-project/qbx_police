@@ -74,6 +74,41 @@ local function createManagement(job, department)
 end
 
 ---@param job string
+---@param department ArmoryData
+local function createArmory(job, department)
+    if not job or not department then return end
+
+    for i = 1, #department do
+        local armory = department[i]
+
+        for ii = 1, #armory.locations do
+            local location = armory.locations[ii]
+
+            exports.ox_target:addSphereZone({
+                coords = location,
+                radius = armory.radius or 1.5,
+                debug = config.debugPoly,
+                options = {
+                    {
+                        name = ('%s-Armory'):format(job),
+                        icon = 'fa-solid fa-person-rifle',
+                        label = locale('targets.armory'),
+                        canInteract = function()
+                            return QBX.PlayerData.job.onduty
+                        end,
+                        onSelect = function()
+                            exports.ox_inventory:openInventory('shop', { type = department.shopType, id = ii })
+                        end,
+                        groups = armory.groups,
+                        distance = 1.5,
+                    },
+                }
+            })
+        end
+    end
+end
+
+---@param job string
 ---@param department PersonalStashData
 local function createPersonalStash(job, department)
     if not job or not department then return end
@@ -353,6 +388,7 @@ CreateThread(function()
         createBlip(data.blip)
         createDuty(job, data.duty)
         createManagement(job, data.management)
+        createArmory(job, data.armory)
         createPersonalStash(job, data.personalStash)
         createEvidence(job, data.evidence)
         createGarage(job, data.garage)

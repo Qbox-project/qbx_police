@@ -17,6 +17,20 @@
 ---@field groups table
 ---@field radius? number radius of the zone. default is 1.5
 
+---@class ArmoryInventoryItem
+---@field name string
+---@field price number
+---@field metadata? table<string, any>
+---@field grade? number
+
+---@class ArmoryData
+---@field shopType string
+---@field name string
+---@field groups table
+---@field inventory ArmoryInventoryItem[]
+---@field locations table
+---@field radius? number radius of the zone. default is 1.5
+
 ---@class PersonalStashData
 ---@field coords vector3
 ---@field groups table
@@ -29,17 +43,22 @@
 ---@field groups table
 ---@field radius? number radius of the zone. default is 1.5
 
+---@class CatalogueItem
+---@field name string
+---@field grade number
+
 ---@class VehicleData
 ---@field coords vector3
 ---@field spawn vector4
 ---@field radius number
----@field catalogue table
+---@field catalogue CatalogueItem[]
 ---@field groups table
 
 ---@class DepartmentData
 ---@field blip BlipData
 ---@field duty DutyData[]
 ---@field management ManagementData[]
+---@field armory ArmoryData[]
 ---@field personalStash PersonalStashData[]
 ---@field evidence EvidenceData[]
 ---@field garage VehicleData[]
