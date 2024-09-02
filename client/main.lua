@@ -2,27 +2,27 @@ local config = require 'config.client'
 local sharedConfig = require 'config.shared'
 local vehicles = require 'client.vehicles'
 
----@param station table
-local function createBlip(station)
-    if not station then return end
+---@param department BlipData
+local function createBlip(department)
+    if not department then return end
 
-    local blip = AddBlipForCoord(station.coords.x, station.coords.y, station.coords.z)
-    SetBlipSprite(blip, station.sprite or 60)
+    local blip = AddBlipForCoord(department.coords.x, department.coords.y, department.coords.z)
+    SetBlipSprite(blip, department.sprite or 60)
     SetBlipAsShortRange(blip, true)
-    SetBlipScale(blip, station.scale or 0.8)
-    SetBlipColour(blip, station.color or 29)
+    SetBlipScale(blip, department.scale or 0.8)
+    SetBlipColour(blip, department.color or 29)
     BeginTextCommandSetBlipName('STRING')
-    AddTextComponentSubstringPlayerName(station.label or locale('blip'))
+    AddTextComponentSubstringPlayerName(department.label or locale('blip'))
     EndTextCommandSetBlipName(blip)
 end
 
 ---@param job string
----@param station table
-local function createDuty(job, station)
-    if not job or not station then return end
+---@param department ManagementData
+local function createDuty(job, department)
+    if not job or not department then return end
 
-    for i = 1, #station do
-        local location = station[i]
+    for i = 1, #department do
+        local location = department[i]
 
         exports.ox_target:addSphereZone({
             coords = location.coords,
@@ -43,12 +43,12 @@ local function createDuty(job, station)
 end
 
 ---@param job string
----@param station table
-local function createManagement(job, station)
-    if not job or not station then return end
+---@param department DutyData
+local function createManagement(job, department)
+    if not job or not department then return end
 
-    for i = 1, #station do
-        local location = station[i]
+    for i = 1, #department do
+        local location = department[i]
 
         exports.ox_target:addSphereZone({
             coords = location.coords,
@@ -74,17 +74,17 @@ local function createManagement(job, station)
 end
 
 ---@param job string
----@param station table
-local function createPersonalStash(job, station)
-    if not job or not station then return end
+---@param department PersonalStashData
+local function createPersonalStash(job, department)
+    if not job or not department then return end
 
-    for i = 1, #station do
-        local stash = station[i]
+    for i = 1, #department do
+        local stash = department[i]
         local stashName = ('%s-%s-PersonalStash'):format(i, job)
 
         exports.ox_target:addSphereZone({
             coords = stash.coords,
-            radius = stash.radius,
+            radius = stash.radius or 1.5,
             debug = config.debugPoly,
             options = {
                 {
@@ -106,16 +106,16 @@ local function createPersonalStash(job, station)
 end
 
 ---@param job string
----@param station table
-local function createEvidence(job, station)
-    if not job or not station then return end
+---@param department EvidenceData
+local function createEvidence(job, department)
+    if not job or not department then return end
 
-    for i = 1, #station do
-        local evidence = station[i]
+    for i = 1, #department do
+        local evidence = department[i]
 
         exports.ox_target:addSphereZone({
             coords = evidence.coords,
-            radius = evidence.radius,
+            radius = evidence.radius or 1.5,
             debug = config.debugPoly,
             options = {
                 {
@@ -137,12 +137,12 @@ local function createEvidence(job, station)
 end
 
 ---@param job string
----@param station table
-local function createGarage(job, station)
-    if not job or not station then return end
+---@param department VehicleData
+local function createGarage(job, department)
+    if not job or not department then return end
 
-    for i = 1, #station do
-        local garage = station[i]
+    for i = 1, #department do
+        local garage = department[i]
 
         exports.ox_target:addSphereZone({
             coords = garage.coords,
@@ -181,12 +181,12 @@ local function createGarage(job, station)
 end
 
 ---@param job string
----@param station table
-local function createHelipad(job, station)
-    if not job or not station then return end
+---@param department VehicleData
+local function createHelipad(job, department)
+    if not job or not department then return end
 
-    for i = 1, #station do
-        local helipad = station[i]
+    for i = 1, #department do
+        local helipad = department[i]
 
         exports.ox_target:addSphereZone({
             coords = helipad.coords,

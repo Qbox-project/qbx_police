@@ -1,7 +1,7 @@
 local sharedConfig = require 'config.shared'
 
 ---@param job string
----@param personalStash table
+---@param personalStash PersonalStashData
 local function registerPersonalStash(job, personalStash)
     if not job or not personalStash then return end
 
@@ -9,7 +9,7 @@ local function registerPersonalStash(job, personalStash)
         local stash = personalStash[i]
         local stashName = ('%s-%s-PersonalStash'):format(i, job)
 
-        exports.ox_inventory:RegisterStash(stashName, 'Personal Stash', stash.slots, stash.weight, true, stash.groups)
+        exports.ox_inventory:RegisterStash(stashName, 'Personal Stash', stash.slots or 100, stash.weight or 100000, true, stash.groups)
     end
 end
 
