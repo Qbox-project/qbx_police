@@ -97,7 +97,7 @@ local function createArmory(job, department)
                             return QBX.PlayerData.job.onduty
                         end,
                         onSelect = function()
-                            exports.ox_inventory:openInventory('shop', { type = department.shopType, id = ii })
+                            exports.ox_inventory:openInventory('shop', { type = armory.shopType, id = ii })
                         end,
                         groups = armory.groups,
                         distance = 1.5,

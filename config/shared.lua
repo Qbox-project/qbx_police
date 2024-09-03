@@ -29,7 +29,7 @@ return {
                     shopType = 'PoliceArmory',
                     name = 'Armory',
                     radius = 1.5,
-                    groups = { 'police' },
+                    groups = { police = 0 },
                     inventory = {
                         { name = 'weapon_stungun', price = 100, metadata = { registered = true, serial = 'LEO' } },
                         { name = 'weapon_pistol', price = 500, metadata = { registered = true, serial = 'LEO' } },
