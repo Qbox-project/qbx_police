@@ -1,7 +1,7 @@
 local sharedConfig = require 'config.shared'
 
----@param job string
----@param department PersonalStashData
+---@param job? string
+---@param department? PersonalStashData
 local function registerPersonalStash(job, department)
     if not job or not department then return end
 
@@ -13,8 +13,10 @@ local function registerPersonalStash(job, department)
     end
 end
 
----@param department ArmoryData
+---@param department? ArmoryData
 local function registerArmory(department)
+    if not department then return end
+
     for i = 1, #department do
         local armory = department[i]
 

@@ -2,7 +2,7 @@ local config = require 'config.client'
 local sharedConfig = require 'config.shared'
 local vehicles = require 'client.vehicles'
 
----@param department BlipData
+---@param department? BlipData
 local function createBlip(department)
     if not department then return end
 
@@ -16,8 +16,8 @@ local function createBlip(department)
     EndTextCommandSetBlipName(blip)
 end
 
----@param job string
----@param department ManagementData
+---@param job? string
+---@param department? ManagementData
 local function createDuty(job, department)
     if not job or not department then return end
 
@@ -42,8 +42,8 @@ local function createDuty(job, department)
     end
 end
 
----@param job string
----@param department DutyData
+---@param job? string
+---@param department? DutyData
 local function createManagement(job, department)
     if not job or not department then return end
 
@@ -73,8 +73,8 @@ local function createManagement(job, department)
     end
 end
 
----@param job string
----@param armories ArmoryData
+---@param job? string
+---@param armories? ArmoryData
 local function createArmory(job, armories)
     if not job or not armories then return end
 
@@ -108,8 +108,8 @@ local function createArmory(job, armories)
     end
 end
 
----@param job string
----@param stashes PersonalStashData
+---@param job? string
+---@param stashes? PersonalStashData
 local function createPersonalStash(job, stashes)
     if not job or not stashes then return end
 
@@ -140,8 +140,8 @@ local function createPersonalStash(job, stashes)
     end
 end
 
----@param job string
----@param department EvidenceData
+---@param job? string
+---@param department? EvidenceData
 local function createEvidence(job, department)
     if not job or not department then return end
 
@@ -171,8 +171,8 @@ local function createEvidence(job, department)
     end
 end
 
----@param job string
----@param garages VehicleData
+---@param job? string
+---@param garages? VehicleData
 local function createGarage(job, garages)
     if not job or not garages then return end
 
@@ -215,8 +215,8 @@ local function createGarage(job, garages)
     end
 end
 
----@param job string
----@param helipads VehicleData
+---@param job? string
+---@param helipads? VehicleData
 local function createHelipad(job, helipads)
     if not job or not helipads then return end
 
