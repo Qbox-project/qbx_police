@@ -74,12 +74,12 @@ local function createManagement(job, department)
 end
 
 ---@param job string
----@param department ArmoryData
-local function createArmory(job, department)
-    if not job or not department then return end
+---@param armories ArmoryData
+local function createArmory(job, armories)
+    if not job or not armories then return end
 
-    for i = 1, #department do
-        local armory = department[i]
+    for i = 1, #armories do
+        local armory = armories[i]
 
         for ii = 1, #armory.locations do
             local location = armory.locations[ii]
@@ -109,12 +109,12 @@ local function createArmory(job, department)
 end
 
 ---@param job string
----@param department PersonalStashData
-local function createPersonalStash(job, department)
-    if not job or not department then return end
+---@param stashes PersonalStashData
+local function createPersonalStash(job, stashes)
+    if not job or not stashes then return end
 
-    for i = 1, #department do
-        local stash = department[i]
+    for i = 1, #stashes do
+        local stash = stashes[i]
         local stashId = ('%s-PersonalStash'):format(job)
 
         exports.ox_target:addSphereZone({
@@ -172,12 +172,12 @@ local function createEvidence(job, department)
 end
 
 ---@param job string
----@param department VehicleData
-local function createGarage(job, department)
-    if not job or not department then return end
+---@param garages VehicleData
+local function createGarage(job, garages)
+    if not job or not garages then return end
 
-    for i = 1, #department do
-        local garage = department[i]
+    for i = 1, #garages do
+        local garage = garages[i]
 
         exports.ox_target:addSphereZone({
             coords = garage.coords,
@@ -216,12 +216,12 @@ local function createGarage(job, department)
 end
 
 ---@param job string
----@param department VehicleData
-local function createHelipad(job, department)
-    if not job or not department then return end
+---@param helipads VehicleData
+local function createHelipad(job, helipads)
+    if not job or not helipads then return end
 
-    for i = 1, #department do
-        local helipad = department[i]
+    for i = 1, #helipads do
+        local helipad = helipads[i]
 
         exports.ox_target:addSphereZone({
             coords = helipad.coords,
