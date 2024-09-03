@@ -3,6 +3,7 @@
     "targets": {
         "duty": "Clock In/Out",
         "boss_menu": "Open Job Management",
+        "armory": "Open Armory",
         "personal_stash": "Open Personal Stash",
         "evidence_drawers": "Open Evidence Drawers",
         "garage": "Open Garage",

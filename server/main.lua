@@ -1,15 +1,26 @@
 local sharedConfig = require 'config.shared'
 
----@param job string
----@param personalStash PersonalStashData
-local function registerPersonalStash(job, personalStash)
-    if not job or not personalStash then return end
+---@param job? string
+---@param department? PersonalStashData
+local function registerPersonalStash(job, department)
+    if not job or not department then return end
 
-    for i = 1, #personalStash do
-        local stash = personalStash[i]
-        local stashName = ('%s-%s-PersonalStash'):format(i, job)
+    for i = 1, #department do
+        local stash = department[i]
+        local stashId = ('%s-PersonalStash'):format(job)
 
-        exports.ox_inventory:RegisterStash(stashName, 'Personal Stash', stash.slots or 100, stash.weight or 100000, true, stash.groups)
+        exports.ox_inventory:RegisterStash(stashId, stash.label, stash.slots or 100, stash.weight or 100000, true, stash.groups, stash.coords)
+    end
+end
+
+---@param department? ArmoryData
+local function registerArmory(department)
+    if not department then return end
+
+    for i = 1, #department do
+        local armory = department[i]
+
+        exports.ox_inventory:RegisterShop(armory.shopType, armory)
     end
 end
 
@@ -37,6 +48,7 @@ AddEventHandler('onServerResourceStart', function(resource)
     if resource ~= cache.resource then return end
 
     for job, data in pairs(sharedConfig.departments) do
+        registerArmory(data.armory)
         registerPersonalStash(job, data.personalStash)
     end
 end)

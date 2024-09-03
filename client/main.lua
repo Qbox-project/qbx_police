@@ -2,7 +2,7 @@ local config = require 'config.client'
 local sharedConfig = require 'config.shared'
 local vehicles = require 'client.vehicles'
 
----@param department BlipData
+---@param department? BlipData
 local function createBlip(department)
     if not department then return end
 
@@ -16,8 +16,8 @@ local function createBlip(department)
     EndTextCommandSetBlipName(blip)
 end
 
----@param job string
----@param department ManagementData
+---@param job? string
+---@param department? ManagementData
 local function createDuty(job, department)
     if not job or not department then return end
 
@@ -42,8 +42,8 @@ local function createDuty(job, department)
     end
 end
 
----@param job string
----@param department DutyData
+---@param job? string
+---@param department? DutyData
 local function createManagement(job, department)
     if not job or not department then return end
 
@@ -73,14 +73,49 @@ local function createManagement(job, department)
     end
 end
 
----@param job string
----@param department PersonalStashData
-local function createPersonalStash(job, department)
-    if not job or not department then return end
+---@param job? string
+---@param armories? ArmoryData
+local function createArmory(job, armories)
+    if not job or not armories then return end
 
-    for i = 1, #department do
-        local stash = department[i]
-        local stashName = ('%s-%s-PersonalStash'):format(i, job)
+    for i = 1, #armories do
+        local armory = armories[i]
+
+        for ii = 1, #armory.locations do
+            local location = armory.locations[ii]
+
+            exports.ox_target:addSphereZone({
+                coords = location,
+                radius = armory.radius or 1.5,
+                debug = config.debugPoly,
+                options = {
+                    {
+                        name = ('%s-Armory'):format(job),
+                        icon = 'fa-solid fa-person-rifle',
+                        label = locale('targets.armory'),
+                        canInteract = function()
+                            return QBX.PlayerData.job.onduty
+                        end,
+                        onSelect = function()
+                            exports.ox_inventory:openInventory('shop', { type = armory.shopType, id = ii })
+                        end,
+                        groups = armory.groups,
+                        distance = 1.5,
+                    },
+                }
+            })
+        end
+    end
+end
+
+---@param job? string
+---@param stashes? PersonalStashData
+local function createPersonalStash(job, stashes)
+    if not job or not stashes then return end
+
+    for i = 1, #stashes do
+        local stash = stashes[i]
+        local stashId = ('%s-PersonalStash'):format(job)
 
         exports.ox_target:addSphereZone({
             coords = stash.coords,
@@ -88,14 +123,14 @@ local function createPersonalStash(job, department)
             debug = config.debugPoly,
             options = {
                 {
-                    name = stashName,
+                    name = stashId,
                     icon = 'fa-solid fa-box-archive',
                     label = locale('targets.personal_stash'),
                     canInteract = function()
                         return QBX.PlayerData.job.onduty
                     end,
                     onSelect = function()
-                        exports.ox_inventory:openInventory('stash', stashName)
+                        exports.ox_inventory:openInventory('stash', stashId)
                     end,
                     groups = stash.groups,
                     distance = 1.5,
@@ -105,8 +140,8 @@ local function createPersonalStash(job, department)
     end
 end
 
----@param job string
----@param department EvidenceData
+---@param job? string
+---@param department? EvidenceData
 local function createEvidence(job, department)
     if not job or not department then return end
 
@@ -136,13 +171,13 @@ local function createEvidence(job, department)
     end
 end
 
----@param job string
----@param department VehicleData
-local function createGarage(job, department)
-    if not job or not department then return end
+---@param job? string
+---@param garages? VehicleData
+local function createGarage(job, garages)
+    if not job or not garages then return end
 
-    for i = 1, #department do
-        local garage = department[i]
+    for i = 1, #garages do
+        local garage = garages[i]
 
         exports.ox_target:addSphereZone({
             coords = garage.coords,
@@ -180,13 +215,13 @@ local function createGarage(job, department)
     end
 end
 
----@param job string
----@param department VehicleData
-local function createHelipad(job, department)
-    if not job or not department then return end
+---@param job? string
+---@param helipads? VehicleData
+local function createHelipad(job, helipads)
+    if not job or not helipads then return end
 
-    for i = 1, #department do
-        local helipad = department[i]
+    for i = 1, #helipads do
+        local helipad = helipads[i]
 
         exports.ox_target:addSphereZone({
             coords = helipad.coords,
@@ -353,6 +388,7 @@ CreateThread(function()
         createBlip(data.blip)
         createDuty(job, data.duty)
         createManagement(job, data.management)
+        createArmory(job, data.armory)
         createPersonalStash(job, data.personalStash)
         createEvidence(job, data.evidence)
         createGarage(job, data.garage)
