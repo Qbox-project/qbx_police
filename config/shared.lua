@@ -14,14 +14,14 @@ return {
                 {
                     coords = vec3(440.085, -974.924, 30.689),
                     radius = 1.5,
-                    groups = { 'police' }
+                    groups = { police = 0 }
                 },
             },
             management = {
                 {
                     coords = vec3(447.04, -974.01, 30.44),
                     radius = 1.5,
-                    groups = { 'police' }
+                    groups = { police = 0 }
                 }
             },
             armory = {
@@ -70,7 +70,7 @@ return {
                 {
                     coords = vec3(442.1722, -996.067, 30.689),
                     radius = 1.5,
-                    groups = { 'police' }
+                    groups = { police = 0 }
                 },
             },
             garage = {
@@ -85,7 +85,7 @@ return {
                         { name = 'police4', grade = 0 },
                         { name = 'polgauntlet', grade = 0 },
                     },
-                    groups = { 'police' }
+                    groups = { police = 0 }
                 },
             },
             helipad = {
@@ -96,7 +96,7 @@ return {
                     catalogue = {
                         { name = 'polmav', grade = 0 },
                     },
-                    groups = { 'police' }
+                    groups = { police = 0 }
                 }
             }
         },
