@@ -5,11 +5,7 @@
         "boss_menu": "Open Job Management",
         "armory": "Open Armory",
         "personal_stash": "Open Personal Stash",
-        "evidence_drawers": "Open Evidence Drawers",
-        "garage": "Open Garage",
-        "store_vehicle": "Store Vehicle",
-        "helipad": "Open Helipad",
-        "store_helicopter": "Store Helicopter"
+        "evidence_drawers": "Open Evidence Drawers"
     },
     "radial": {
         "label": "Police",
@@ -26,6 +22,10 @@
         "not_around": "It looks like that person is not around right now..."
     },
     "vehicles": {
+        "open_helipad": "E - Open Helipad",
+        "store_helicopter": "E - Store Helicopter",
+        "open_garage": "E - Open Garage",
+        "store_vehicle": "E - Store Vehicle",
         "garage_title": "PD Garage",
         "helipad_title": "PD Helipad",
         "not_helipad_grade": "You're not the appropriate grade to pilot a helicopter yet...",

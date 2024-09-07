@@ -1,3 +1,4 @@
+local config = require 'config.server'
 local sharedConfig = require 'config.shared'
 
 ---@param job? string
@@ -25,21 +26,22 @@ local function registerArmory(department)
 end
 
 ---@param source number
----@param model string
+---@param vehicle table
 ---@param spawn vector4
-lib.callback.register('qbx_police:server:spawnVehicle', function(source, model, spawn)
+lib.callback.register('qbx_police:server:spawnVehicle', function(source, vehicle, spawn)
     local ped = GetPlayerPed(source)
     local plate = ('LSPD%s'):format(math.random(1000, 9999))
     local netId, _ = qbx.spawnVehicle({
         spawnSource = spawn,
-        model = model,
+        model = vehicle.name,
         warp = ped,
         props = {
-            plate = plate
+            plate = plate,
+            modLivery = vehicle.livery or 0
         }
     })
 
-    exports.qbx_vehiclekeys:GiveKeys(source, plate)
+    config.giveVehicleKeys(source, plate)
 
     return netId
 end)

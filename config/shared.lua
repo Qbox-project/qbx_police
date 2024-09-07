@@ -75,8 +75,8 @@ return {
             },
             garage = {
                 {
-                    coords = vec3(-586.17, -427.92, 31.16),
-                    spawn = vec4(-588.28, -419.13, 30.59, 270.21),
+                    coords = vec3(452.26, -997.18, 25.76),
+                    spawn = vec4(452.26, -997.18, 25.76, 180.0),
                     radius = 2.5,
                     catalogue = {
                         { name = 'police', grade = 0 },
@@ -90,8 +90,8 @@ return {
             },
             helipad = {
                 {
-                    coords = vec3(-595.85, -431.48, 51.38),
-                    spawn = vec4(-595.85, -431.48, 51.38, 2.56),
+                    coords = vec3(449.23, -981.28, 43.69),
+                    spawn = vec4(449.23, -981.28, 43.69, 0.0),
                     radius = 2.5,
                     catalogue = {
                         { name = 'polmav', grade = 0 },

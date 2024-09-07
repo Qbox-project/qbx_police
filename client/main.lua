@@ -178,39 +178,33 @@ local function createGarage(job, garages)
 
     for i = 1, #garages do
         local garage = garages[i]
+        local hasGroup = exports.qbx_core:HasGroup(garage.groups)
 
-        exports.ox_target:addSphereZone({
+        lib.zones.sphere({
             coords = garage.coords,
             radius = garage.radius,
             debug = config.debugPoly,
-            options = {
-                {
-                    name = ('%s-Garage'):format(job),
-                    icon = 'fa-solid fa-warehouse',
-                    label = locale('targets.garage'),
-                    canInteract = function()
-                        return not cache.vehicle and QBX.PlayerData.job.onduty
-                    end,
-                    onSelect = function()
-                        vehicles.openGarage(garage)
-                    end,
-                    groups = garage.groups,
-                    distance = 1.5,
-                },
-                {
-                    name = ('%s-GarageStore'):format(job),
-                    icon = 'fa-solid fa-square-parking',
-                    label = locale('targets.store_vehicle'),
-                    canInteract = function()
-                        return cache.vehicle and QBX.PlayerData.job.onduty
-                    end,
-                    onSelect = function()
+            onEnter = function()
+                if not hasGroup or not QBX.PlayerData.job.onduty then return end
+
+                lib.showTextUI(cache.vehicle and locale('vehicles.store_vehicle') or locale('vehicles.open_garage'))
+            end,
+            inside = function()
+                if not hasGroup or not QBX.PlayerData.job.onduty then return end
+
+                if IsControlJustReleased(0, 38) then
+                    if cache.vehicle then
                         vehicles.store(cache.vehicle)
-                    end,
-                    groups = garage.groups,
-                    distance = 1.5,
-                },
-            }
+                    else
+                        vehicles.openHelipad(garage)
+                    end
+
+                    lib.hideTextUI()
+                end
+            end,
+            onExit = function()
+                lib.hideTextUI()
+            end,
         })
     end
 end
@@ -222,39 +216,33 @@ local function createHelipad(job, helipads)
 
     for i = 1, #helipads do
         local helipad = helipads[i]
+        local hasGroup = exports.qbx_core:HasGroup(helipad.groups)
 
-        exports.ox_target:addSphereZone({
+        lib.zones.sphere({
             coords = helipad.coords,
             radius = helipad.radius,
             debug = config.debugPoly,
-            options = {
-                {
-                    name = ('%s-Helipad'):format(job),
-                    icon = 'fa-solid fa-helicopter-symbol',
-                    label = locale('targets.helipad'),
-                    canInteract = function()
-                        return not cache.vehicle and QBX.PlayerData.job.onduty
-                    end,
-                    onSelect = function()
-                        vehicles.openHelipad(helipad)
-                    end,
-                    groups = helipad.groups,
-                    distance = 1.5,
-                },
-                {
-                    name = ('%s-HelipadStore'):format(job),
-                    icon = 'fa-solid fa-square-parking',
-                    label = locale('targets.store_helicopter'),
-                    canInteract = function()
-                        return cache.vehicle and QBX.PlayerData.job.onduty
-                    end,
-                    onSelect = function()
+            onEnter = function()
+                if not hasGroup or not QBX.PlayerData.job.onduty then return end
+
+                lib.showTextUI(cache.vehicle and locale('vehicles.store_helicopter') or locale('vehicles.open_helipad'))
+            end,
+            inside = function()
+                if not hasGroup or not QBX.PlayerData.job.onduty then return end
+
+                if IsControlJustReleased(0, 38) then
+                    if cache.vehicle then
                         vehicles.store(cache.vehicle)
-                    end,
-                    groups = helipad.groups,
-                    distance = 1.5,
-                },
-            }
+                    else
+                        vehicles.openHelipad(helipad)
+                    end
+
+                    lib.hideTextUI()
+                end
+            end,
+            onExit = function()
+                lib.hideTextUI()
+            end,
         })
     end
 end
@@ -360,6 +348,7 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function()
     })
 end)
 
+---@diagnostic disable-next-line: param-type-mismatch
 AddStateBagChangeHandler('DEATH_STATE_STATE_BAG', nil, function(bagName, _, dead)
     local player = GetPlayerFromStateBagName(bagName)
 
