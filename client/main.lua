@@ -178,18 +178,21 @@ local function createGarage(job, garages)
 
     for i = 1, #garages do
         local garage = garages[i]
-        local hasGroup = exports.qbx_core:HasGroup(garage.groups)
 
         lib.zones.sphere({
             coords = garage.coords,
             radius = garage.radius,
             debug = config.debugPoly,
             onEnter = function()
+                local hasGroup = exports.qbx_core:HasGroup(garage.groups)
+
                 if not hasGroup or not QBX.PlayerData.job.onduty then return end
 
                 lib.showTextUI(cache.vehicle and locale('vehicles.store_vehicle') or locale('vehicles.open_garage'))
             end,
             inside = function()
+                local hasGroup = exports.qbx_core:HasGroup(garage.groups)
+
                 if not hasGroup or not QBX.PlayerData.job.onduty then return end
 
                 if IsControlJustReleased(0, 38) then
@@ -216,18 +219,21 @@ local function createHelipad(job, helipads)
 
     for i = 1, #helipads do
         local helipad = helipads[i]
-        local hasGroup = exports.qbx_core:HasGroup(helipad.groups)
 
         lib.zones.sphere({
             coords = helipad.coords,
             radius = helipad.radius,
             debug = config.debugPoly,
             onEnter = function()
+                local hasGroup = exports.qbx_core:HasGroup(helipad.groups)
+
                 if not hasGroup or not QBX.PlayerData.job.onduty then return end
 
                 lib.showTextUI(cache.vehicle and locale('vehicles.store_helicopter') or locale('vehicles.open_helipad'))
             end,
             inside = function()
+                local hasGroup = exports.qbx_core:HasGroup(helipad.groups)
+
                 if not hasGroup or not QBX.PlayerData.job.onduty then return end
 
                 if IsControlJustReleased(0, 38) then
