@@ -47,6 +47,7 @@
 ---@class CatalogueItem
 ---@field name string
 ---@field grade number
+---@field livery? number default is 0
 
 ---@class VehicleData
 ---@field coords vector3
