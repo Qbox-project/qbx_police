@@ -1,6 +1,17 @@
 local config = require 'config.server'
 local sharedConfig = require 'config.shared'
 
+---@param department? ArmoryData
+local function registerArmory(department)
+    if not department then return end
+
+    for i = 1, #department do
+        local armory = department[i]
+
+        exports.ox_inventory:RegisterShop(armory.shopType, armory)
+    end
+end
+
 ---@param job? string
 ---@param department? PersonalStashData
 local function registerPersonalStash(job, department)
@@ -11,17 +22,6 @@ local function registerPersonalStash(job, department)
         local stashId = ('%s-PersonalStash'):format(job)
 
         exports.ox_inventory:RegisterStash(stashId, stash.label, stash.slots or 100, stash.weight or 100000, true, stash.groups, stash.coords)
-    end
-end
-
----@param department? ArmoryData
-local function registerArmory(department)
-    if not department then return end
-
-    for i = 1, #department do
-        local armory = department[i]
-
-        exports.ox_inventory:RegisterShop(armory.shopType, armory)
     end
 end
 
