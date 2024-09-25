@@ -284,7 +284,6 @@ local function handleInVehicle()
         fov = (FOV_MAX + FOV_MIN) * 0.5 -- reset to starting zoom level
 
         scaleform:Dispose()
-        scaleform = nil
 
         RenderScriptCams(false, false, 0, true, false) -- Return to gameplay camera
         DestroyCam(cam, false)
