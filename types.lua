@@ -47,7 +47,7 @@
 ---@class CatalogueItem
 ---@field name string
 ---@field grade number
----@field livery? number default is 0
+---@field mods? table See https://overextended.dev/ox_lib/Modules/VehicleProperties/Client#vehicle-properties
 
 ---@class VehicleData
 ---@field coords vector3

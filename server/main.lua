@@ -37,18 +37,17 @@ end
 ---@param spawn vector4
 lib.callback.register('qbx_police:server:spawnVehicle', function(source, vehicle, spawn)
     local ped = GetPlayerPed(source)
-    local plate = ('LSPD%s'):format(math.random(1000, 9999))
+
+    vehicle.mods.plate = vehicle.mods.plate or ('LSPD%s'):format(math.random(1000, 9999))
+
     local netId, _ = qbx.spawnVehicle({
         spawnSource = spawn,
         model = vehicle.name,
         warp = ped,
-        props = {
-            plate = plate,
-            modLivery = vehicle.livery or 0
-        }
+        props = vehicle.mods or {}
     })
 
-    config.giveVehicleKeys(source, plate)
+    config.giveVehicleKeys(source, vehicle.mods.plate)
 
     return netId
 end)
