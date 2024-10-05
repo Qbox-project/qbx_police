@@ -99,6 +99,22 @@ local function takeOutImpound(vehicle)
     SetVehicleEngineOn(veh, true, true, false)
 end
 
+local function applyLivery(veh, liveryIndex)
+    SetVehicleModKit(veh, 0)                                            -- Ensure the vehicle mod kit is set
+                                                                        -- Check which livery method the vehicle supports
+    if GetVehicleLiveryCount(veh) > 0 then
+        SetVehicleLivery(veh, liveryIndex)                              -- Vehicle uses SetVehicleLivery
+        SetVehicleMod(veh, 48, -1, false)                               -- Disable mod type 48
+    elseif GetNumVehicleMods(veh, 48) > 0 then
+        SetVehicleMod(veh, 48, liveryIndex, false)                      -- Vehicle uses mod type 48
+        SetVehicleLivery(veh, -1)                                       -- Disable SetVehicleLivery
+    elseif GetVehicleRoofLiveryCount(veh) > 0 then
+        SetVehicleRoofLivery(veh, liveryIndex)                          -- Vehicle uses SetVehicleRoofLivery
+    else
+        print('Vehicle does not support liveries')                      -- Vehicle doesn't support livery
+    end
+end
+
 local function takeOutVehicle(vehicleInfo)
     if not inGarage then return end
     local coords = sharedConfig.locations.vehicle[currentGarage]
@@ -125,8 +141,10 @@ local function takeOutVehicle(vehicleInfo)
         if config.vehicleSettings[vehicleInfo].extras then
             qbx.setVehicleExtras(veh, config.vehicleSettings[vehicleInfo].extras)
         end
+
         if config.vehicleSettings[vehicleInfo].livery then
-            SetVehicleLivery(veh, config.vehicleSettings[vehicleInfo].livery)
+            local liveryIndex = config.vehicleSettings[vehicleInfo].livery
+            applyLivery(veh, liveryIndex) --New Livery application function
         end
     end
     SetVehicleEngineOn(veh, true, true, false)
