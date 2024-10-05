@@ -1,7 +1,23 @@
 local VEHICLES = exports.qbx_core:GetVehiclesByName()
 
 ---@param vehicle integer
+local function kickOutOfVehicle(vehicle)
+    local seats = GetVehicleMaxNumberOfPassengers(vehicle)
+
+    for i = -1, seats do
+        local ped = GetPedInVehicleSeat(vehicle, i)
+
+        if ped then
+            TaskLeaveVehicle(ped, vehicle, 0)
+        end
+    end
+end
+
+---@param vehicle integer
 local function store(vehicle)
+    SetEntityAsMissionEntity(vehicle, true, true)
+    kickOutOfVehicle(vehicle)
+    Wait(1500)
     DeleteVehicle(vehicle)
 end
 
@@ -83,8 +99,98 @@ local function openHelipad(helipad)
     lib.showContext('helipadMenu')
 end
 
+local function impound()
+    if not cache.vehicle then
+        exports.qbx_core:Notify(locale('notify.not_in_vehicle'), 'error')
+        return
+    end
+
+    if lib.progressBar({
+        duration = 5000,
+        label = locale('progress.impound'),
+        canCancel = true,
+        disable = {
+            move = false,
+            car = false,
+            combat = false,
+            mouse = true,
+        },
+        anim = {
+            dict = 'mini@repair',
+            clip = 'fixing_a_player'
+        },
+    }) then
+        local netId = NetworkGetNetworkIdFromEntity(cache.vehicle)
+        local canBeImpounded = lib.callback.await('qbx_police:server:canImpound', false, netId)
+
+        if not canBeImpounded then
+            store(cache.vehicle)
+            return
+        end
+
+        kickOutOfVehicle(cache.vehicle)
+        Wait(1500)
+
+        local impounded = lib.callback.await('qbx_police:server:impoundVehicle', false, netId)
+
+        if impounded then
+            exports.qbx_core:Notify(locale('notify.impounded'), 'success')
+        else
+            exports.qbx_core:Notify(locale('notify.failed_impound'), 'error')
+        end
+    else
+        exports.qbx_core:Notify(locale('notify.canceled'), 'error')
+    end
+end
+
+local function confiscate()
+    if not cache.vehicle then
+        exports.qbx_core:Notify(locale('notify.not_in_vehicle'), 'error')
+        return
+    end
+
+    local netId = NetworkGetNetworkIdFromEntity(cache.vehicle)
+    local canBeConfiscated = lib.callback.await('qbx_police:server:canImpound', false, netId)
+
+    if not canBeConfiscated then
+        exports.qbx_core:Notify(locale('notify.cannot_confiscate'), 'error')
+        return
+    end
+
+    if lib.progressBar({
+        duration = 5000,
+        label = locale('progress.confiscate'),
+        canCancel = true,
+        disable = {
+            move = false,
+            car = false,
+            combat = false,
+            mouse = false,
+        },
+        anim = {
+            dict = 'mini@repair',
+            clip = 'fixing_a_player'
+        },
+    }) then
+        kickOutOfVehicle(cache.vehicle)
+        Wait(1500)
+
+        local confiscated = lib.callback.await('qbx_police:server:confiscateVehicle', false, netId)
+
+        if confiscated then
+            exports.qbx_core:Notify(locale('notify.confiscated'), 'success')
+        else
+            exports.qbx_core:Notify(locale('notify.failed_confiscate'), 'error')
+        end
+    else
+        exports.qbx_core:Notify(locale('notify.canceled'), 'error')
+    end
+end
+
 return {
     openGarage = openGarage,
     openHelipad = openHelipad,
-    store = store
+    store = store,
+    impound = impound,
+    confiscate = confiscate
 }

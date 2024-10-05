@@ -65,3 +65,4 @@
 ---@field evidence EvidenceData[]
 ---@field garage VehicleData[]
 ---@field helipad VehicleData[]
+---@field impound table

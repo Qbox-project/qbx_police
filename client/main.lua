@@ -292,12 +292,14 @@ local function registerAliveRadial()
                 icon = 'truck-fast',
                 label = locale('radial.impound'),
                 onSelect = function()
+                    vehicles.impound()
                 end,
             },
             {
                 icon = 'truck-ramp-box',
                 label = locale('radial.confiscate'),
                 onSelect = function()
+                    vehicles.confiscate()
                 end,
             },
         }
