@@ -58,7 +58,7 @@ lib.callback.register('qbx_police:server:canImpound', function(_, netId)
     local entity = NetworkGetEntityFromNetworkId(netId)
     local plate = GetVehicleNumberPlateText(entity)
 
-    return exports.qbx_vehicles:DoesPlayerVehiclePlateExist(plate)
+    return Entity(entity).state.vehicleid or exports.qbx_vehicles:DoesPlayerVehiclePlateExist(plate)
 end)
 
 ---@param netId integer
