@@ -13,6 +13,22 @@ local function kickOutOfVehicle(vehicle)
     end
 end
 
+---@param veicle integer
+---@return boolean
+local function checkSeats(veicle)
+    local seats = GetVehicleMaxNumberOfPassengers(veicle)
+
+    for i = -1, seats do
+        local ped = GetPedInVehicleSeat(veicle, i)
+
+        if ped then
+            return false
+        end
+    end
+
+    return true
+end
+
 ---@param vehicle integer
 local function store(vehicle)
     SetEntityAsMissionEntity(vehicle, true, true)
@@ -128,8 +144,12 @@ local function impound()
             return
         end
 
-        kickOutOfVehicle(cache.vehicle)
-        Wait(1500)
+        local isVehicleEmpty = checkSeats(cache.vehicle)
+
+        if not isVehicleEmpty then
+            exports.qbx_core:Notify(locale('notify.still_occupied'), 'error')
+            return
+        end
 
         local impounded = lib.callback.await('qbx_police:server:impoundVehicle', false, netId)
 
@@ -172,8 +192,12 @@ local function confiscate()
             clip = 'fixing_a_player'
         },
     }) then
-        kickOutOfVehicle(cache.vehicle)
-        Wait(1500)
+        local isVehicleEmpty = checkSeats(cache.vehicle)
+
+        if not isVehicleEmpty then
+            exports.qbx_core:Notify(locale('notify.still_occupied'), 'error')
+            return
+        end
 
         local confiscated = lib.callback.await('qbx_police:server:confiscateVehicle', false, netId)
 

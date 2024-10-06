@@ -27,6 +27,7 @@
         "not_in_vehicle": "You're not in a vehicle...",
         "not_around": "It looks like that person is not around right now...",
         "something_wrong": "Something went wrong while attempting to spawn the police vehicle...",
+        "still_occupied": "You cannot do this while there are individuals inside the vehicle...",
         "cannot_confiscate": "This vehicle cannot be confiscated...",
         "failed_to_retrieve": "Failed to retrieve vehicle...",
         "failed_impound": "Failed to impound vehicle...",
