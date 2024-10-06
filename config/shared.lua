@@ -98,7 +98,27 @@ return {
                     },
                     groups = { police = 0 }
                 }
-            }
+            },
+            impound = {
+                name = 'policeimpound',
+                lot = {
+                    label = 'Impound',
+                    vehicleType = 'car',
+                    groups = { police = 0 },
+                    shared = true,
+                    accessPoints = {
+                        {
+                            blip = {
+                                name = 'Impound',
+                                sprite = 68,
+                                color = 3
+                            },
+                            coords = vec3(473.01, -1018.39, 28.1),
+                            spawn = vec4(481.18, -1021.63, 27.32, 280.59),
+                        },
+                    },
+                },
+            },
         },
     },
 }
