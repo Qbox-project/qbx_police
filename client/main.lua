@@ -328,12 +328,12 @@ end
 
 AddEventHandler('onResourceStop', function(resource)
     if resource ~= cache.resource then return end
+
     lib.removeRadialItem('leo')
 end)
 
 AddEventHandler('onResourceStart', function(resource)
-    if resource ~= cache.resource then return end
-    if QBX.PlayerData.job.type ~= 'leo' then return end
+    if resource ~= cache.resource or QBX.PlayerData.job.type ~= 'leo' then return end
 
     if QBX.PlayerData.metadata.isdead then
         registerDeadRadial()
