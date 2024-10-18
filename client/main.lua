@@ -366,10 +366,10 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     })
 end)
 
-RegisterNetEvent('QBCore:Client:OnJobUpdate', function()
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(job)
     lib.removeRadialItem('leo')
 
-    if QBX.PlayerData.job.type ~= 'leo' then return end
+    if job.type ~= 'leo' then return end
 
     if QBX.PlayerData.metadata.isdead then
         registerDeadRadial()
