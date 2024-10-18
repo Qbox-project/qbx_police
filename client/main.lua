@@ -371,6 +371,12 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function()
 
     if QBX.PlayerData.job.type ~= 'leo' then return end
 
+    if QBX.PlayerData.metadata.isdead then
+        registerDeadRadial()
+    else
+        registerAliveRadial()
+    end
+
     lib.addRadialItem({
         id = 'leo',
         icon = 'shield-halved',
