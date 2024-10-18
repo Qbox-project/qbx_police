@@ -40,14 +40,14 @@ lib.callback.register('qbx_police:server:spawnVehicle', function(source, vehicle
 
     vehicle.mods.plate = vehicle.mods.plate or ('LSPD%s'):format(math.random(1000, 9999))
 
-    local netId, _ = qbx.spawnVehicle({
+    local netId, veh = qbx.spawnVehicle({
         spawnSource = spawn,
         model = vehicle.name,
         warp = ped,
         props = vehicle.mods or {}
     })
 
-    config.giveVehicleKeys(source, vehicle.mods.plate)
+    config.giveVehicleKeys(source, veh)
 
     return netId
 end)

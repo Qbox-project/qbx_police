@@ -1,5 +1,5 @@
 return {
-    giveVehicleKeys = function(src, plate)
-        return exports.qbx_vehiclekeys:GiveKeys(src, plate)
+    giveVehicleKeys = function(src, vehicle)
+        return exports.qbx_vehiclekeys:GiveKeys(src, vehicle)
     end,
 }
