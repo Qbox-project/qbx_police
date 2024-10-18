@@ -385,15 +385,12 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function()
     })
 end)
 
----@diagnostic disable-next-line: param-type-mismatch
-AddStateBagChangeHandler('DEATH_STATE_STATE_BAG', nil, function(bagName, _, dead)
-    local player = GetPlayerFromStateBagName(bagName)
-
-    if player ~= cache.playerId or QBX.PlayerData?.job?.type ~= 'leo' then return end
+RegisterNetEvent('qbx_core:client:onSetMetaData', function(key, oldValue, newValue)
+    if QBX.PlayerData.job.type ~= 'leo' or (key ~= 'isdead' and key ~= 'inlaststand') or oldValue == newValue then return end
 
     lib.removeRadialItem('leo')
 
-    if dead then
+    if newValue then
         registerDeadRadial()
     else
         registerAliveRadial()
