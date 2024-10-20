@@ -328,12 +328,12 @@ end
 
 AddEventHandler('onResourceStop', function(resource)
     if resource ~= cache.resource then return end
+
     lib.removeRadialItem('leo')
 end)
 
 AddEventHandler('onResourceStart', function(resource)
-    if resource ~= cache.resource then return end
-    if QBX.PlayerData.job.type ~= 'leo' then return end
+    if resource ~= cache.resource or QBX.PlayerData.job.type ~= 'leo' then return end
 
     if QBX.PlayerData.metadata.isdead then
         registerDeadRadial()
@@ -366,10 +366,16 @@ AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
     })
 end)
 
-RegisterNetEvent('QBCore:Client:OnJobUpdate', function()
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(job)
     lib.removeRadialItem('leo')
 
-    if QBX.PlayerData.job.type ~= 'leo' then return end
+    if job.type ~= 'leo' then return end
+
+    if QBX.PlayerData.metadata.isdead then
+        registerDeadRadial()
+    else
+        registerAliveRadial()
+    end
 
     lib.addRadialItem({
         id = 'leo',
@@ -379,15 +385,12 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function()
     })
 end)
 
----@diagnostic disable-next-line: param-type-mismatch
-AddStateBagChangeHandler('DEATH_STATE_STATE_BAG', nil, function(bagName, _, dead)
-    local player = GetPlayerFromStateBagName(bagName)
-
-    if player ~= cache.playerId or QBX.PlayerData?.job?.type ~= 'leo' then return end
+RegisterNetEvent('qbx_core:client:onSetMetaData', function(key, oldValue, newValue)
+    if QBX.PlayerData.job.type ~= 'leo' or (key ~= 'isdead' and key ~= 'inlaststand') or oldValue == newValue then return end
 
     lib.removeRadialItem('leo')
 
-    if dead then
+    if newValue then
         registerDeadRadial()
     else
         registerAliveRadial()
