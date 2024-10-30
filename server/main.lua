@@ -1,3 +1,7 @@
+assert(lib.checkDependency('qbx_vehicles', '1.4.1', true))
+assert(lib.checkDependency('qbx_garages', '1.1.3', true))
+lib.versionCheck('Qbox-project/qbx_police')
+
 local config = require 'config.server'
 local sharedConfig = require 'config.shared'
 
