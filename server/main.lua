@@ -42,6 +42,7 @@ end
 lib.callback.register('qbx_police:server:spawnVehicle', function(source, vehicle, spawn)
     local ped = GetPlayerPed(source)
 
+    vehicle.mods = vehicle.mods or {}
     vehicle.mods.plate = vehicle.mods.plate or ('LSPD%s'):format(math.random(1000, 9999))
 
     local netId, veh = qbx.spawnVehicle({
