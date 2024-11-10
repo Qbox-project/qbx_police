@@ -10,7 +10,7 @@ lib.addCommand('callsign', {
 }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
 
-    if not player or (player.PlayerData.job.name ~= 'leo' and player.PlayerData.job.name ~= 'ems') then return end
+    if not player or player.PlayerData.job.type ~= 'leo' and player.PlayerData.job.type ~= 'ems' then return end
 
     player.Functions.SetMetaData('callsign', args.callsign)
 end)
@@ -32,7 +32,7 @@ lib.addCommand('fine', {
 }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
 
-    if not player or (player.PlayerData.job.name ~= 'leo' and player.PlayerData.job.name ~= 'ems') then return end
+    if not player or player.PlayerData.job.type ~= 'leo' then return end
 
     local target = exports.qbx_core:GetPlayer(args.target)
 
