@@ -1,3 +1,7 @@
+assert(lib.checkDependency('qbx_vehicles', '1.4.1', true))
+assert(lib.checkDependency('qbx_garages', '1.1.3', true))
+lib.versionCheck('Qbox-project/qbx_police')
+
 local config = require 'config.server'
 local sharedConfig = require 'config.shared'
 
@@ -38,6 +42,7 @@ end
 lib.callback.register('qbx_police:server:spawnVehicle', function(source, vehicle, spawn)
     local ped = GetPlayerPed(source)
 
+    vehicle.mods = vehicle.mods or {}
     vehicle.mods.plate = vehicle.mods.plate or ('LSPD%s'):format(math.random(1000, 9999))
 
     local netId, veh = qbx.spawnVehicle({
