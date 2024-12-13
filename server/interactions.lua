@@ -1,3 +1,4 @@
+local config = require 'config.server'
 
 local function handcuff(source)
     local playerPed = GetPlayerPed(source)
@@ -12,7 +13,9 @@ local function handcuff(source)
 
     if not targetCuffed then return end
 
-    exports.ox_inventory:RemoveItem(source, 'handcuffs', 1)
+    if config.consumeHandcuffs then
+        exports.ox_inventory:RemoveItem(source, 'handcuffs', 1)
+    end
 
     Player(targetId).state:set('handcuffed', true, true)
     exports.qbx_core:SetMetadata(targetId, 'handcuffed', true)
@@ -30,7 +33,9 @@ local function unhandcuff(source)
     TriggerClientEvent('qbx_police:client:unhandcuffPlayer', source)
     TriggerClientEvent('qbx_police:client:getUnhandcuffed', targetId)
 
-    exports.ox_inventory:AddItem(source, 'handcuffs', 1)
+    if config.consumeHandcuffs then
+        exports.ox_inventory:AddItem(source, 'handcuffs', 1)
+    end
 
     Player(targetId).state:set('handcuffed', true, true)
     exports.qbx_core:SetMetadata(targetId, 'handcuffed', false)
