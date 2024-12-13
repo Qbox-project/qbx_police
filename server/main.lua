@@ -106,6 +106,15 @@ lib.callback.register('qbx_police:server:confiscateVehicle', function(source, ne
     return true
 end)
 
+RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function()
+    local src = source
+    local isHandcuffed = exports.qbx_core:GetMetadata(source, 'ishandcuffed')
+
+    if isHandcuffed then
+        Player(src).state:set('handcuffed', true, true)
+    end
+end)
+
 AddEventHandler('onServerResourceStart', function(resource)
     if resource ~= cache.resource then return end
 
