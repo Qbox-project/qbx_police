@@ -28,10 +28,7 @@ local function unhandcuff(source)
     if not targetId or not Player(targetId).state.handcuffed then return end
 
     TriggerClientEvent('qbx_police:client:unhandcuffPlayer', source)
-
-    local targetCuffed = lib.callback.await('qbx_police:client:getHandcuffed', targetId)
-
-    if not targetCuffed then return end
+    TriggerClientEvent('qbx_police:client:getUnhandcuffed', targetId)
 
     exports.ox_inventory:AddItem(source, 'handcuffs', 1)
 
