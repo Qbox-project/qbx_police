@@ -41,10 +41,6 @@ lib.callback.register('qbx_police:client:getHandcuffed', function()
     lib.playAnim('mp_arrest_paired', 'crook_p2_back_right', 8.0, 8.0, 3750, 48, 0.0, false, 0, false)
     Wait(3750)
 
-    while lib.skillCheckActive() do
-        Wait(0)
-    end
-
     if success then
         lib.disableControls:Add(disabledControls)
         lib.disableRadial(true)
