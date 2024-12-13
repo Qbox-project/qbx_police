@@ -34,9 +34,9 @@ lib.callback.register('qbx_police:client:getHandcuffed', function()
     SetCurrentPedWeapon(cache.ped, `WEAPON_UNARMED`, true)
     FreezeEntityPosition(cache.ped, true)
 
-    local success = lib.skillCheck('medium')
-
     LocalPlayer.state.invBusy = true
+
+    local success = lib.skillCheck('medium')
 
     lib.playAnim('mp_arrest_paired', 'crook_p2_back_right', 8.0, 8.0, 3750, 48, 0.0, false, 0, false)
     Wait(3750)
@@ -70,13 +70,13 @@ end)
 RegisterNetEvent('qbx_police:client:getUnhandcuffed', function()
     FreezeEntityPosition(cache.ped, true)
 
-    LocalPlayer.state.invBusy = false
-
     lib.playAnim('mp_arresting', 'b_uncuff', 8.0, 8.0, 5500, 48, 0.0, false, 0, false)
     Wait(5500)
 
     lib.disableControls:Remove(disabledControls)
     lib.disableRadial(false)
+
+    LocalPlayer.state.invBusy = false
 
     FreezeEntityPosition(cache.ped, false)
 end)
