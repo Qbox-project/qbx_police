@@ -12,7 +12,7 @@ lib.addCommand('callsign', {
 
     if not player or player.PlayerData.job.type ~= 'leo' and player.PlayerData.job.type ~= 'ems' then return end
 
-    player.Functions.SetMetaData('callsign', args.callsign)
+    exports.qbx_core:SetMetadata(source, 'callsign', args.callsign)
 end)
 
 lib.addCommand('fine', {
@@ -41,8 +41,7 @@ lib.addCommand('fine', {
         return
     end
 
-    target.Functions.RemoveMoney('bank', args.amount, locale('commands.fine.issuer'))
-
+    exports.qbx_core:RemoveMoney(source, 'bank', args.amount, locale('commands.fine.issuer'))
     exports.qbx_core:Notify(source, locale('commands.fine.issued'), 'success')
     exports.qbx_core:Notify(target, locale('commands.fine.fined', args.amount), 'error')
 end)
