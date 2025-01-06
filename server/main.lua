@@ -36,9 +36,6 @@ local function registerImpound(impound)
     exports.qbx_garages:RegisterGarage(impound.name, impound.lot)
 end
 
----@param source number
----@param vehicle table
----@param spawn vector4
 lib.callback.register('qbx_police:server:spawnVehicle', function(source, vehicle, spawn)
     local ped = GetPlayerPed(source)
 
@@ -57,8 +54,6 @@ lib.callback.register('qbx_police:server:spawnVehicle', function(source, vehicle
     return netId
 end)
 
----@param netId number
----@return integer
 lib.callback.register('qbx_police:server:canImpound', function(_, netId)
     local entity = NetworkGetEntityFromNetworkId(netId)
     local plate = GetVehicleNumberPlateText(entity)
@@ -66,8 +61,6 @@ lib.callback.register('qbx_police:server:canImpound', function(_, netId)
     return Entity(entity).state.vehicleid or exports.qbx_vehicles:DoesPlayerVehiclePlateExist(plate)
 end)
 
----@param netId integer
----@return boolean
 lib.callback.register('qbx_police:server:impoundVehicle', function(_, netId)
     local player = exports.qbx_core:GetPlayer(source)
 
