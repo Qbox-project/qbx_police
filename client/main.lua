@@ -258,18 +258,6 @@ local function registerAliveRadial()
         id = 'policeMenu',
         items = {
             {
-                icon = 'lock',
-                label = locale('radial.cuff'),
-                onSelect = function()
-                end,
-            },
-            {
-                icon = 'lock-open',
-                label = locale('radial.uncuff'),
-                onSelect = function()
-                end,
-            },
-            {
                 icon = 'magnifying-glass',
                 label = locale('radial.search'),
                 onSelect = function()
