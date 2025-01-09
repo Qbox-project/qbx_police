@@ -36,9 +36,6 @@ local function registerImpound(impound)
     exports.qbx_garages:RegisterGarage(impound.name, impound.lot)
 end
 
----@param source number
----@param vehicle table
----@param spawn vector4
 lib.callback.register('qbx_police:server:spawnVehicle', function(source, vehicle, spawn)
     local ped = GetPlayerPed(source)
 
@@ -57,8 +54,6 @@ lib.callback.register('qbx_police:server:spawnVehicle', function(source, vehicle
     return netId
 end)
 
----@param netId number
----@return integer
 lib.callback.register('qbx_police:server:canImpound', function(_, netId)
     local entity = NetworkGetEntityFromNetworkId(netId)
     local plate = GetVehicleNumberPlateText(entity)
@@ -66,52 +61,12 @@ lib.callback.register('qbx_police:server:canImpound', function(_, netId)
     return Entity(entity).state.vehicleid or exports.qbx_vehicles:DoesPlayerVehiclePlateExist(plate)
 end)
 
----@param netId integer
----@return boolean
-lib.callback.register('qbx_police:server:impoundVehicle', function(_, netId)
-    local player = exports.qbx_core:GetPlayer(source)
-
-    if not player or player.PlayerData.job.type ~= 'police' then return false end
-
-    local entity = NetworkGetEntityFromNetworkId(netId)
-
-    exports.qbx_vehicles:SaveVehicle(entity, {
-        garage = 'impoundlot',
-        state = 2, -- Impounded
-    })
-
-    exports.qbx_core:DeleteVehicle(entity)
-
-    return true
-end)
-
----@param source number
----@param netId integer
----@return boolean
-lib.callback.register('qbx_police:server:confiscateVehicle', function(source, netId)
-    local player = exports.qbx_core:GetPlayer(source)
-
-    if not player or player.PlayerData.job.type ~= 'police' then return false end
-
-    local entity = NetworkGetEntityFromNetworkId(netId)
-    local impound = sharedConfig.departments[player.PlayerData.job.name].impound
-
-    exports.qbx_vehicles:SaveVehicle(entity, {
-        garage = impound.name,
-        state = 1, -- Garaged
-    })
-
-    exports.qbx_core:DeleteVehicle(entity)
-
-    return true
-end)
-
 RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function()
-    local src = source
+    local source = source
     local isHandcuffed = exports.qbx_core:GetMetadata(source, 'ishandcuffed')
 
     if isHandcuffed then
-        Player(src).state:set('handcuffed', true, true)
+        Player(source).state:set('handcuffed', true, true)
     end
 end)
 
@@ -122,5 +77,50 @@ AddEventHandler('onServerResourceStart', function(resource)
         registerArmory(data.armory)
         registerPersonalStash(job, data.personalStash)
         registerImpound(data.impound)
+    end
+end)
+
+RegisterNetEvent('qbx_police:server:impoundVehicle', function(netId)
+    local source = source
+    local player = exports.qbx_core:GetPlayer(source)
+
+    if not player or player.PlayerData.job.type ~= 'leo' then return end
+
+    local entity = NetworkGetEntityFromNetworkId(netId)
+    local saved, _ = exports.qbx_vehicles:SaveVehicle(entity, { garage = 'impoundlot', state = 2 })
+
+    if not saved then
+        exports.qbx_core:Notify(source, locale('notify.failed_save'), 'error')
+        return
+    end
+
+    exports.qbx_core:DeleteVehicle(entity)
+    Wait(500)
+
+    if DoesEntityExist(entity) then
+        exports.qbx_core:Notify(source, locale('notify.failed_delete'), 'error')
+    end
+end)
+
+RegisterNetEvent('qbx_police:server:confiscateVehicle', function(netId)
+    local source = source
+    local player = exports.qbx_core:GetPlayer(source)
+
+    if not player or player.PlayerData.job.type ~= 'leo' then return end
+
+    local entity = NetworkGetEntityFromNetworkId(netId)
+    local impound = sharedConfig.departments[player.PlayerData.job.name].impound
+    local saved, _ = exports.qbx_vehicles:SaveVehicle(entity, { garage = impound.name, state = 1 })
+
+    if not saved then
+        exports.qbx_core:Notify(source, locale('notify.failed_save'), 'error')
+        return
+    end
+
+    exports.qbx_core:DeleteVehicle(entity)
+    Wait(500)
+
+    if DoesEntityExist(entity) then
+        exports.qbx_core:Notify(source, locale('notify.failed_delete'), 'error')
     end
 end)

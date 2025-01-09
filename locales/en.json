@@ -30,9 +30,9 @@
         "still_occupied": "You cannot do this while there are individuals inside the vehicle...",
         "cannot_confiscate": "This vehicle cannot be confiscated...",
         "failed_to_retrieve": "Failed to retrieve vehicle...",
-        "failed_impound": "Failed to impound vehicle...",
+        "failed_save": "Failed to save vehicle...",
+        "failed_delete": "Failed to delete vehicle...",
         "impounded": "Vehicle impounded!",
-        "failed_confiscate": "Failed to confiscate vehicle...",
         "confiscated": "Vehicle confiscated!"
     },
     "vehicles": {

@@ -137,9 +137,9 @@ local function impound()
         },
     }) then
         local netId = NetworkGetNetworkIdFromEntity(cache.vehicle)
-        local canBeImpounded = lib.callback.await('qbx_police:server:canImpound', false, netId)
+        local canImpound = lib.callback.await('qbx_police:server:canImpound', false, netId)
 
-        if not canBeImpounded then
+        if not canImpound then
             store(cache.vehicle)
             return
         end
@@ -151,13 +151,7 @@ local function impound()
             return
         end
 
-        local impounded = lib.callback.await('qbx_police:server:impoundVehicle', false, netId)
-
-        if impounded then
-            exports.qbx_core:Notify(locale('notify.impounded'), 'success')
-        else
-            exports.qbx_core:Notify(locale('notify.failed_impound'), 'error')
-        end
+        TriggerServerEvent('qbx_police:server:impoundVehicle', false, netId)
     else
         exports.qbx_core:Notify(locale('notify.canceled'), 'error')
     end
@@ -170,9 +164,9 @@ local function confiscate()
     end
 
     local netId = NetworkGetNetworkIdFromEntity(cache.vehicle)
-    local canBeConfiscated = lib.callback.await('qbx_police:server:canImpound', false, netId)
+    local canConfiscate = lib.callback.await('qbx_police:server:canImpound', false, netId)
 
-    if not canBeConfiscated then
+    if not canConfiscate then
         exports.qbx_core:Notify(locale('notify.cannot_confiscate'), 'error')
         return
     end
@@ -199,13 +193,7 @@ local function confiscate()
             return
         end
 
-        local confiscated = lib.callback.await('qbx_police:server:confiscateVehicle', false, netId)
-
-        if confiscated then
-            exports.qbx_core:Notify(locale('notify.confiscated'), 'success')
-        else
-            exports.qbx_core:Notify(locale('notify.failed_confiscate'), 'error')
-        end
+        TriggerServerEvent('qbx_police:server:confiscateVehicle', netId)
     else
         exports.qbx_core:Notify(locale('notify.canceled'), 'error')
     end
