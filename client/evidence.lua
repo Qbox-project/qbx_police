@@ -1,4 +1,3 @@
-local config = require 'config.client'
 local currentStatusList = {}
 local casings = {}
 local currentCasing = nil
