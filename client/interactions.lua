@@ -326,6 +326,7 @@ end)
 RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
     if not QBX.PlayerData.metadata.ishandcuffed then
         TriggerServerEvent('police:server:SetHandcuffStatus', true)
+        LocalPlayer.state.invBusy = true
         ClearPedTasksImmediately(cache.ped)
         if cache.weapon ~= `WEAPON_UNARMED` then
             SetCurrentPedWeapon(cache.ped, `WEAPON_UNARMED`, true)
@@ -338,6 +339,7 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
                 local isSuccess = lib.skillCheck(config.breakCuffsDifficulty, config.breakCuffsKeys)
                 if isSuccess then
                     TriggerServerEvent('police:server:SetHandcuffStatus', false)
+                    LocalPlayer.state.invBusy = false
                     ClearPedTasksImmediately(cache.ped)
                     exports.qbx_core:Notify(locale('success.escapedcuff'), 'success')
                     return
@@ -352,6 +354,7 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
         TriggerEvent('hospital:client:isEscorted', IsEscorted)
         DetachEntity(cache.ped, true, false)
         TriggerServerEvent('police:server:SetHandcuffStatus', false)
+        LocalPlayer.state.invBusy = false
         ClearPedTasksImmediately(cache.ped)
         TriggerServerEvent('InteractSound_SV:PlayOnSource', 'Uncuff', 0.2)
         exports.qbx_core:Notify(locale('success.uncuffed'), 'success')
