@@ -22,7 +22,7 @@ local function handleSpeedCam(speedCam, radar)
     local speed = GetEntitySpeed(cache.vehicle) * (config.useMPH and 2.236936 or 3.6)
     local overLimit = speed - speedCam.speed
 
-    lib.callback('police:server:isPlateFlagged', false, function(result)
+    lib.callback('qbx_police:server:isPlateFlagged', false, function(result)
         if not result then return end
         local s1, s2 = GetStreetNameAtCoord(speedCam.coords.x, speedCam.coords.y, speedCam.coords.z)
         local street = GetStreetNameFromHashKey(s1)
