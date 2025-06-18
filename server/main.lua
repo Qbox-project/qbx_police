@@ -28,7 +28,7 @@ local function updateBlips()
             local ped = GetPlayerPed(source)
             local coords = GetEntityCoords(ped)
             local heading = GetEntityHeading(ped)
-            dutyPlayers[#dutyPlayers+1] = {
+            dutyPlayers[#dutyPlayers + 1] = {
                 job = job.name,
                 source = source,
                 label = playerData.metadata.callsign,
@@ -75,7 +75,9 @@ exports.qbx_core:CreateUseableItem('moneybag', function(source, item)
         or player.PlayerData.job.type == 'leo'
         or not player.Functions.GetItemByName('moneybag')
         or not player.Functions.RemoveItem('moneybag', 1, item.slot)
-    then return end
+    then
+        return
+    end
     player.Functions.AddMoney('cash', tonumber(item.info.cash), 'used-moneybag')
 end)
 
@@ -141,22 +143,24 @@ lib.callback.register('qbx_police:server:isPoliceForcePresent', isPoliceForcePre
 
 if GetConvar('qbx:enablebridge', 'true') == 'true' then
     local QBCore = exports['qb-core']:GetCoreObject()
-    ---@deprecated use qbx_police:server:isPlateFlagged
+    ---@deprecated use police:server:isPlateFlagged
     QBCore.Functions.CreateCallback('police:IsPlateFlagged', function(_, cb, plate)
-        lib.print.warn(GetInvokingResource(), 'invoked deprecated callback police:IsPlateFlagged. Use qbx_police:server:isPlateFlagged instead.')
+        lib.print.warn(GetInvokingResource(),
+            'invoked deprecated callback police:IsPlateFlagged. Use police:server:isPlateFlagged instead.')
         cb(isPlateFlagged(plate))
     end)
 
     ---@deprecated
     QBCore.Functions.CreateCallback('police:server:IsPoliceForcePresent', function(_, cb)
-        lib.print.warn(GetInvokingResource(), 'invoked deprecated callback police:server:IsPoliceForcePresent. Use lib callback qbx_police:server:isPoliceForcePresent instead')
+        lib.print.warn(GetInvokingResource(),
+            'invoked deprecated callback police:server:IsPoliceForcePresent. Use lib callback qbx_police:server:isPoliceForcePresent instead')
         cb(isPoliceForcePresent())
     end)
 end
 
 -- Events
 RegisterNetEvent('police:server:Radar', function(fine)
-    local src = source
+    local src    = source
     local price  = sharedConfig.radars.speedFines[fine].fine
     local player = exports.qbx_core:GetPlayer(src)
     if not player.Functions.RemoveMoney('bank', math.floor(price), 'Radar Fine') then return end
@@ -172,11 +176,16 @@ RegisterNetEvent('police:server:policeAlert', function(text, camId, playerSource
     for k, v in pairs(players) do
         if IsLeoAndOnDuty(v) then
             if camId then
-                local alertData = {title = locale('info.new_call'), coords = coords, description = text .. locale('info.camera_id') .. camId}
+                local alertData = {
+                    title = locale('info.new_call'),
+                    coords = coords,
+                    description = text ..
+                        locale('info.camera_id') .. camId
+                }
                 TriggerClientEvent('qb-phone:client:addPoliceAlert', k, alertData)
                 TriggerClientEvent('police:client:policeAlert', k, coords, text, camId)
             else
-                local alertData = {title = locale('info.new_call'), coords = coords, description = text}
+                local alertData = { title = locale('info.new_call'), coords = coords, description = text }
                 TriggerClientEvent('qb-phone:client:addPoliceAlert', k, alertData)
                 TriggerClientEvent('police:client:policeAlert', k, coords, text)
             end
@@ -323,6 +332,7 @@ RegisterNetEvent('police:server:SetHandcuffStatus', function(isHandcuffed)
     local player = exports.qbx_core:GetPlayer(source)
     if not player then return end
     player.Functions.SetMetaData('ishandcuffed', isHandcuffed)
+    Player(source).state.invBusy = isHandcuffed
 end)
 
 RegisterNetEvent('heli:spotlight', function(state)
@@ -336,7 +346,12 @@ RegisterNetEvent('police:server:FlaggedPlateTriggered', function(radar, plate, s
     local players = exports.qbx_core:GetQBPlayers()
     for i = 1, #players do
         if IsLeoAndOnDuty(players[i]) then
-            local alertData = {title = locale('info.new_call'), coords = coords, description = locale('info.plate_triggered', plate, street, radar)}
+            local alertData = {
+                title = locale('info.new_call'),
+                coords = coords,
+                description = locale(
+                    'info.plate_triggered', plate, street, radar)
+            }
             TriggerClientEvent('qb-phone:client:addPoliceAlert', i, alertData)
             TriggerClientEvent('police:client:policeAlert', i, coords, locale('info.plate_triggered_blip', radar))
         end
@@ -431,16 +446,16 @@ end)
 RegisterNetEvent('evidence:server:AddBlooddropToInventory', function(bloodId, bloodInfo)
     local src = source
     local player = exports.qbx_core:GetPlayer(src)
-    local playerName = player.PlayerData.charinfo.firstname..' '..player.PlayerData.charinfo.lastname
+    local playerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
     local streetName = bloodInfo.street
     local bloodType = bloodInfo.bloodtype
     local bloodDNA = bloodInfo.dnalabel
     local metadata = {}
     metadata.type = 'Blood Evidence'
-    metadata.description = 'DNA ID: '..bloodDNA
-    metadata.description = metadata.description..'\n\nBlood Type: '..bloodType
-    metadata.description = metadata.description..'\n\nCollected By: '..playerName
-    metadata.description = metadata.description..'\n\nCollected At: '..streetName
+    metadata.description = 'DNA ID: ' .. bloodDNA
+    metadata.description = metadata.description .. '\n\nBlood Type: ' .. bloodType
+    metadata.description = metadata.description .. '\n\nCollected By: ' .. playerName
+    metadata.description = metadata.description .. '\n\nCollected At: ' .. streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
         return exports.qbx_core:Notify(src, locale('error.have_evidence_bag'), 'error')
     end
@@ -453,14 +468,14 @@ end)
 RegisterNetEvent('evidence:server:AddFingerprintToInventory', function(fingerId, fingerInfo)
     local src = source
     local player = exports.qbx_core:GetPlayer(src)
-    local playerName = player.PlayerData.charinfo.firstname..' '..player.PlayerData.charinfo.lastname
+    local playerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
     local streetName = fingerInfo.street
     local fingerprint = fingerInfo.fingerprint
     local metadata = {}
     metadata.type = 'Fingerprint Evidence'
-    metadata.description = 'Fingerprint ID: '..fingerprint
-    metadata.description = metadata.description..'\n\nCollected By: '..playerName
-    metadata.description = metadata.description..'\n\nCollected At: '..streetName
+    metadata.description = 'Fingerprint ID: ' .. fingerprint
+    metadata.description = metadata.description .. '\n\nCollected By: ' .. playerName
+    metadata.description = metadata.description .. '\n\nCollected At: ' .. streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
         return exports.qbx_core:Notify(src, locale('error.have_evidence_bag'), 'error')
     end
@@ -474,7 +489,7 @@ RegisterNetEvent('evidence:server:CreateCasing', function(weapon, serial, coords
     local casingId = generateId(casings)
     local serieNumber = exports.ox_inventory:GetCurrentWeapon(source).metadata.serial
     if not serieNumber then
-    serieNumber = serial
+        serieNumber = serial
     end
     TriggerClientEvent('evidence:client:AddCasing', -1, casingId, weapon, coords, serieNumber)
 end)
@@ -505,16 +520,16 @@ end)
 RegisterNetEvent('evidence:server:AddCasingToInventory', function(casingId, casingInfo)
     local src = source
     local player = exports.qbx_core:GetPlayer(src)
-    local playerName = player.PlayerData.charinfo.firstname..' '..player.PlayerData.charinfo.lastname
+    local playerName = player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
     local streetName = casingInfo.street
     local ammoType = casingInfo.ammolabel
     local serialNumber = casingInfo.serie
     local metadata = {}
     metadata.type = 'Casing Evidence'
-    metadata.description = 'Ammo Type: '..ammoType
-    metadata.description = metadata.description..'\n\nSerial #: '..serialNumber
-    metadata.description = metadata.description..'\n\nCollected By: '..playerName
-    metadata.description = metadata.description..'\n\nCollected At: '..streetName
+    metadata.description = 'Ammo Type: ' .. ammoType
+    metadata.description = metadata.description .. '\n\nSerial #: ' .. serialNumber
+    metadata.description = metadata.description .. '\n\nCollected By: ' .. playerName
+    metadata.description = metadata.description .. '\n\nCollected At: ' .. streetName
     if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
         return exports.qbx_core:Notify(src, locale('error.have_evidence_bag'), 'error')
     end
@@ -547,12 +562,16 @@ RegisterNetEvent('police:server:SetTracker', function(targetId)
     if trackerMeta then
         target.Functions.SetMetaData('tracker', false)
         exports.qbx_core:Notify(targetId, locale('success.anklet_taken_off'), 'success')
-        exports.qbx_core:Notify(src, locale('success.took_anklet_from', target.PlayerData.charinfo.firstname, target.PlayerData.charinfo.lastname), 'success')
+        exports.qbx_core:Notify(src,
+            locale('success.took_anklet_from', target.PlayerData.charinfo.firstname, target.PlayerData.charinfo.lastname),
+            'success')
         TriggerClientEvent('police:client:SetTracker', targetId, false)
     else
         target.Functions.SetMetaData('tracker', true)
         exports.qbx_core:Notify(targetId, locale('success.put_anklet'), 'success')
-        exports.qbx_core:Notify(src, locale('success.put_anklet_on', target.PlayerData.charinfo.firstname, target.PlayerData.charinfo.lastname), 'success')
+        exports.qbx_core:Notify(src,
+            locale('success.put_anklet_on', target.PlayerData.charinfo.firstname, target.PlayerData.charinfo.lastname),
+            'success')
         TriggerClientEvent('police:client:SetTracker', targetId, true)
     end
 end)
@@ -568,7 +587,8 @@ AddEventHandler('onServerResourceStart', function(resource)
     end
 
     for i = 1, #sharedConfig.locations.trash do
-        exports.ox_inventory:RegisterStash(('policetrash_%s'):format(i), 'Police Trash', 300, 4000000, nil, jobs, sharedConfig.locations.trash[i])
+        exports.ox_inventory:RegisterStash(('policetrash_%s'):format(i), 'Police Trash', 300, 4000000, nil, jobs,
+            sharedConfig.locations.trash[i])
     end
     exports.ox_inventory:RegisterStash('policelocker', 'Police Locker', 30, 100000, true)
 end)

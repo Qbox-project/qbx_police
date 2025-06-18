@@ -18,11 +18,11 @@ end
 
 local function handleSpeedCam(speedCam, radar)
     if not cache.vehicle or cache.seat ~= -1 or GetVehicleClass(cache.vehicle) == 18 then return end
-    local plate =  qbx.getVehiclePlate(cache.vehicle)
+    local plate = qbx.getVehiclePlate(cache.vehicle)
     local speed = GetEntitySpeed(cache.vehicle) * (config.useMPH and 2.236936 or 3.6)
     local overLimit = speed - speedCam.speed
 
-    lib.callback('qbx_police:server:isPlateFlagged', false, function(result)
+    lib.callback('police:server:isPlateFlagged', false, function(result)
         if not result then return end
         local s1, s2 = GetStreetNameAtCoord(speedCam.coords.x, speedCam.coords.y, speedCam.coords.z)
         local street = GetStreetNameFromHashKey(s1)
