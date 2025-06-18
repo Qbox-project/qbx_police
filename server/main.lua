@@ -123,7 +123,7 @@ local function isPlateFlagged(plate)
 end
 
 
-lib.callback.register('qbx_police:server:isPlateFlagged', function(_, plate)
+lib.callback.register('police:server:isPlateFlagged', function(_, plate)
     return isPlateFlagged(plate)
 end)
 
