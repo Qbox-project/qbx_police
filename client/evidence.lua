@@ -1,4 +1,3 @@
-local config = require 'config.client'
 local currentStatusList = {}
 local casings = {}
 local currentCasing = nil
@@ -93,18 +92,18 @@ RegisterNetEvent('evidence:client:ClearBlooddropsInArea', function()
     local pos = GetEntityCoords(cache.ped)
     local bloodDropList = {}
     if lib.progressCircle({
-        duration = 5000,
-        position = 'bottom',
-        label = locale('progressbar.blood_clear'),
-        useWhileDead = false,
-        canCancel = true,
-        disable = {
-            move = false,
-            car = false,
-            combat = true,
-            mouse = false
-        }
-    })
+            duration = 5000,
+            position = 'bottom',
+            label = locale('progressbar.blood_clear'),
+            useWhileDead = false,
+            canCancel = true,
+            disable = {
+                move = false,
+                car = false,
+                combat = true,
+                mouse = false
+            }
+        })
     then
         if bloodDrops and next(bloodDrops) then
             for bloodId in pairs(bloodDrops) do
@@ -138,18 +137,18 @@ RegisterNetEvent('evidence:client:ClearCasingsInArea', function()
     local casingList = {}
 
     if lib.progressCircle({
-        duration = 5000,
-        position = 'bottom',
-        label = locale('progressbar.bullet_casing'),
-        useWhileDead = false,
-        canCancel = true,
-        disable = {
-            move = false,
-            car = false,
-            combat = true,
-            mouse = false,
-        }
-    })
+            duration = 5000,
+            position = 'bottom',
+            label = locale('progressbar.bullet_casing'),
+            useWhileDead = false,
+            canCancel = true,
+            disable = {
+                move = false,
+                car = false,
+                combat = true,
+                mouse = false,
+            }
+        })
     then
         if casings and next(casings) then
             for casingId in pairs(casings) do
@@ -227,6 +226,20 @@ local function getPlayerDistanceFromCoords(coords)
     return #(pos - coords)
 end
 
+---@param metadata table
+local function enrichCasingMetadata(metadata)
+    local weapon = exports.qbx_core:GetWeapons()[casings[currentCasing].type]
+    if not weapon then return end
+
+    local weaponData = exports.ox_inventory:Items(string.upper(weapon.name))
+    if not weaponData?.ammoname then return end
+
+    local ammo = exports.ox_inventory:Items(weaponData.ammoname)
+    if ammo?.label then
+        metadata.ammolabel = ammo.label
+    end
+end
+
 ---@class DrawEvidenceIfInRangeArgs
 ---@field evidenceId integer
 ---@field coords vector3
@@ -237,8 +250,14 @@ end
 ---@param args DrawEvidenceIfInRangeArgs
 local function drawEvidenceIfInRange(args)
     if getPlayerDistanceFromCoords(args.coords) >= 1.5 then return end
-    qbx.drawText3d({text = args.text, coords = args.coords})
+
+    qbx.drawText3d({ text = args.text, coords = args.coords })
+
     if IsControlJustReleased(0, 47) then
+        if args.metadata.type == locale('info.casing') then
+            enrichCasingMetadata(args.metadata)
+        end
+
         TriggerServerEvent(args.serverEventOnPickup, args.evidenceId, args.metadata)
     end
 end
@@ -247,6 +266,7 @@ end
 CreateThread(function()
     while true do
         Wait(0)
+
         if currentCasing and currentCasing ~= 0 then
             drawEvidenceIfInRange({
                 evidenceId = currentCasing,
@@ -255,7 +275,6 @@ CreateThread(function()
                 metadata = {
                     type = locale('info.casing'),
                     street = getStreetLabel(casings[currentCasing].coords),
-                    ammolabel = config.ammoLabels[exports.qbx_core:GetWeapons()[casings[currentCasing].type].ammotype],
                     ammotype = casings[currentCasing].type,
                     serie = casings[currentCasing].serie
                 },
@@ -296,10 +315,10 @@ end)
 
 local function canDiscoverEvidence()
     return LocalPlayer.state.isLoggedIn
-    and QBX.PlayerData.job.type == 'leo'
-    and QBX.PlayerData.job.onduty
-    and IsPlayerFreeAiming(cache.playerId)
-    and cache.weapon == `WEAPON_FLASHLIGHT`
+        and QBX.PlayerData.job.type == 'leo'
+        and QBX.PlayerData.job.onduty
+        and IsPlayerFreeAiming(cache.playerId)
+        and cache.weapon == `WEAPON_FLASHLIGHT`
 end
 
 ---@param evidence table<number, {coords: vector3}>

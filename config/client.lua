@@ -82,7 +82,6 @@ return {
             policet = 'Police Car 6',
             sheriff = 'Sheriff Car 1',
             sheriff2 = 'Sheriff Car 2',
-    
         },
         [2] = { -- Grade 2
             police = 'Police Car 1',
@@ -117,15 +116,6 @@ return {
     },
 
     whitelistedVehicles = {},
-
-    ammoLabels = {
-        AMMO_PISTOL = '9x19mm parabellum bullet',
-        AMMO_SMG = '9x19mm parabellum bullet',
-        AMMO_RIFLE = '7.62x39mm bullet',
-        AMMO_MG = '7.92x57mm mauser bullet',
-        AMMO_SHOTGUN = '12-gauge bullet',
-        AMMO_SNIPER = 'Large caliber bullet',
-    },
 
     radars = {
         -- Radars will fine the driver if the vehicle is over the defined speed limit
