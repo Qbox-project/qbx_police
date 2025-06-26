@@ -18,7 +18,7 @@ end
 
 local function handleSpeedCam(speedCam, radar)
     if not cache.vehicle or cache.seat ~= -1 or GetVehicleClass(cache.vehicle) == 18 then return end
-    local plate =  qbx.getVehiclePlate(cache.vehicle)
+    local plate = qbx.getVehiclePlate(cache.vehicle)
     local speed = GetEntitySpeed(cache.vehicle) * (config.useMPH and 2.236936 or 3.6)
     local overLimit = speed - speedCam.speed
 
