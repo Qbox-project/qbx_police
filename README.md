@@ -3,7 +3,7 @@ Police Job for QBOX :police_officer:
 
 ## Dependencies
 - [qbx_core](https://github.com/Qbox-project/qbx_core)
-- [ox_lib](https://github.com/overextended/ox_lib) - For UI elements and cached data
+- [ox_lib](https://github.com/communityox/ox_lib) - For UI elements and cached data
 
 ## Screenshots
 *We need new ones*
