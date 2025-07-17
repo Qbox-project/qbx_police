@@ -50,13 +50,13 @@ end
 local function handcuffActions()
     lib.disableControls()
     DisableControlAction(27, 75, true) -- Disable exit vehicle
-    EnableControlAction(0, 249, true) -- Added for talking while cuffed
-    EnableControlAction(0, 46, true)  -- Added for talking while cuffed
+    EnableControlAction(0, 249, true)  -- Added for talking while cuffed
+    EnableControlAction(0, 46, true)   -- Added for talking while cuffed
 end
 
 local function handcuffedEscorted()
     local sleep = 1000
-    local anim = {{dict = 'mp_arresting', anim = 'idle'}, {dict = 'mp_arrest_paired', anim = 'crook_p2_back_right'}}
+    local anim = { { dict = 'mp_arresting', anim = 'idle' }, { dict = 'mp_arrest_paired', anim = 'crook_p2_back_right' } }
 
     if not LocalPlayer.state.isLoggedIn then return sleep end
     if IsEscorted then
@@ -135,30 +135,30 @@ RegisterNetEvent('police:client:RobPlayer', function()
     local playerId = GetPlayerServerId(player)
 
     if not (IsEntityPlayingAnim(playerPed, 'missminuteman_1ig_2', 'handsup_base', 3)
-        or IsEntityPlayingAnim(playerPed, 'mp_arresting', 'idle', 3)
-        or isTargetDead(playerId))
+            or IsEntityPlayingAnim(playerPed, 'mp_arresting', 'idle', 3)
+            or isTargetDead(playerId))
     then
         return exports.qbx_core:Notify(locale('error.no_rob'), 'error')
     end
 
     if lib.progressCircle({
-        duration = math.random(5000, 7000),
-        position = 'bottom',
-        label = locale('progressbar.robbing'),
-        useWhileDead = false,
-        canCancel = true,
-        disable = {
-            move = true,
-            car = true,
-            combat = true,
-            mouse = false
-        },
-        anim = {
-            dict = 'random@shop_robbery',
-            clip = 'robbery_action_b',
-            flags = 16
-        }
-    })
+            duration = math.random(5000, 7000),
+            position = 'bottom',
+            label = locale('progressbar.robbing'),
+            useWhileDead = false,
+            canCancel = true,
+            disable = {
+                move = true,
+                car = true,
+                combat = true,
+                mouse = false
+            },
+            anim = {
+                dict = 'random@shop_robbery',
+                clip = 'robbery_action_b',
+                flags = 16
+            }
+        })
     then
         local playerCoords = GetEntityCoords(playerPed)
         local pos = GetEntityCoords(cache.ped)
@@ -180,7 +180,7 @@ RegisterNetEvent('police:client:JailPlayer', function()
     if not player then return end
     local playerId = GetPlayerServerId(player)
     local dialog = lib.inputDialog(locale('info.jail_time_input'), {
-        {type = 'number', label = locale('info.time_months'), min = 0}
+        { type = 'number', label = locale('info.time_months'), min = 0 }
     })
     if dialog and dialog[1] > 0 then
         TriggerServerEvent('police:server:JailPlayer', playerId, dialog[1])
@@ -194,7 +194,7 @@ RegisterNetEvent('police:client:BillPlayer', function()
     if not player then return end
     local playerId = GetPlayerServerId(player)
     local dialog = lib.inputDialog(locale('info.bill'), {
-        {type = 'number', label = locale('info.amount'), min = 0}
+        { type = 'number', label = locale('info.amount'), min = 0 }
     })
     if dialog and dialog[1] > 0 then
         TriggerServerEvent('police:server:BillPlayer', playerId, dialog[1])
@@ -267,17 +267,20 @@ RegisterNetEvent('police:client:CuffPlayer', function()
 end)
 
 RegisterNetEvent('police:client:GetEscorted', function(playerId)
-    if not(QBX.PlayerData.metadata.isdead
-        or QBX.PlayerData.metadata.ishandcuffed
-        or QBX.PlayerData.metadata.inlaststand)
-    then return end
+    if not (QBX.PlayerData.metadata.isdead
+            or QBX.PlayerData.metadata.ishandcuffed
+            or QBX.PlayerData.metadata.inlaststand)
+    then
+        return
+    end
 
     if not IsEscorted then
         IsEscorted = true
         local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
         local offset = GetOffsetFromEntityInWorldCoords(dragger, 0.0, 0.45, 0.0)
         SetEntityCoords(cache.ped, offset.x, offset.y, offset.z, true, false, false, false)
-        AttachEntityToEntity(cache.ped, dragger, 11816, 0.45, 0.45, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2, true)
+        AttachEntityToEntity(cache.ped, dragger, 11816, 0.45, 0.45, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 2,
+            true)
     else
         IsEscorted = false
         DetachEntity(cache.ped, true, false)
@@ -292,7 +295,7 @@ RegisterNetEvent('police:client:DeEscort', function()
 end)
 
 RegisterNetEvent('police:client:GetKidnappedTarget', function(playerId)
-    if     QBX.PlayerData.metadata.isdead
+    if QBX.PlayerData.metadata.isdead
         or QBX.PlayerData.metadata.ishandcuffed
         or QBX.PlayerData.metadata.inlaststand
     then
@@ -300,7 +303,8 @@ RegisterNetEvent('police:client:GetKidnappedTarget', function(playerId)
             IsEscorted = true
             local dragger = GetPlayerPed(GetPlayerFromServerId(playerId))
             lib.playAnim(cache.ped, 'nm', 'firemans_carry', 8.0, -8.0, 100000, 33, 0, false, false, false)
-            AttachEntityToEntity(cache.ped, dragger, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 0.0, false, false, false, false, 2, false)
+            AttachEntityToEntity(cache.ped, dragger, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 0.0, false, false, false, false, 2,
+                false)
         else
             IsEscorted = false
             DetachEntity(cache.ped, true, false)
@@ -312,7 +316,8 @@ end)
 
 RegisterNetEvent('police:client:GetKidnappedDragger', function()
     if not isEscorting then
-        lib.playAnim(cache.ped, 'missfinale_c2mcs_1', 'fin_c2_mcs_1_camman', 8.0, -8.0, 100000, 49, 0, false, false, false)
+        lib.playAnim(cache.ped, 'missfinale_c2mcs_1', 'fin_c2_mcs_1_camman', 8.0, -8.0, 100000, 49, 0, false, false,
+            false)
         isEscorting = true
     else
         ClearPedSecondaryTask(cache.ped)
