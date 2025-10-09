@@ -7,7 +7,7 @@ local fingerprints = {}
 local currentFingerprint = 0
 local shotAmount = 0
 
-local statusList = {
+local StatusList = {
     fight = locale('evidence.red_hands'),
     widepupils = locale('evidence.wide_pupils'),
     redeyes = locale('evidence.red_eyes'),
