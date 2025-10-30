@@ -94,8 +94,8 @@ lib.callback.register('police:GetPlayerStatus', function(_, targetSrc)
     local status = playerStatus[targetSrc]
 
     local statList = {}
-    for i = 1, #status do
-        statList[#statList + 1] = status[i].text
+    for _, statusData in pairs(status) do
+        statList[#statList + 1] = statusData.text
     end
 
     return statList
