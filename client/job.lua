@@ -417,8 +417,8 @@ RegisterNetEvent('police:client:CheckStatus', function()
     if not playerId then
         return exports.qbx_core:Notify(locale('error.none_nearby'), 'error')
     end
-    local result = lib.callback.await('police:GetPlayerStatus', false, playerId)
-    if not result then return end
+    local result = lib.callback.await('police:GetPlayerStatus', false, GetPlayerServerId(playerId))
+    if not next(result) then return end
     for _, v in pairs(result) do
         exports.qbx_core:Notify(v, 'success')
     end
