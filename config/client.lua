@@ -8,6 +8,8 @@ return {
     breakCuffs = true,
     breakCuffsDifficulty = { "medium", "hard", "medium" },
     breakCuffsKeys = { "w", "a", "s", "d" },
+    disableHelicamToggle = false,
+    nightvisionSyncedWithClothes = true,
 
     securityCameras = {
         hideRadar = false,

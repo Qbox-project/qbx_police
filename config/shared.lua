@@ -13,6 +13,7 @@ return {
         tabe = {model = `prop_table_03`, freeze = true},
         monitor = {model = `des_tvsmash_root`, freeze = true},
     },
+    disableNightvision = false,
 
     locations = {
         duty = {

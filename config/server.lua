@@ -11,5 +11,6 @@ return {
     },
     lawyerJobs = { -- lawyer jobs
         lawyer = true,
-    }
+    },
+    disableDutyBlips = false
 }

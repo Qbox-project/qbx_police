@@ -5,8 +5,10 @@ end
 
 function FetchImpoundedVehicles()
     local result = MySQL.query.await('SELECT * FROM player_vehicles WHERE state = 2')
-    if result[1] then
+    if result and #result > 0 then
         return result
+    else
+      return {}
     end
 end
 

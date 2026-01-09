@@ -57,6 +57,16 @@ Police Job for QBOX :police_officer:
 ### Manual
 - Download the script and put it in the `[qbx]` directory.
 - Add the following code to your server.cfg/resouces.cfg
+- Add the [audio file](./assets/nightvision.ogg) into the `interact-sound/client/html/sounds` folder. (OPTIONAL)
+- Add the [image file](./assets/nightvision.png) into the `ox_inventory/web/images` folder. (OPTIONAL)
+- Add the following code to your `ox_inventory/data/items.lua` file (OPTIONAL)
+```lua
+['nightvision'] = {
+  label = 'nightvision',
+  weight = 775,
+  stack = true,
+},
+```
 
 ```
 ensure qbx_core

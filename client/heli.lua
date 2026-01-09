@@ -203,13 +203,15 @@ local function handleInVehicle()
     if not LocalPlayer.state.isLoggedIn then return end
     if QBX.PlayerData.job.type ~= 'leo' and not QBX.PlayerData.job.onduty then return end
     if isHeliHighEnough(cache.vehicle) then
-        if IsControlJustPressed(0, toggleHeliCam) then -- Toggle Helicam
-            PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', false)
-            heliCam = true
-            heliCamThread()
-            SendNUIMessage({
-                type = 'heliopen',
-            })
+        if not config.disableHelicamToggle then
+          if IsControlJustPressed(0, toggleHeliCam) then -- Toggle Helicam
+              PlaySoundFrontend(-1, 'SELECT', 'HUD_FRONTEND_DEFAULT_SOUNDSET', false)
+              heliCam = true
+              heliCamThread()
+              SendNUIMessage({
+                  type = 'heliopen',
+              })
+          end
         end
 
         if IsControlJustPressed(0, toggleRappel) and (cache.seat == 1 or cache.seat == 2) then -- Initiate rappel

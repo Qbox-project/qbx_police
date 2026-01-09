@@ -4,7 +4,7 @@ game 'gta5'
 name 'qbx_policejob'
 description 'Police system for Qbox'
 repository 'https://github.com/Qbox-project/qbx_policejob'
-version '1.0.0'
+version '1.0.5'
 
 ox_lib 'locale'
 

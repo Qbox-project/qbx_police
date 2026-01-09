@@ -1,4 +1,5 @@
 local sharedConfig = require 'config.shared'
+local config<const> = require 'config.server'
 local playerStatus = {}
 local casings = {}
 local bloodDrops = {}
@@ -76,9 +77,7 @@ exports.qbx_core:CreateUseableItem('moneybag', function(source, item)
         or player.PlayerData.job.type == 'leo'
         or not player.Functions.GetItemByName('moneybag')
         or not player.Functions.RemoveItem('moneybag', 1, item.slot)
-    then
-        return
-    end
+    then return end
     player.Functions.AddMoney('cash', tonumber(item.info.cash), 'used-moneybag')
 end)
 
@@ -94,8 +93,8 @@ lib.callback.register('police:GetPlayerStatus', function(_, targetSrc)
     local status = playerStatus[targetSrc]
 
     local statList = {}
-    for _, statusData in pairs(status) do
-        statList[#statList + 1] = statusData.text
+    for i = 1, #status do
+        statList[#statList + 1] = status[i].text
     end
 
     return statList
@@ -610,6 +609,7 @@ CreateThread(function()
 end)
 
 CreateThread(function()
+    if config.disableDutyBlips then return end
     while true do
         Wait(5000)
         updateBlips()
