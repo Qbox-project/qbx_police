@@ -371,21 +371,21 @@ RegisterNetEvent('police:client:FinePlayer', function(nearbyPlayers)
             options = nearbyPlayers,
             required = true,
         },
-        { 
-            type = 'input', 
-            label = locale('info.law_violated'), 
+        {
+            type = 'input',
+            label = locale('info.law_violated'),
             placeholder = locale('info.law_placeholder'),
             required = true
         },
-        { 
-            type = 'number', 
-            label = locale('info.fine_amount'), 
-            min = 1, 
-            required = true 
+        {
+            type = 'number',
+            label = locale('info.fine_amount'),
+            min = 1,
+            required = true
         },
-        { 
-            type = 'input', 
-            label = locale('info.officer_notes'), 
+        {
+            type = 'input',
+            label = locale('info.officer_notes'),
             placeholder = locale('info.notes_placeholder'),
             optional = true
         }

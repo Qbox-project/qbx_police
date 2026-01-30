@@ -424,8 +424,8 @@ lib.addCommand('fine', {
                 if targetPlayer then
                     nearbyPlayers[#nearbyPlayers + 1] = {
                         label = ('%s %s (%s)'):format(
-                            targetPlayer.PlayerData.charinfo.firstname, 
-                            targetPlayer.PlayerData.charinfo.lastname, 
+                            targetPlayer.PlayerData.charinfo.firstname,
+                            targetPlayer.PlayerData.charinfo.lastname,
                             targetId
                         ),
                         value = targetId

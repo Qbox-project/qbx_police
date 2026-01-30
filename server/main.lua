@@ -608,12 +608,12 @@ RegisterNetEvent('police:server:IssueFine', function(targetSrc, lawViolated, fin
 
     exports['Renewed-Banking']:addAccountMoney('police', fineAmount)
 
-    exports.qbx_core:Notify(targetPlayer.PlayerData.source, 
-        locale('success.fine_issued', fineAmount, lawViolated, officerInfo.name, officerInfo.callsign), 
+    exports.qbx_core:Notify(targetPlayer.PlayerData.source,
+        locale('success.fine_issued', fineAmount, lawViolated, officerInfo.name, officerInfo.callsign),
         'inform'
     )
-    exports.qbx_core:Notify(src, 
-        locale('success.fine_sent', targetPlayer.PlayerData.charinfo.firstname .. ' ' .. targetPlayer.PlayerData.charinfo.lastname, fineAmount), 
+    exports.qbx_core:Notify(src,
+        locale('success.fine_sent', targetPlayer.PlayerData.charinfo.firstname .. ' ' .. targetPlayer.PlayerData.charinfo.lastname, fineAmount),
         'success'
     )
 
