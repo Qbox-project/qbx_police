@@ -402,3 +402,42 @@ lib.addCommand('911p', {
         end
     end
 end)
+
+lib.addCommand('fine', {
+    help = locale('commands.fine'),
+    params = {},
+}, function(source)
+    local player = exports.qbx_core:GetPlayer(source)
+    local ped = GetPlayerPed(source)
+    local coords = GetEntityCoords(ped)
+    local nearby = lib.getNearbyPlayers(coords, 5.0, false)
+    local nearbyPlayers = {}
+
+    if not checkLeoAndOnDuty(player) then return end
+
+    if nearby then
+        for i = 1, #nearby do
+            local targetId = nearby[i].id
+            local targetPlayer = exports.qbx_core:GetPlayer(targetId)
+
+            if targetId ~= source then
+                if targetPlayer then
+                    nearbyPlayers[#nearbyPlayers + 1] = {
+                        label = ('%s %s (%s)'):format(
+                            targetPlayer.PlayerData.charinfo.firstname, 
+                            targetPlayer.PlayerData.charinfo.lastname, 
+                            targetId
+                        ),
+                        value = targetId
+                    }
+                end
+            end
+        end
+    end
+
+    if #nearbyPlayers == 0 then
+        return exports.qbx_core:Notify(source, locale('error.none_nearby'), 'error')
+    end
+
+    TriggerClientEvent('police:client:FinePlayer', source, nearbyPlayers)
+end)
