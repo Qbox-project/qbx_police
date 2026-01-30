@@ -579,6 +579,57 @@ RegisterNetEvent('police:server:SetTracker', function(targetId)
     end
 end)
 
+RegisterNetEvent('police:server:IssueFine', function(targetSrc, lawViolated, fineAmount, notes)
+    local src = source
+    if isTargetTooFar(src, targetSrc) then
+        return exports.qbx_core:Notify(src, locale('error.target_too_far'), 'error')
+    end
+
+    local officer = exports.qbx_core:GetPlayer(src)
+    if not officer or officer.PlayerData.job.type ~= 'leo' then
+        return exports.qbx_core:Notify(src, locale('error.on_duty_police_only'), 'error')
+    end
+    
+    local targetPlayer = exports.qbx_core:GetPlayer(targetSrc)
+    if not targetPlayer then
+        return exports.qbx_core:Notify(src, locale('error.player_not_found'), 'error')
+    end
+
+    local officerInfo = {
+        id = officer.PlayerData.source,
+        citizenId = officer.PlayerData.citizenid,
+        name = officer.PlayerData.charinfo.firstname .. ' ' .. officer.PlayerData.charinfo.lastname,
+        callsign = officer.PlayerData.metadata.callsign or 'N/A'
+    }
+
+    if not targetPlayer.Functions.RemoveMoney('bank', fineAmount, 'police-fine') then
+        return exports.qbx_core:Notify(src, locale('error.insufficient_funds'), 'error')
+    end
+
+    exports['Renewed-Banking']:addAccountMoney('police', fineAmount)
+
+    exports.qbx_core:Notify(targetPlayer.PlayerData.source, 
+        locale('success.fine_issued', fineAmount, lawViolated, officerInfo.name, officerInfo.callsign), 
+        'inform'
+    )
+    exports.qbx_core:Notify(src, 
+        locale('success.fine_sent', targetPlayer.PlayerData.charinfo.firstname .. ' ' .. targetPlayer.PlayerData.charinfo.lastname, fineAmount), 
+        'success'
+    )
+
+    if sharedConfig.fineLogger then
+        lib.logger(src, 'issue_fine', {
+            officer = officerInfo.name,
+            officerCallsign = officerInfo.callsign,
+            target = targetPlayer.PlayerData.charinfo.firstname .. ' ' .. targetPlayer.PlayerData.charinfo.lastname,
+            amount = fineAmount,
+            reason = lawViolated,
+            notes = notes
+        })
+    end
+end)
+
+
 AddEventHandler('onServerResourceStart', function(resource)
     if resource ~= 'ox_inventory' then return end
 
