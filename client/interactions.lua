@@ -363,6 +363,42 @@ RegisterNetEvent('police:client:GetCuffed', function(playerId, isSoftcuff)
     end
 end)
 
+RegisterNetEvent('police:client:FinePlayer', function(nearbyPlayers)
+    local dialog = lib.inputDialog(locale('info.fine_title'), {
+        {
+            type = 'select',
+            label = locale('info.select_citizen'),
+            options = nearbyPlayers,
+            required = true,
+        },
+        {
+            type = 'input',
+            label = locale('info.law_violated'),
+            placeholder = locale('info.law_placeholder'),
+            required = true
+        },
+        {
+            type = 'number',
+            label = locale('info.fine_amount'),
+            min = 1,
+            required = true
+        },
+        {
+            type = 'input',
+            label = locale('info.officer_notes'),
+            placeholder = locale('info.notes_placeholder'),
+            optional = true
+        }
+    })
+    
+    if dialog and dialog[1] and dialog[2] and dialog[3] and dialog[3] > 0 then
+        TriggerServerEvent('police:server:IssueFine', dialog[1], dialog[2], dialog[3], dialog[4] or '')
+    else
+        exports.qbx_core:Notify(locale('error.invalid_fine'), 'error')
+    end
+end)
+
+
 local DISABLED_CONTROLS = {
     21,  -- Sprint
     24,  -- Attack
