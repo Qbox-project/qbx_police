@@ -25,6 +25,7 @@ Police Job for QBOX :police_officer:
 - Police radar
 - Handcuff as an item (Can used via command too. Check Commands section.)
 - Emergency services can see each other on map
+- Issue Fines
 
 ### Commands
 - /spikestrip - Places spike strip on ground.
@@ -52,6 +53,7 @@ Police Job for QBOX :police_officer:
 - /ankletlocation [citizenId] - Get the location of the player with the specified citizenId.
 - /takedna [id] - Takes a DNA sample from the player.
 - /911p [message] - Sends a report to the police.
+- /fine - Issue a fine to a nearby player.
 
 ## Installation
 ### Manual

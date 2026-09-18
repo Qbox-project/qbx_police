@@ -2,6 +2,7 @@ return {
     timeout = 10000,
     maxSpikes = 5,
     policePlatePrefix = 'LSPD',
+    fineLogger = false,
     objects = {
         cone = {model = `prop_roadcone02a`, freeze = false},
         barrier = {model = `prop_barrier_work06a`, freeze = true},
