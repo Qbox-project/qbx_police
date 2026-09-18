@@ -216,11 +216,10 @@ lib.addCommand('flagplate', {
  }, function(source, args)
     local player = exports.qbx_core:GetPlayer(source)
     if not checkLeoAndOnDuty(player) then return end
-    local reason = {}
 
     Plates[args.plate:upper()] = {
         isflagged = true,
-        reason = args.reason or table.concat(reason, ' ')
+        reason = args.reason or ' '
     }
     exports.qbx_core:Notify(source, locale('info.vehicle_flagged', args.plate:upper(), Plates[args.plate:upper()].reason), 'inform')
 end)
