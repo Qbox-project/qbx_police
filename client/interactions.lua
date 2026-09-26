@@ -1,4 +1,5 @@
 local config = require 'config.client'
+local sharedConfig = require 'config.shared'
 local isEscorting = false
 local cuffType = 1
 
@@ -182,7 +183,9 @@ RegisterNetEvent('police:client:JailPlayer', function()
     local dialog = lib.inputDialog(locale('info.jail_time_input'), {
         { type = 'number', label = locale('info.time_months'), min = 0 }
     })
-    if dialog and dialog[1] > 0 then
+    if not dialog then return end
+
+    if dialog[1] > 0 then
         TriggerServerEvent('police:server:JailPlayer', playerId, dialog[1])
     else
         exports.qbx_core:Notify(locale('error.time_higher'), 'error')
@@ -381,6 +384,7 @@ RegisterNetEvent('police:client:FinePlayer', function(nearbyPlayers)
             type = 'number',
             label = locale('info.fine_amount'),
             min = 1,
+            max = sharedConfig.maxFine or 100000,
             required = true
         },
         {

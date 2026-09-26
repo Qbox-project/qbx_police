@@ -581,18 +581,24 @@ end)
 
 RegisterNetEvent('police:server:IssueFine', function(targetSrc, lawViolated, fineAmount, notes)
     local src = source
-    if isTargetTooFar(src, targetSrc) then
-        return exports.qbx_core:Notify(src, locale('error.target_too_far'), 'error')
+    if type(targetSrc) ~= 'number' or not math.tointeger(targetSrc) or targetSrc <= 0 or targetSrc == src
+        or type(fineAmount) ~= 'number' or not math.tointeger(fineAmount) or fineAmount < 1 or fineAmount > (sharedConfig.maxFine or 100000)
+        or type(lawViolated) ~= 'string' or not lawViolated:find('%S') or #lawViolated > 200
+        or (notes ~= nil and (type(notes) ~= 'string' or #notes > 1000)) then
+        return exports.qbx_core:Notify(src, locale('error.invalid_fine'), 'error')
     end
 
     local officer = exports.qbx_core:GetPlayer(src)
-    if not officer or officer.PlayerData.job.type ~= 'leo' then
+    if not officer or not IsLeoAndOnDuty(officer) then
         return exports.qbx_core:Notify(src, locale('error.on_duty_police_only'), 'error')
     end
-    
+
     local targetPlayer = exports.qbx_core:GetPlayer(targetSrc)
     if not targetPlayer then
         return exports.qbx_core:Notify(src, locale('error.player_not_found'), 'error')
+    end
+    if GetPlayerRoutingBucket(src) ~= GetPlayerRoutingBucket(targetSrc) or isTargetTooFar(src, targetSrc, 5.0) then
+        return exports.qbx_core:Notify(src, locale('error.target_too_far'), 'error')
     end
 
     local officerInfo = {
