@@ -31,7 +31,8 @@
     "target_too_far": "Target is too far away",
     "player_not_found": "Player not found",
     "insufficient_funds": "Player has insufficient funds",
-    "invalid_fine": "Invalid fine details provided"
+    "invalid_fine": "Invalid fine details provided",
+    "fine_payment_failed": "Fine payment failed; the citizen was refunded"
   },
   "success": {
     "uncuffed": "You have been uncuffed",

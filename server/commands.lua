@@ -411,6 +411,7 @@ lib.addCommand('fine', {
     if not player or not checkLeoAndOnDuty(player) then return end
 
     local ped = GetPlayerPed(source)
+    if ped == 0 then return end
     local coords = GetEntityCoords(ped)
     local nearby = lib.getNearbyPlayers(coords, 5.0, false)
     local nearbyPlayers = {}
@@ -420,7 +421,7 @@ lib.addCommand('fine', {
             local targetId = nearby[i].id
             local targetPlayer = exports.qbx_core:GetPlayer(targetId)
 
-            if targetId ~= source and GetPlayerRoutingBucket(source) == GetPlayerRoutingBucket(targetId) then
+            if targetId ~= source and GetPlayerPed(targetId) ~= 0 and GetPlayerRoutingBucket(source) == GetPlayerRoutingBucket(targetId) then
                 if targetPlayer then
                     nearbyPlayers[#nearbyPlayers + 1] = {
                         label = ('%s %s (%s)'):format(

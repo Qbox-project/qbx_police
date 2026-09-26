@@ -597,7 +597,8 @@ RegisterNetEvent('police:server:IssueFine', function(targetSrc, lawViolated, fin
     if not targetPlayer then
         return exports.qbx_core:Notify(src, locale('error.player_not_found'), 'error')
     end
-    if GetPlayerRoutingBucket(src) ~= GetPlayerRoutingBucket(targetSrc) or isTargetTooFar(src, targetSrc, 5.0) then
+    if GetPlayerPed(src) == 0 or GetPlayerPed(targetSrc) == 0
+        or GetPlayerRoutingBucket(src) ~= GetPlayerRoutingBucket(targetSrc) or isTargetTooFar(src, targetSrc, 5.0) then
         return exports.qbx_core:Notify(src, locale('error.target_too_far'), 'error')
     end
 
@@ -612,7 +613,13 @@ RegisterNetEvent('police:server:IssueFine', function(targetSrc, lawViolated, fin
         return exports.qbx_core:Notify(src, locale('error.insufficient_funds'), 'error')
     end
 
-    exports['Renewed-Banking']:addAccountMoney('police', fineAmount)
+    local success, deposited = pcall(function()
+        return exports['Renewed-Banking']:addAccountMoney('police', fineAmount)
+    end)
+    if not success or not deposited then
+        targetPlayer.Functions.AddMoney('bank', fineAmount, 'police-fine-refund')
+        return exports.qbx_core:Notify(src, locale('error.fine_payment_failed'), 'error')
+    end
 
     exports.qbx_core:Notify(targetPlayer.PlayerData.source,
         locale('success.fine_issued', fineAmount, lawViolated, officerInfo.name, officerInfo.callsign),
@@ -624,14 +631,14 @@ RegisterNetEvent('police:server:IssueFine', function(targetSrc, lawViolated, fin
     )
 
     if sharedConfig.fineLogger then
-        lib.logger(src, 'issue_fine', {
+        lib.logger(src, 'issue_fine', json.encode({
             officer = officerInfo.name,
             officerCallsign = officerInfo.callsign,
             target = targetPlayer.PlayerData.charinfo.firstname .. ' ' .. targetPlayer.PlayerData.charinfo.lastname,
             amount = fineAmount,
             reason = lawViolated,
             notes = notes
-        })
+        }))
     end
 end)
 
