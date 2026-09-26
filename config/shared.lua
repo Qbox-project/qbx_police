@@ -3,6 +3,7 @@ return {
     maxSpikes = 5,
     policePlatePrefix = 'LSPD',
     fineLogger = false,
+    maxFine = 100000, -- Maximum amount allowed by the /fine command.
     objects = {
         cone = {model = `prop_roadcone02a`, freeze = false},
         barrier = {model = `prop_barrier_work06a`, freeze = true},
