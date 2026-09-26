@@ -378,8 +378,7 @@ RegisterNetEvent('police:client:ImpoundVehicle', function(fullImpound, price)
     })
     then
         local plate = qbx.getVehiclePlate(vehicle)
-        TriggerServerEvent('police:server:Impound', plate, fullImpound, price, bodyDamage, engineDamage, totalFuel)
-        DeleteVehicle(vehicle)
+        TriggerServerEvent('police:server:Impound', plate, fullImpound, price, bodyDamage, engineDamage, totalFuel, NetworkGetNetworkIdFromEntity(vehicle))
         exports.qbx_core:Notify(locale('success.impounded'), 'success')
     else
         exports.qbx_core:Notify(locale('error.canceled'), 'error')

@@ -405,17 +405,31 @@ RegisterNetEvent('police:server:RobPlayer', function(targetSrc)
     exports.qbx_core:Notify(player.PlayerData.source, locale('info.stolen_money', money), 'inform')
 end)
 
-RegisterNetEvent('police:server:Impound', function(plate, fullImpound, price, body, engine, fuel)
+RegisterNetEvent('police:server:Impound', function(plate, fullImpound, price, body, engine, fuel, netId)
     local src = source
-    price = price or 0
-    if not IsVehicleOwned(plate) then return end
-    if not fullImpound then
-        ImpoundWithPrice(price, body, engine, fuel, plate)
-        exports.qbx_core:Notify(src, locale('info.vehicle_taken_depot', price), 'inform')
-    else
-        ImpoundForever(body, engine, fuel, plate)
-        exports.qbx_core:Notify(src, locale('info.vehicle_seized'), 'inform')
+    local player = exports.qbx_core:GetPlayer(src)
+    if not player or not IsLeoAndOnDuty(player) then return end
+    if type(plate) ~= 'string' or type(netId) ~= 'number' then return end
+
+    local vehicle = NetworkGetEntityFromNetworkId(netId)
+    if not DoesEntityExist(vehicle) or qbx.getVehiclePlate(vehicle) ~= plate then return end
+    if #(GetEntityCoords(GetPlayerPed(src)) - GetEntityCoords(vehicle)) > 10.0 then return end
+
+    price = tonumber(price) or 0
+    body, engine, fuel = tonumber(body), tonumber(engine), tonumber(fuel)
+    if price < 0 or not body or not engine or not fuel then return end
+
+    if IsVehicleOwned(plate) then
+        if not fullImpound then
+            ImpoundWithPrice(price, body, engine, fuel, plate)
+            exports.qbx_core:Notify(src, locale('info.vehicle_taken_depot', price), 'inform')
+        else
+            ImpoundForever(body, engine, fuel, plate)
+            exports.qbx_core:Notify(src, locale('info.vehicle_seized'), 'inform')
+        end
     end
+
+    DeleteEntity(vehicle)
 end)
 
 RegisterNetEvent('evidence:server:UpdateStatus', function(data)
