@@ -320,9 +320,12 @@ RegisterNetEvent('police:server:JailPlayer', function(targetSrc, time)
 end)
 
 RegisterNetEvent('police:server:SetHandcuffStatus', function(isHandcuffed)
+    if type(isHandcuffed) ~= 'boolean' then return end
     local player = exports.qbx_core:GetPlayer(source)
     if not player then return end
+    if not player then return end
     player.Functions.SetMetaData('ishandcuffed', isHandcuffed)
+    Player(source).state:set('invBusy', isHandcuffed, true)
 end)
 
 RegisterNetEvent('heli:spotlight', function(state)
